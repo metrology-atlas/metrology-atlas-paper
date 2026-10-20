@@ -51,8 +51,9 @@ and timing tools carry over unchanged, and the aim is to describe many other dat
 
 Open physiological datasets are now the training ground for clinical machine learning and time-series foundation
 models. Their users mostly treat each record as exact: a value that happened at its time stamp. In a multi-device
-recording, that assumption fails in ways that matter. Device clocks drift by tens to hundreds of parts per million
-against the recording PC and are corrected in steps of up to half a second. Monitor numerics describe a window of
+recording such as VitalDB, that assumption fails in ways that matter. Device clocks drift by tens to hundreds of parts per million
+against the recording PC and are periodically reset to it, so their time error grows and then jumps back: a
+sawtooth. Monitor numerics describe a window of
 signal that ended seconds before their stamp. Hand-charted events are rounded to five-minute marks. Converters
 store fewer bits than documented. None of this is visible in a typical loader's output, and an analysis that
 relates two signals in time (pulse arrival time, EEG--haemodynamic coupling, an alarm against its cause) inherits
@@ -67,7 +68,7 @@ all of it (Figure~\ref{fig:concept}).
     of ECG that ended 1.05--2.3\,s before its stamp, and the monitor truncates, so the true value lies in
     [72,\,73) blurred by measurement error. (B) An ECG sample is known to milliseconds and microvolts. (C) A charted
     volume entered on a 5-minute mark is uncertain by minutes, and heaping makes its true value broad and skewed.
-    Shapes follow the atlas's models; widths are illustrative.}
+    Shapes follow the VitalDB atlas's models; widths are illustrative.}
   \label{fig:concept}
 \end{figure}
 
@@ -86,7 +87,10 @@ read, compared and reused in the same way.
 
 This paper introduces the approach through the VitalDB atlas: the themes it investigates, what it found, and how
 to use and extend it. The
-detail lives in the atlas itself; this paper is a guide to it. The values and results quoted here are correct at
+detail lives in the atlas itself; this paper is a guide to it. While the approach is general, the numbers in
+this paper, including the examples above, are measured in VitalDB, on its devices and recording set-up, unless
+stated otherwise. They show the kinds of error the approach describes, not values to assume for another
+dataset, which needs its own measurements. The values and results quoted here are correct at
 the time of publication and match the archived snapshot of the atlas cited in Section~\ref{sec:access}. The atlas
 itself is a living document: studies are added, models refitted and numbers revised as evidence comes in, so the
 website may have moved on since. Superseded results stay on the site, marked as such, so any number quoted here can still be traced.
@@ -184,7 +188,8 @@ the truth, systematically) and resolution (how finely it can be read at all). Th
       SNUADC stores 10-bit codes, not the documented 12; a time on a grid of step $\Delta$ carries
       $\Delta/\sqrt{12}$ of error \\
     Rounding and heaping & Was a value rounded, truncated or heaped by hand? &
-      Solar8000 heart rate drops its fraction; anaesthesia start and end entered on 5-minute marks were rounded up \\
+      Urine output is heaped: 43\% of values sit on 50 or 100\,mL, so a recorded 100\,mL is uncertain by about
+      $\pm$20--40\,mL; anaesthesia start and end entered on 5-minute marks were rounded up \\
     Clocks and sensors & How fast does each clock drift, and how is it corrected? &
       SNUADC $-63$\,ppm, BIS $+25$\,ppm, Primus $+104$\,ppm, all against the recorder PC \\
     The recording system & Which clock stamps which record, through which path? &
@@ -238,7 +243,7 @@ axes of accuracy and resolution.
 % ---------------------------------------------------------------------------
 \section{Signal synchronisation}
 
-The timing network places every clock one level below the clock it is measured against
+The VitalDB timing network places every clock one level below the clock it is measured against
 (Figure~\ref{fig:network}). All device rates are relative: each is measured against another clock that also
 drifts. The recorder PC's link to UTC cannot be observed in the release and is assumed, so no time in VitalDB is
 traceable to UTC.
@@ -246,17 +251,19 @@ traceable to UTC.
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig4-timing-network.pdf}
-  \caption{The timing network. Each clock sits below the clock it is measured against; solid links are measured,
+  \caption{The VitalDB timing network. Each clock sits below the clock it is measured against; solid links are measured,
     dashed estimated, dotted assumed. The recorder PC's link to UTC (1) and the hospital records' link to the PC
     (8) cannot be observed in the release. Generated from the atlas on every build.}
   \label{fig:network}
 \end{figure}
 
-Two kinds of evidence carry the links. \textbf{Stamp reading} fits each device's drift and correction schedule
+Three kinds of evidence carry the links. \textbf{Stamp reading} fits each device's drift and correction schedule
 from its own time stamps. The resulting stamp model rebuilds each device's timeline on the recorder PC, including
-the 17.7\,ms of signal lost at each SNUADC reset. \textbf{Signal-borne clocks} use a physiological event seen by
-two devices: the heartbeat in the ECG and the EEG, a breath in the airway pressure and the central venous
-pressure, or the oximeter's frame slips in the plethysmogram. The atlas's working reference is SNUADC stamp-model
+the 17.7\,ms of signal lost at each SNUADC reset. \textbf{Shared events} are anything two devices both record,
+whether it comes from the patient or from the equipment: electrocautery and muscle bursts in the ECG and the EEG,
+the heartbeat's faint electrical trace in the EEG, or a breath in the airway pressure and the central venous
+pressure. \textbf{Clocks carried in the signal} are regular rhythms inside a recorded signal that act as a third,
+independent clock, such as the oximeter's frame slips in the plethysmogram. The atlas's working reference is SNUADC stamp-model
 time, against which every delay is stated.
 
 Figure~\ref{fig:syncdemo} shows what synchronisation does in one recording. Before correction, the EEG--ECG and
@@ -299,8 +306,8 @@ and pacing spikes in the EEG, mains-frequency wander, cuff inflations and the So
 \section{Data-quality issues found}
 
 Of the 54 observations, 39 are established, 7 likely, 7 open and 1 withdrawn. Several differ from VitalDB's
-documentation (Table~\ref{tab:quality}); the atlas's import already corrects the scale factors. \todo{state who has been told: e.g.\ shared with PhysioNet
-  and the VitalDB authors ahead of this preprint}
+documentation (Table~\ref{tab:quality}); the atlas's import already corrects the scale factors. The VitalDB team knows this work is being released and will
+review these findings once the atlas is public.
 
 \begin{table}[t]
   \centering
@@ -332,7 +339,19 @@ would be found in any multi-device recording that was examined this closely.
 % ---------------------------------------------------------------------------
 \section{Software and labels}
 
-The atlas is one of several repositories released together (Table~\ref{tab:repos}).
+\paragraph{Software.} The atlas is one of five repositories released together (Table~\ref{tab:repos}), and the
+code is split by how far it generalises. Three know nothing about VitalDB. The metrology-atlas engine checks a
+folder of YAML files against the schema and compiles it into the website and the machine-readable file; the
+VitalDB atlas is one such folder in the same repository. physiosync holds the timing tools: it models a device's
+stamp clock from its time stamps, returns corrected times, and solves the clock-network adjustment used to close
+loops. It reads no file format and works on the times and samples it is given, so any dataset's reader can call
+it. lineaccess finds accesses to invasive pressure lines (blood draws, flushes and zeroing) from the pressure
+waveform alone. Two repositories are specific to VitalDB. vitaldb-bench holds the analyses behind most studies,
+each a script that runs per recording on the analysis machine and publishes only aggregates, together with the
+VitalDB clock model, corrected readers and the labels described below. vitaldb-resolution turns a recorded VitalDB
+value or time into a distribution over its true value, using versioned model files; its engine is general and is
+to be released separately (Section~\ref{sec:beyond}). Every study in the atlas links to the code that produced it,
+and every value model to the version it shows, so a number can be traced to the script that made it.
 
 \begin{table}[t]
   \centering
@@ -422,6 +441,7 @@ PCs' link to UTC and the hospital records' clock.
 
 % ---------------------------------------------------------------------------
 \section{Beyond VitalDB}
+\label{sec:beyond}
 
 The next atlases are other open physiological datasets, in particular multi-device waveform collections from
 operating theatres and intensive care, where the same questions arise: how far apart the clocks are, what a
@@ -459,7 +479,7 @@ been described as a complete measurement system in this way.
 \section*{Acknowledgements}
 
 We thank the VitalDB team for making their dataset openly available, and Tom Pollard (PhysioNet) for his advice
-on releasing this work \todo{confirm wording with Tom}. Analysis code, figures and drafts of the text were
+on releasing this work. Analysis code, figures and drafts of the text were
 developed with the assistance of an AI system (Claude, Anthropic); the author designed the work, checked the
 analyses and is responsible for all content.
 

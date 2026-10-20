@@ -2,8 +2,11 @@
 
 LaTeX source of the paper "The Metrology Atlas: describing recorded physiological data as a measurement system, with VitalDB as a first application", which accompanies the atlas (vitaldb.metrology-atlas.org).
 
-Build: `latexmk -pdf main.tex` (pdflatex + BibTeX). For arXiv, upload `main.tex`, `references.bib`,
-the generated `main.bbl` and `figures/*.pdf`.
+Build: `latexmk -pdf main.tex` (pdflatex + BibTeX).
+
+arXiv: `python make_arxiv.py` writes `arxiv/arxiv.tar.gz` (main.tex, main.bbl and the figures), checks that it
+compiles on its own as arXiv compiles it, and writes the plain-text abstract and the comments line for the form.
+It refuses while `\todo` notes or unresolved references remain (`--draft` builds anyway). `arxiv/` is git-ignored.
 
 ## Figures
 
