@@ -1,6 +1,7 @@
 """Build the arXiv upload: arxiv/ (main.tex, main.bbl, the figures it uses), arxiv.tar.gz and abstract.txt.
 
-    python make_arxiv.py            # refuses if the text still has \\todo{...} or unresolved references
+    python make_arxiv.py            # refuses on \\todo{...}, TODO-style markers in the references or the PDF,
+                                    # unresolved references, or a figure too large for its page
     python make_arxiv.py --draft    # builds anyway, for a test upload
 
 Steps: build the paper with latexmk in a scratch copy (for main.bbl), collect the figures named by
@@ -54,6 +55,15 @@ def main(argv=None):
         mlog = (build / "main.log").read_text(encoding="utf-8", errors="ignore")
         if re.search(r"(Reference|Citation) `[^']*' .*undefined", mlog):
             problems.append("undefined references or citations")
+        if "Float too large" in mlog:
+            problems.append("a figure is too large for its page (see main.log)")
+        bbl = (build / "main.bbl").read_text(encoding="utf-8", errors="ignore")
+        for marker in ("TODO", "TBD", "FIXME", "XXX"):
+            if marker in bbl or marker in (build / "references.bib").read_text(encoding="utf-8", errors="ignore"):
+                problems.append(f"{marker} in the references")
+        code, text = run(["pdftotext", "main.pdf", "-"], build)
+        if not code and re.search(r"\bTODO\b|\?\?|\bTBD\b|\bFIXME\b", text):
+            problems.append("TODO, TBD, FIXME or ?? in the built PDF text")
         figs = sorted(set(re.findall(r"\\includegraphics(?:\[[^\]]*\])?\{([^}]+)\}", tex)))
         if OUT.exists():
             shutil.rmtree(OUT)
