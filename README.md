@@ -1,6 +1,6 @@
 # The Metrology Atlas: paper
 
-LaTeX source of the paper "The Metrology Atlas: describing recorded physiological data as a measurement system, with VitalDB as a first application", which accompanies the atlas (vitaldb.metrology-atlas.org).
+LaTeX source of the paper "The Metrology Atlas: describing recorded physiological data as a measurement system, with VitalDB as a first application", which accompanies the atlas (vitaldb.metrology-atlas.org). Published as [arXiv:2610.29001](https://arxiv.org/abs/2610.29001).
 
 Build: `latexmk -pdf main.tex` (pdflatex + BibTeX).
 
