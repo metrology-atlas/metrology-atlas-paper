@@ -171,7 +171,36 @@ Scope and keys decide how errors combine. Errors shared by two signals cancel wh
 fixed within a recording do not shrink by averaging within it. Where the errors used to evaluate an uncertainty
 include the checking signal's own noise, their standard deviation overstates the standard uncertainty. An atlas
 gives it as the headline, labelled an upper bound, and beside it, where a second independent reference allows, a
-likely value from the part of the errors the two references share.
+likely value from the part of the errors the two references share. Table~\ref{tab:terms} lists the terms that replace
+those of version~1 of this paper, and why.
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Terms changed since version~1 of this paper. Version~1 described each time stamp by its accuracy and
+    resolution; version~2 uses the VIM's terms, so that the atlas's numbers combine and propagate as the GUM
+    intends. The atlas keeps the version~1 values on its pages, marked as superseded.}
+  \label{tab:terms}
+  \begin{tabularx}{\textwidth}{@{}p{0.17\textwidth}p{0.22\textwidth}Lp{0.17\textwidth}@{}}
+  \toprule
+  Version 1 & Version 2 & Why & Source \\
+  \midrule
+  Accuracy, as a number & Bias and standard uncertainty, stated separately &
+    Accuracy is a qualitative concept and is not given a number; a known systematic effect is a bias, corrected
+    where possible, and what remains is uncertainty & VIM 2.13, 2.18, 2.26; GUM 3.2.3--3.2.4 \\
+  Offset & Bias: stamp minus the working reference, negative early & Sign and reference made explicit; an offset without a sign was
+    applied the wrong way in version~1's planner for the BIS & VIM 2.18 \\
+  Residual & Standard uncertainty after correction, an upper bound with a likely value & Separates what a
+    correction removes from what it leaves & GUM 3.2.4; VIM 2.53 (correction) \\
+  Window, counted as timing error & Support: the interval a value describes, stamped at its close &
+    The window is part of the measurand, not an error about its time & VIM 2.3; \citet{gotway2002combining} \\
+  Error sources, unlabelled & Components: Type A or B, distribution, scope, correlation & So that shared errors
+    cancel between signals & GUM 4.2--4.3; \citet{mittaz2019metrology} \\
+  Resolution & Kept, with rounding and truncation & Truncation shifts a value as well as widening it &
+    VIM 4.14 \\
+  \bottomrule
+\end{tabularx}
+\end{table}
 
 \subsection{The value side}
 
@@ -232,35 +261,7 @@ a geodetic adjustment, the misclosures flag a bad link and test whether the stat
 outside the recording, such as the mains grid, breaks the circle of relative rates and links the network to an
 outside reference.
 
-\begin{figure}[tp]
-\begin{boxed}
-\textbf{Terms changed since version~1 of this paper.} Version~1 described each time stamp by its
-\emph{accuracy} and \emph{resolution}. Version~2 uses the VIM's terms, so that the atlas's numbers combine and
-propagate as the GUM intends. The atlas keeps the version~1 values on its pages, marked as superseded.
 
-\smallskip
-\small
-\begin{tabularx}{\linewidth}{@{}p{0.2\linewidth}p{0.23\linewidth}Lp{0.17\linewidth}@{}}
-  \toprule
-  Version 1 & Version 2 & Why & Source \\
-  \midrule
-  Accuracy, as a number & Bias and standard uncertainty, stated separately &
-    Accuracy is a qualitative concept and is not given a number; a known systematic effect is a bias, corrected
-    where possible, and what remains is uncertainty & VIM 2.13, 2.18, 2.26; GUM 3.2.3--3.2.4 \\
-  Offset & Bias: stamp minus the working reference, negative early & Sign and reference made explicit; an offset without a sign was
-    applied the wrong way in version~1's planner for the BIS & VIM 2.18 \\
-  Residual & Standard uncertainty after correction, an upper bound with a likely value & Separates what a
-    correction removes from what it leaves & GUM 3.2.4; VIM 2.53 (correction) \\
-  Window, counted as timing error & Support: the interval a value describes, stamped at its close &
-    The window is part of the measurand, not an error about its time & VIM 2.3; \citet{gotway2002combining} \\
-  Error sources, unlabelled & Components: Type A or B, distribution, scope, correlation & So that shared errors
-    cancel between signals & GUM 4.2--4.3; \citet{mittaz2019metrology} \\
-  Resolution & Kept, with rounding and truncation & Truncation shifts a value as well as widening it &
-    VIM 4.14 \\
-  \bottomrule
-\end{tabularx}
-\end{boxed}
-\end{figure}
 
 % ---------------------------------------------------------------------------
 \section{The atlas as a system}
