@@ -115,12 +115,12 @@ signal they are not independent over time either.
 | Primus drift +104 ppm | parameter `primus-drift-breath` | Correct |
 | Primus lag moves a median 1.5 s over a recording | a study page, not link `primus-vs-pc` | Number correct; item misattributed |
 | Sampling line 3.6 s, spread 0.25 s | study `co2-sampling-line`; `primus-co2` / `primus-sync` | Correct |
-| ETCO2 labels and release fit contradict each other (+1.55 against −2.05 s) | `etco2-delay`; `numerics-derivation-release` | Correct, and a real conflict in the atlas (now recorded as an open question) |
+| ETCO2 labels and release fit contradict each other (+1.55 against −2.05 s) | `etco2-delay`; `numerics-derivation-release` | Correct, and a real conflict in the atlas (traced to the fit's phase model and corrected) |
 | ECG–EEG after correction: 42 ms median, u 62 ms upper bound, 95% −233 to +166 ms; own bursts 30 ms | `bis-sync`, `bis-own`, parameter `stamp-model-error` | Correct |
 | One constant for all modes about 110 ms wrong in frequent mode | observation `eeg-ecg-offset-by-mode` | The assistant's inference (−804 against −660 ms); not stated as such |
 | Uncorrected reference drifts about 76 ms per hour | `snu-model` evidence; study `hum-snuadc-rate` | Correct |
 | CO2 after breath matching: 55 ms, 95% −262 to +272 ms, 1,067 recordings | `primus-co2` / `primus-sync`; study text | Correct (the form's median absolute error is 53 ms; 55 ms is the study's window median) |
-| `primus-lab` has no Primus clock component | `primus-numerics` / `primus-lab` | Correct; a gap in the atlas |
+| `primus-lab` has no Primus clock component | `primus-numerics` / `primus-lab` | Correct, and it pointed to a real error: the numerics' forms were in the wrong clock domain (fixed) |
 | Errors share the SNUADC reference; correlation lengths 8 and 7 min; recording-scope components | forms' `shared_with`, `length_s`, `scope`; `dataset.domains` | Correct |
 | No stated correlation between BIS and Primus clock errors | — | Correct: the atlas is silent |
 | Pre-release v0.1.0 | `dataset.notice` | Correct for the file tested; to update at release |
@@ -129,8 +129,13 @@ signal they are not independent over time either.
 assistant's own inference, labelled as a claim. The exchange also found four problems in the atlas, now fixed or
 recorded:
 
-1. The ETCO2 delay conflict (open question added to `numerics-derivation-release`).
+1. The ETCO2 delay conflict. Resolved: the release fit let each last-breath value have been computed anywhere in the
+   7 s poll gap, which counts the hold twice and puts the delay about half a gap (3.5 s) too low. Per recording the
+   labels sit 3.55 s above the fit (6,186 recordings), against a half gap of 3.51 s. The study page now carries the
+   correction, and the same fix explains most of PEEP's negative delay.
 2. Stale wording, "the EEG lags the ECG by −804 ms", from before the BIS sign was settled (fixed in
    `eeg-ecg-offset-by-mode` and `snuadc-stamp-sawtooth`).
-3. No Primus clock term in the ETCO2 per-case-label form (to do).
-4. The release notice still says v0.1.0 (to update at release).
+3. No Primus clock term in the ETCO2 per-case-label form. Resolved: the Primus numerics are stamped by the recorder
+   PC on arrival, so the Primus clock does not enter their stamps; the real error was that their forms (and the
+   Solar8000 numerics' forms) sat in a device's clock domain. They now sit in a recorder-PC domain with no drift.
+4. The release notice still said v0.1.0 (updated to v0.2.0).
