@@ -47,14 +47,31 @@ for r in sorted(rows, key=lambda r: r[2]["u_c"]):
         continue
     uniq.append([r[0], r[1], r[2], key])
 fig, ax = plt.subplots(figsize=(7.2, 5.0))
+fig.subplots_adjust(left=0.1, right=0.98, top=0.98, bottom=0.22)
 for i, (label, typ, f, _) in enumerate(uniq):
     b, c = f["bias"], COL.get(typ, "#888")
     measured = f["status"] == "measured"
     ax.plot([b["lo"], b["hi"]], [f["u_c"]] * 2, color=c, lw=1.4, alpha=0.6, solid_capstyle="butt")
     ax.plot(b["mid"], f["u_c"], "o", ms=5, color=c, mfc=c if measured else "white", mew=1.2)
-    ax.annotate(f"{i + 1}", (b["mid"], f["u_c"]), xytext=(4, 3), textcoords="offset points", fontsize=6.5, color=INK)
 ax.set_xscale("symlog", linthresh=1e-3, linscale=0.3)
 ax.set_yscale("log")
+ax.set_xlim(-3, 7200); ax.set_ylim(6e-3, 2.5e4)
+# number labels placed so they do not overlap each other or the markers (display coordinates)
+fig.canvas.draw()
+pts = [ax.transData.transform((u[2]["bias"]["mid"], u[2]["u_c"])) for u in uniq]
+placed = []
+OFFS = [(4, 3), (4, -10), (-11, 3), (-11, -10), (4, 10), (-11, 10), (9, -3), (-16, -3), (4, -17), (-11, -17), (4, 17), (-11, 17)]
+for i, (x0, y0) in enumerate(pts):
+    w = 6.5 * len(str(i + 1)) * 0.8; h = 7
+    for dx, dy in OFFS:
+        box = (x0 + dx, y0 + dy, x0 + dx + w, y0 + dy + h)
+        clash = any(not (box[2] < q[0] or box[0] > q[2] or box[3] < q[1] or box[1] > q[3]) for q in placed)
+        clash = clash or any(box[0] - 3 < px < box[2] + 3 and box[1] - 3 < py < box[3] + 3 for px, py in pts)
+        if not clash:
+            break
+    placed.append(box)
+    ax.annotate(f"{i + 1}", (uniq[i][2]["bias"]["mid"], uniq[i][2]["u_c"]), xytext=(dx, dy), textcoords="offset points",
+                fontsize=6.5, color=INK)
 ticks = [-1, -0.1, -0.01, 0, 0.01, 0.1, 1, 10, 60, 600, 3600]
 ax.set_xticks(ticks)
 ax.set_xticklabels(["−1 s", "−100 ms", "−10 ms", "0", "10 ms", "100 ms", "1 s", "10 s", "1 min", "10 min", "1 h"])
@@ -84,7 +101,8 @@ fig.savefig(sys.argv[2])
 pairs = []
 for vid, v in V.items():
     fs = forms(v)
-    for f in fs:
+    seen = {}
+    for f in sorted(fs, key=lambda g: not g["default"]):
         if f["kind"] != "per_recording":
             continue
         before = [g for g in fs if g["id"] in f["corrects"] or (g["kind"] == "fixed_shift" and set(g["corrects"]) & set(f["corrects"]))]
@@ -92,6 +110,10 @@ for vid, v in V.items():
         b = (shifted or before)
         if not b: continue
         ub = min(g["u_c"] for g in b)
+        k_v = (round(ub, 4), round(f["u_c"], 4))
+        if not f["default"] and k_v in seen.values():
+            continue          # same before and after as the signal's default form (e.g. differs only in drift rate)
+        seen[f["id"]] = k_v
         short = {"draw time from arterial access": "draw time", "after sync with the recording's own bursts": "own bursts"}
         pairs.append((v["name"] + ("" if f["default"] else f" ({short.get(f['name'], f['name'])})"), v["type"], ub, f["u_c"], f["likely_u"], f["upper_bound"]))
 P = []
