@@ -1,4 +1,4 @@
-"""Build the arXiv upload: arxiv/ (main.tex, main.bbl, the figures it uses), arxiv.tar.gz and abstract.txt.
+"""Build the arXiv upload: arxiv/ (main.tex, main.bbl, facts/facts.tex, the figures it uses), arxiv.tar.gz and abstract.txt.
 
     python make_arxiv.py            # refuses on \\todo{...}, TODO-style markers in the references or the PDF,
                                     # unresolved references, or a figure too large for its page
@@ -29,6 +29,10 @@ def run(cmd, cwd):
 
 def plain_abstract(tex):
     a = re.search(r"\\begin\{abstract\}(.*?)\\end\{abstract\}", tex, re.S).group(1)
+    ft = HERE / "facts" / "facts.tex"
+    facts = dict(re.findall(r"\\@namedef\{fact@([^}]+)\}\{(.*)\}$", ft.read_text(encoding="utf-8"), re.M)) if ft.exists() else {}
+    a = re.sub(r"\\fact\{([^}]+)\}", lambda m: facts.get(m.group(1), "??"), a)
+    a = a.replace("$-$", "\u2212").replace("$+$", "+").replace("{,}", ",")
     a = a.replace("\\,", " ").replace("~", " ").replace("---", "\u2014").replace("--", "\u2013")
     a = re.sub(r"\\(emph|textit|textbf)\{([^}]*)\}", r"\2", a)
     a = re.sub(r"\\url\{([^}]*)\}", r"\1", a)
@@ -70,6 +74,8 @@ def main(argv=None):
         (OUT / "figures").mkdir(parents=True)
         shutil.copy(build / "main.tex", OUT)
         shutil.copy(build / "main.bbl", OUT)
+        (OUT / "facts").mkdir()
+        shutil.copy(build / "facts" / "facts.tex", OUT / "facts")  # every dataset number (facts/make_facts.py)
         for f in figs:
             src = build / (f if Path(f).suffix else f + ".pdf")
             shutil.copy(src, OUT / src.relative_to(build))

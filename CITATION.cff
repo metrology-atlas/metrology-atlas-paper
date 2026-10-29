@@ -1,12 +1,15 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
 type: software
-title: "The Metrology Atlas: describing recorded physiological data as a measurement system, with VitalDB as a first application"
+title: "The Metrology Atlas: describing recorded physiological data as a measurement system"
 authors:
   - family-names: Goodwin
     given-names: "Andrew J."
     affiliation: "School of Biomedical Engineering, The University of Sydney"
     orcid: "https://orcid.org/0000-0002-2776-7039"
+  - family-names: Eytan
+    given-names: "Danny"
+    affiliation: "The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology; Pediatric Intensive Care Unit, Rambam Health Care Campus"
 license:
   - CC-BY-4.0
   - MIT
@@ -19,12 +22,15 @@ keywords:
   - "VitalDB"
 preferred-citation:
   type: article
-  title: "The Metrology Atlas: describing recorded physiological data as a measurement system, with VitalDB as a first application"
+  title: "The Metrology Atlas: describing recorded physiological data as a measurement system"
   authors:
     - family-names: Goodwin
       given-names: "Andrew J."
       affiliation: "School of Biomedical Engineering, The University of Sydney"
       orcid: "https://orcid.org/0000-0002-2776-7039"
+    - family-names: Eytan
+      given-names: "Danny"
+      affiliation: "The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology; Pediatric Intensive Care Unit, Rambam Health Care Campus"
   year: 2026
   journal: "arXiv"
   doi: "10.48550/arXiv.2610.29001"

@@ -1,0 +1,758 @@
+The Metrology Atlas: describing recorded physiological data as a
+                     measurement system
+                                   Andrew J. Goodwin1 , Danny Eytan2,3
+                 School of Biomedical Engineering, The University of Sydney, Sydney, Australia
+                 1
+
+ 2
+     The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology, Haifa, Israel
+                  3
+                    Pediatric Intensive Care Unit, Rambam Health Care Campus, Haifa, Israel
+
+                                          [TODO: month] 2026
+
+
+                                                  Abstract
+            Every value in a recorded physiological dataset is a pair: a recorded time and a recorded
+        value. Neither is the truth, yet users of open datasets mostly treat records as exact. We
+        present the Metrology Atlas, a dataset-independent way to describe a recorded dataset as
+        a measurement system, in the terms of the International Vocabulary of Metrology and the
+        Guide to the Expression of Uncertainty in Measurement. For every variable, an atlas states
+        its measurement model, the interval of time each value describes, the bias and the standard
+        uncertainty of its time and value, which errors are shared with other signals, and the evidence
+        behind each number, marked as measured, derived, estimated or assumed. A schema and an
+        engine, independent of any dataset, check an atlas and publish it as a website and a single
+        machine-readable file, and the atlas is revised as evidence comes in. Our first application,
+        to VitalDB (6,388 surgical patients), shows what the approach finds. Against the working
+        reference the BIS EEG stamps sit 0.79 s early; after per-recording synchronisation their
+        standard uncertainty is 63 ms (an upper bound), against 161 ms with a shift known in advance.
+        The mains hum links the recording’s clocks to an outside reference, and more than halves the
+        drift of the working reference in the fifth of recordings where its own stamps cannot measure
+        it. An atlas can be read, loaded by analysis code, or given to an AI assistant as compact,
+        checkable context for planning a study. The approach will be applied to further datasets.
+
+
+1       Introduction: a record is a measurement
+Open physiological datasets are now the training ground for clinical machine learning and time-
+series foundation models. Their users mostly treat each record as exact: a value that happened
+at its time stamp. In a multi-device recording that assumption fails in ways that matter. Device
+clocks drift by tens to hundreds of parts per million against the recording computer and are
+pulled back to it in jumps, so their time error grows and resets: a sawtooth. Monitor numerics
+describe a window of signal that closed seconds before their stamp. Values are truncated, rounded
+or heaped by hand. Converters store fewer bits than documented. None of this shows in a typical
+loader’s output, and an analysis that relates two signals in time (pulse arrival time, coupling
+between the EEG and haemodynamics, an alarm against its cause) inherits all of it.
+    What a record tells us is not a point but a region (Figure 1). A heart rate recorded as 72 per
+minute by a monitor that truncates lies somewhere in [72, 73), and it describes several seconds
+of ECG that ended a variable delay before its stamp. A laboratory haematocrit of 35% means
+35±0.5 or 35±0.05 depending on which analyser made it, which the record does not say, and the
+blood was drawn minutes before the stamp, by an amount that also depends on the analyser.
+These shapes are uniform, bimodal, mixed and skewed. Few are Gaussian.
+    Timing errors in clinical databases have been reviewed [1], and specific cases solved, such
+as aligning the EEG with bedside waveforms [2]. What is missing is a complete, checkable
+
+                                                      1
+              A Monitor heart rate (6,222 recordings)                                                                    B ECG sample, raw stamps
+                                                          two groups of recording PCs
+
+                                                                                                                         1.02 after the stamp model: ±1.6 ms
+
+
+
+
+                                                                                                              ECG (mV)
+                                                                                                                         1.00
+                         74.0         the 6–10 s of ECG it describes (its support), shown closing at the median
+                                                                                                                         0.98
+                         73.5
+                                                                                                                                       −400         −200         0
+true heart rate (/min)
+
+
+
+
+                                                                                                                                true time relative to the stamp (ms)
+                         73.0
+                                                                                                                         C Lab haematocrit, source unknown
+                         72.5 truncated: true value
+                              uniform on [72, 73)
+                         72.0
+                                                                                                                                wide band: blood gas, whole % (77%)
+                                                                                                                         35.5
+                         71.5
+
+
+
+
+                                                                                                              Hct (%)
+                                                                                                                                thin line: central lab, 0.1 % (23%)
+                                                                recorded pair                                            35.0
+                         71.0                               (stamp, 72 /min)
+                                                                                                                         34.5
+                            −16 −14 −12 −10 −8 −6 −4 −2 0                                                                     −30        −20          −10         0
+                             true time of the window's close, relative to the stamp (s)                                  time of the draw relative to the lab stamp (min)
+
+   Figure 1: A record is a point; what it tells us is a region, here drawn from the VitalDB atlas’s own data.
+   Each panel shows what is known about the true time (across) and true value (up) behind one recorded
+   pair (white dot); the curves are the two marginals. (A) A monitor heart rate of 72 per minute is truncated,
+   so its true value is uniform on [72, 73); it describes 6–10 s of ECG (orange: its support), which closed
+   before the stamp by a delay that differs between two groups of recording computers (6,222 recordings:
+   5,427 in the two groups, 795 not assigned). (B) An ECG sample on the stored stamps lies anywhere in
+   the 480 ms of a clock sawtooth; its value is one converter code. In recordings with stamp corrections, the
+   stamp model places it to 1.6 ms against the working reference; without them the reference itself drifts
+   (Table 3). (C) A laboratory haematocrit of 35% came from a blood-gas analyser (whole percent) or the
+   central laboratory (0.1%), which the record does not say; the weights, 77% and 23%, come from the value
+   model in vitaldb-resolution. The draw preceded the lab stamp by that analyser’s delay, so value and time
+   are a joint mixture (shaded on a square-root scale).
+
+
+     description of a dataset’s measurement system that others can read, reuse and correct. Metrology
+     already has the language: a measurand, a measurement model, and a stated uncertainty with its
+     evidence [3, 4]. Earth observation has shown how to apply it to historical data whose instruments
+     can no longer be examined [5]. The Metrology Atlas applies it to recorded physiological data.
+         This paper describes the approach and the system that implements it, and uses the first atlas,
+     of VitalDB [6], to show what it finds. Its contributions are:
+                         • a way to describe each variable of a recorded dataset by its measurement model, the
+                           interval each value describes, its bias and uncertainty with their correlation structure, and
+                           its evidence (Section 2);
+                         • a dataset-independent schema and engine that check an atlas and publish it as a website
+                           and one machine-readable file, revised as evidence comes in (Section 3);
+                         • a first atlas, of VitalDB, with 80 studies behind it (Section 4);
+                         • three ways to use an atlas: a planner for combining signals, labels that respect when a
+                           value could first be known, and the machine-readable file as context for an AI assistant
+                           (Section 5).
+    The detail lives in the atlas, at https://vitaldb.metrology-atlas.org; this paper quotes its
+    numbers and points to it. The numbers are VitalDB’s, measured on its devices and recording
+    set-up. They show the kinds of error the approach describes, not values to assume for another
+    dataset.
+
+                                                                                                2
+    Forward: the measurement model, from the truth to the recorded pair
+
+
+         True time            Delay after            Clock            Correction            Stamp                Recorded
+      when it happened        its window              drift             steps                grid               time stamp
+
+
+
+         True value             Sensor               Scale            Converter           Rounding,             Recorded
+         what it was             error               factor            codes               heaping                value
+
+
+
+
+                         Inverse, the atlas: undo the steps whose parameters are measured, and carry the rest
+                                          as a joint distribution over the true time and true value
+
+        invertible once measured             many-to-one or random: leaves an interval or a spread
+
+
+
+Figure 2: The measurement model runs forward from the true time and value to the recorded pair. Steps
+whose parameters can be measured (delay, drift, correction steps, scale factors) can be undone; steps that
+are many-to-one or random (converter codes, rounding and heaping, sensor noise) cannot be undone for a
+single value, so inverting a record gives a distribution rather than a point. The window a value describes
+is part of the measurand, not an error.
+
+
+2     Describing a dataset as a measurement system
+2.1     Measurand and measurement model
+Each record indicates two measurands: when something happened and what its value was. The
+measurement model runs forward, from the true time and value to the recorded pair, through
+steps such as a processing delay, a clock’s drift and corrections, a sensor’s error, a scale factor, a
+converter’s codes and a rounding rule (Figure 2). An atlas runs the model backwards. Steps
+whose parameters can be measured, such as a drift or a scale factor, can be undone. Steps that
+are many-to-one, such as rounding or a coarse grid, map a record back to an interval, not a point.
+Inverting a record therefore gives a joint distribution over its true time and value, which can be
+propagated through any later calculation [7, 8].
+
+2.2     The interval each value describes
+Most values describe an interval of time, not an instant: a heart rate averages several beats, an
+end-tidal CO2 takes the last breath, a laboratory result describes the blood at the moment of
+the draw. An atlas states this interval as part of what the value is: its support, a term borrowed
+from geostatistics, where a value’s support is the region it averages over [9]. The support is not
+an error, and counting it as uncertainty, as many descriptions do, overstates how badly a value is
+timed. An atlas also states where in the interval the stamp sits.
+    Two times then matter. A value describes its support, and by convention its time is the
+support’s close. It becomes available at or after that close: at once for a monitor’s numeric, only
+after analysis for a laboratory result. An atlas states both. The bias of a stamp is the stamp
+minus the close of the support. A negative bias means the stamp comes before the interval
+it describes has closed. That is look-ahead: real if the value was computed from later data,
+apparent if the reference the bias is measured against is itself late. A non-negative bias does not
+make a value safe to use at its stamp; that is the job of its availability time (Section 5.2).
+
+2.3     Bias and uncertainty
+Following the VIM, an atlas separates a systematic shift, the bias [3, 2.18], from the standard
+uncertainty that remains [3, 2.26, 2.30]. A known bias is corrected where possible [4, 3.2.3–3.2.4],
+and what the correction leaves is uncertainty. Biases and uncertainties are stated against the
+
+
+                                                                 3
+Table 1: Terms changed since version 1 of this paper. Version 1 described each time stamp by its accuracy
+and resolution; version 2 uses the VIM’s terms, so that the atlas’s numbers combine and propagate as the
+GUM intends. The atlas keeps the version 1 values on its pages, marked as superseded.
+
+Version 1           Version 2                 Why                                      Source
+Accuracy,   as a    Bias and standard un-   Accuracy is a qualitative concept and      VIM 2.13, 2.18,
+number              certainty, stated sepa- is not given a number; a known             2.26; GUM 3.2.3–
+                    rately                  systematic effect is a bias, corrected     3.2.4
+                                            where possible, and what remains is
+                                            uncertainty
+Offset             Bias: stamp minus the Sign and reference made explicit; an          VIM 2.18
+                   working reference, neg- offset without a sign was applied the
+                   ative early              wrong way in version 1’s planner for
+                                            the BIS
+Residual           Standard uncertainty Separates what a correction removes            GUM 3.2.4; VIM
+                   after correction, an up- from what it leaves                        2.53 (correction)
+                   per bound with a likely
+                   value
+Window, counted Support:        the inter- The window is part of the measurand,        VIM 2.3; Gotway
+as timing error    val a value describes, not an error about its time                  and Young [9]
+                   stamped at its close
+Error sources, un- Components:        Type So that shared errors cancel between        GUM       4.2–4.3;
+labelled           A or B, distribution, signals                                       Mittaz et al. [5]
+                   scope, correlation
+Resolution         Kept, with rounding Truncation shifts a value as well as            VIM 4.14
+                   and truncation           widening it
+
+
+atlas’s working reference, one clock chosen because the others can be tied to it. The reference’s
+own offset from the true event, such as a monitor’s output delay, is stated as a component
+common to the whole release where it is known, and named as unknown where it is not. Each
+uncertainty is a budget of named components, as in the effects tables of Mittaz et al. [5]. Each
+component states:
+   • its evaluation, Type A from this dataset’s data or Type B from documentation or judge-
+     ment [4, 4.2–4.3], and its distribution (rectangular for a grid, empirical for a measured
+     spread);
+   • its scope: independent from value to value, structured over a time scale, fixed within one
+     recording, shared with other signals, common to the whole release, or unknown;
+   • for a structured error, the shape and length of its correlation over time (exponential,
+     rectangular, triangular or bell);
+   • for a shared error, a key naming what shares it, such as one clock or one correction.
+Scope and keys decide how errors combine. Errors shared by two signals cancel when the signals
+are compared; errors fixed within a recording do not shrink by averaging within it. Where the
+errors used to evaluate an uncertainty include the checking signal’s own noise, their standard
+deviation overstates the standard uncertainty. An atlas gives it as the headline, labelled an upper
+bound, and beside it, where a second independent reference allows, a likely value from the part
+of the errors the two references share. Table 1 lists the terms that replace those of version 1 of
+this paper, and why.
+
+2.4    The value side
+The same structure describes values. A value has a native resolution [3, 4.14] and a rule that
+mapped the true value onto it: rounding to the nearest step, truncation, or heaping by hand to
+
+                                                    4
+                                 1d
+                                                                               25
+                                       stamp before the
+                                       value could exist
+                                       (look-ahead)
+                                 1h
+
+                              10 min                                                                                                                             24
+Standard uncertainty (1 SD)
+
+
+
+
+                                                                                                                                                            23
+                                                                                                                                                      22
+                               1 min                                                                                                             21
+                                                                               20
+                                                                                                                                 18         19
+                                10 s                                                                                                        17
+                                                                                                                                15
+                                                                                                                         13 16
+                                                                                                                         11    12 14
+                                 1s                                                                                     10        9
+                                                                                                                             7
+                                                                               5                                           8     64
+                                              3                                                                 2
+                              100 ms                                                                                                   Waveform samples
+                                                                                                                                       Numeric values
+                                                                                                                    1                  Records, lab and clinical times
+                               10 ms                                                                                                   estimated or assumed
+                                         −1 s      −100 ms −10 ms             0            10 ms 100 ms            1s       10 s 1 min 10 min                         1h
+                                                     Bias: stamp minus the end of the interval the value describes (p5–p95 between recordings)
+          1 Plethysmogram (SNUADC) (stamp-model time) 2 Arterial pressure, ECG lead II (SNUADC) 3 BIS EEG 4 SpO2 5 Case end 6 BIS index 7 Solar8000
+          heart rate (as stamped, early group) 8 Infusion pump rates and volumes 9 Solar8000 heart rate (as stamped, late group) 10 Solar8000 ART and CVP
+          numerics 11 EV1000 mean arterial pressure 12 CardioQ pressure and flow 13 Airway pressure (Primus) 14 Capnogram (Primus) 15 Solar8000 pulse
+          rate (PLETH_HR) 16 Primus ETCO2, PIP and RR 17 Non-invasive blood pressure 18 Vigileo SV, CO and SVV 19 Anaesthesia record events (minute
+          entries) 20 FMS rapid infuser, Invos regional oxygen saturation 21 Vigilance continuous cardiac output 22 Anaesthesia record events (5-minute
+          entries) 23 Blood gas lab timestamp (lab timestamp) 24 Central lab timestamp (lab timestamp) 25 Admission and discharge
+
+Figure 3: Every kind of time stamp in VitalDB in its stored form (the plethysmogram’s is already on the
+working reference): bias (stamp minus the close of the interval the value describes, against the working
+reference; the bar spans the 5th to 95th percentile between recordings, a spread the uncertainty also
+contains) against combined standard uncertainty. Left of zero, the stamp comes before the value could
+exist. Waveform samples sit at milliseconds; numerics describe windows of seconds that closed seconds
+earlier; records and hand-entered times span minutes to days. Solid markers measured, hollow estimated
+or assumed. Drawn from the atlas file.
+
+
+round numbers. Truncation is a bias as well as a spread: a monitor that truncates records half
+a step low on average. Where a value’s resolution is a mixture, as with hand-charted volumes
+or a test that two analysers report differently, the distribution of the true value is a mixture
+too [10–12].
+
+2.5                              Forms of the times
+A signal’s times can be used in more than one form, and an atlas states each: the stamps as
+stored; the stamps shifted by a value known in advance, such as the release median, which can
+be used in real time; and the stamps after a correction fitted to each recording, which uses data
+from later in the recording and so cannot. Each form has its own bias and uncertainty, so a user
+chooses the form that suits the analysis and knows what it costs (Figures 3 and 4).
+
+2.6                              Evidence
+Every number carries a status (measured, derived, estimated or assumed) and points to the study
+that produced it. Studies are short reports: data in aggregate, method, results, limitations and the
+code that ran them. Their general findings are collected as observations, each established, likely,
+open or withdrawn, and their unsettled points as open questions of five kinds: phenomena not
+yet explained, weakly supported hypotheses, untestable assumptions, conflicts between studies,
+
+
+                                                                                          5
+                  Central lab timestamp (draw time)
+                Blood gas lab timestamp (draw time)
+                      EV1000 mean arterial pressure                                         ≤
+
+                          CardioQ pressure and flow                                     ≤
+
+                                Capnogram (Primus)                                  ≤
+
+                                Solar8000 heart rate
+                           Primus ETCO2, PIP and RR
+                   Solar8000 ART and CVP numerics
+                            Airway pressure (Primus)                        ≤
+
+                                             BIS EEG                       ≤
+
+                                BIS EEG (own bursts)                   ≤
+
+              Arterial pressure, ECG lead II (SNUADC)
+                                                        1 ms   10 ms        100 ms        1s           10 s          1 min   10 min
+                                                                              Standard uncertainty (1 SD)
+
+                                                               before: bias removed by a shift known in advance
+                                                               after the per-recording correction (≤: upper bound)
+                                                               likely value (part shared with a second reference)
+
+
+
+Figure 4: Residual uncertainty after correction. For each signal with a per-recording correction: its
+standard uncertainty with the bias removed by a shift known in advance (hollow), and after the correction
+(solid; ≤ marks an upper bound, a diamond the likely value where a second reference exists). Drawn from
+the atlas file.
+
+
+and next steps. Evidence can come from the records themselves, from device documentation, or
+from reverse-engineering the recording chain: converter and filter models, bench tests. When a
+result changes, the old one is marked superseded, not overwritten, so any number quoted from
+an earlier version can still be traced.
+
+2.7    Clocks and links
+Time reaches a record through a chain of clocks: the reference, a recording computer, each device.
+An atlas maps them as a network in which each clock is measured against another, with the rate
+and correction schedule of each link. Device rates are relative, each measured against another
+clock that also drifts, so the network is tested by its loops: where two routes join the same pair
+of clocks, the rates around the loop should sum to zero. Treated as a geodetic adjustment, the
+misclosures flag a bad link and test whether the stated uncertainties are right. A clock outside
+the recording, such as the mains grid, breaks the circle of relative rates and links the network to
+an outside reference.
+
+
+3     The atlas as a system
+An atlas is a folder of YAML files, one per item, from which an engine builds a website and a
+single machine-readable file. The engine knows nothing about any one dataset; another dataset
+is another folder. Items are of twelve kinds: variables, clocks, links between clocks, devices,
+parameters, studies, observations, the methods and techniques the studies use, worked examples,
+software and references. Each fact lives in one place, and every relation is written once and linked
+both ways. Table 2 shows what an atlas records for each variable, the part a new atlas fills in.
+
+                                                                6
+Table 2: What an atlas records for each variable, with the BIS EEG after synchronisation in the VitalDB
+atlas as the example. The combined standard uncertainty is computed by the engine from the components,
+never typed.
+
+Part                Fields                                         Example: BIS EEG, after
+                                                                   synchronisation
+Measurand           What is measured; device; the clock that       EEG voltage; BIS monitor; recorder PC
+                    stamps it
+Support             Length of the interval each value describes;   An instant (one sample)
+                    where the stamp sits in it
+Timing forms        As stored, shifted by a value known in         Four forms; this one uses data from
+                    advance, or corrected per recording; usable    later in the recording
+                    in real time or not
+Bias                Stamp minus the close of the support,          Removed by the correction; as stored
+                    against the working reference: one value or    −0.787 s (−0.97 to −0.60 s; 2,702
+                    a distribution between recordings (median,     recordings)
+                    5th–95th percentile, number), its scope
+                    and status
+Uncertainty         Components, each with a name, Type A           The recording’s constant 58 ms (scope:
+                    or B, distribution, standard uncertainty,      recording); drift left by the stamp
+                    scope, correlation shape and length, and       model 26 ms (structured, exponential,
+                    shared key; an upper-bound flag, a 95%         8 min); sample grid 2.3 ms (independent,
+                    interval and a likely value                    rectangular); combined 63 ms, an upper
+                                                                   bound; 95% −233 to +166 ms
+Value               Resolution, rounding rule, bias and uncer-     An exact 0.05 µV grid
+                    tainty of the value
+Clock domain        The domain whose drift remains, with its       The working reference
+                    rate and its spread between recordings
+Evidence            Status (measured, derived, estimated, as-      Measured; three studies
+                    sumed), the studies behind each number,
+                    the correction and the code
+
+
+    Studies are grouped by nine general methods, which another dataset can reuse: reading a
+device’s drift and corrections from its own stamps, as a sawtooth; one event seen by two clocks,
+such as an electrocautery burst in two devices’ signals, aligned by windowed cross-correlation;
+clocks carried in the signal, such as a pacemaker, an oximeter’s frames or the mains hum,
+used as a third clock; delays and averaging windows, found by recomputing a numeric from its
+own waveform; rounding, heaping and value resolution; the continuity of data and of signals;
+clinical and laboratory times; and reading the source documentation. Each method’s page in
+the atlas describes its techniques, such as sawtooth fits, null controls and predictions tested
+against the data, and the studies that use them. The loops of the clock network are adjusted as
+in geodesy [13].
+    The engine checks every field and cross-reference before it builds. It refuses unknown and
+retired fields, a timing form whose bias and uncertainty do not follow the conventions of Section 2,
+the word accuracy next to a number [3, 2.13], and patterns the dataset forbids, such as a case
+identifier outside a deliberate link, so that no per-recording table leaves by accident. Each
+variable’s page states its timing forms with their budgets, its value model, and the chain of clocks
+behind its stamp; each study links to the code that produced it.
+    An atlas is a living document. Studies are added, models refitted and numbers revised as
+evidence comes in, and each release is archived with a DOI, so that a paper can quote a fixed
+version while the website moves on. Adding a study is the system working, not a new edition.
+Contributions are pull requests against the folder, checked by the same engine. What carries over
+to a new dataset is the schema, the engine and its checks, the website and the machine-readable
+output, the planner, and the dataset-independent timing tools; what is written afresh is the
+
+
+                                                    7
+                                                                                                                                            UTC
+                                                                                                                                        Civil time
+
+
+
+
+                                                                                                                       2                                          3
+
+
+
+                                                                                                        Recorder PC clock                    1
+                                                                                                                                                                  Mains grid
+                                                                                                   Windows time, synchronised by NTP                           60 Hz, regulated
+
+
+
+
+                                      4                                   5                                       7                                        8                                          10
+
+
+
+          Primus clock                                    CardioQ clock                  6
+                                                                                                     SNUADC sample clock                     9
+                                                                                                                                                                  BIS clock                                 Hospital records clock
+       62.5 Hz waveform clock                           Waveform sample clock                          500 Hz ADC sample clock                           128 Hz EEG sample clock                            Clinical and laboratory systems
+
+
+
+
+                                                        11                                    12                                       13                                         14
+
+
+
+                        Pulse oximeter frame clock                     Monitor analogue output clock                             Pacemaker clock                                         Solar8000 clock
+                                  30 Hz output frames                    240 Hz line in the analogue outputs               Fixed pacing interval (860–1,204 ms)                        Monitor numerics windows
+
+
+      measured                  estimated               assumed
+
+
+
+
+Figure 5: The VitalDB timing network. Each clock sits below the clock it is measured against, or beside
+it in the same row; solid links are measured, dashed estimated, dotted assumed. The recorder computer
+and the mains grid hang from UTC by assumed links; the computer’s rate is measured against the grid
+(1) through the hum in the SNUADC waveforms. Generated from the atlas.
+
+
+dataset’s folder and the studies behind it. The approach will be applied to further datasets,
+including ones whose recording chain can be reverse-engineered in more detail than VitalDB’s,
+and a shared schema will let datasets be compared on the same terms.
+
+
+4    VitalDB: the first application
+VitalDB holds high-resolution waveforms, numerics and clinical information from 6,388 non-
+cardiac surgical patients [6, 14, 15]. Each operating room had one computer running Vital
+Recorder [16], which stamped every record from every device on arrival. A 500 Hz converter
+(SNUADC) samples the patient monitor’s analogue outputs; the BIS monitor, the anaesthesia
+machine and several haemodynamic monitors send their own waveforms and numerics on their
+own clocks; clinical events and laboratory results come from the hospital’s records.
+    The atlas describes 136 variables, 12 clocks, 16 links and 14 devices, with 80 studies (70
+current, the rest draft, open or superseded), 51 parameters and 54 observations behind them; 47
+timing forms cover the 25 variables with a time stamp model, and 98 open questions are listed.
+Its working reference is the SNUADC sample clock after a model of its stamps. Figure 5 shows
+the timing network, and Table 3 the findings that most change how the data should be used.
+    Two findings show the approach at work. First, the sign. In version 1 the sign of the BIS
+offset was lost, and the planner shifted the EEG the wrong way. Stating every bias with its
+sign, as the stamp minus the working reference’s time for the same event, made the error visible:
+the EEG stamps come 0.79 s before the ECG’s. Second, the outside reference. The SNUADC
+waveforms carry the mains hum at its harmonics in 39% of recordings. Because the grid is
+regulated, the hum is a clock outside the recording. In recordings whose SNUADC stamps carry
+no correction, it gives the converter’s rate where the stamps cannot, and a second path through
+the BIS confirms that rate to 13 ppm. This applies to the 1,248 recordings without corrections
+that carry hum, about a fifth of the release. Mains hum as a clock is established in audio forensics,
+where the electrical network frequency dates recordings [17]. The hum gives rates, not absolute
+times: the recording computers’ offset from UTC remains unobserved.
+    The atlas also documents issues that differ from VitalDB’s documentation or from common
+
+                                                                                                                  8
+Table 3: Findings from the VitalDB atlas that change how its data should be used. Each links to its
+study on the website.
+
+Finding                           Number
+BIS EEG stamps sit early          −0.79 s median (5th–95th percentile −0.97 to −0.60 s; 2,702 recordings)
+against the ECG (the working
+reference)
+Synchronisation, EEG to ECG     Standard uncertainty 161 ms with a shift known in advance; 63 ms after
+                                per-recording synchronisation (an upper bound); 30 ms with the
+                                recording’s own bursts (2,710 recordings)
+Synchronisation, ventilator to 1.36 s with a shift known in advance; 78 ms after breath matching (an
+monitor                         upper bound; 1,067 recordings)
+Monitor heart rate is truncated In 98.6% of 6,343 recordings; it describes 6–10 s of ECG
+The CO2 waveform trails the 3.60 s median (interquartile range 3.45–3.79 s; 6,341 recordings): the
+breath                          gas sampling line
+Recording computers against −14 to +2 ppm median, depending on the recordings; setups −47 to
+the mains grid                  +18 ppm
+Working reference without Rate error 31 ppm (robust SD between recordings); 13 ppm with the
+stamp corrections (57% of SNUADC rate from the mains hum, in the 1,248 such recordings with
+recordings)                     hum (median 76 to 31 ms per hour; checked in 224)
+Loop closure                    Median misclosure +1.3 ppm over 253 loops through the BIS, 17%
+                                beyond 3 standard errors; variance factors of 2 to 5, so the stated
+                                standard errors are too small by a factor of about 1.4 to 2.2
+
+        Table 4: Issues that differ from VitalDB’s documentation or from common assumptions.
+
+Issue                             Documented or as-      Found
+                                  sumed
+SNUADC converter resolution       12-bit                 10-bit codes (0–1023) in every channel
+Primus CO2 gain                   0.1                    0.075
+Primus airway pressure continu-   Continuous             About 21 s lost every 7,230 s, in 5,502
+ity                                                      recordings
+Laboratory time stamp             Result time            Specimen time; the result came later, by an
+                                                         unrecorded turnaround
+Operation end                     Charted                Set 10 min before the recording end in 537
+                                                         cases (8.4%)
+
+
+assumptions (Table 4). None is a criticism of VitalDB, which remains the most detailed open
+intraoperative dataset; most would be found in any multi-device recording examined this closely.
+
+
+5       Using an atlas
+5.1     Planning a synchronised analysis
+The planner combines any set of signals’ timingqforms. For each pair it gives the standard
+uncertainty of the difference between their times, u2a + u2b − 2 cov, where the covariance is the
+sum of the products of the components with the same shared key; shared errors cancel. From
+the largest pair it gives the finest useful shared time grid and, from the clock domains’ drift
+rates and their spread between recordings, how long a window can be before drift adds another
+standard deviation. A switch restricts the forms to those usable in real time. The planner never
+shifts a signal silently: it says which shift each form needs and in which direction.
+
+
+
+
+                                                   9
+ Box 1. A planning question, answered from the atlas file alone. A fresh AI assistant
+ (Claude), given only the VitalDB atlas file and Python, with no web access, was asked:
+ “I’m planning to use signals ECG, BIS EEG and ETCO2 from VitalDB, and I have made
+ these assumptions about synchronisation and uncertainty: the three signals are synchronised
+ to within 50 ms as stored, and their timing uncertainties are independent of each other. What
+ does the atlas tell me about my assumptions, and how might they affect my research?”
+    Its answer (abridged): neither assumption holds. As stored, the EEG stamps sit 0.79 s from
+    the ECG’s, the ECG’s own stamps carry a 0–480 ms sawtooth, and ETCO2 is stamped seconds
+    after its breath, with a further 3.6 s sampling line in the CO2 waveform. After correction
+    only the EEG gets near 50 ms (42 ms median; 62 ms, an upper bound). The errors are not
+    independent: the corrections share the SNUADC reference, the BIS and ventilator errors
+    persist for 7–8 minutes, and some are fixed for a whole recording, so confidence intervals that
+    assume independence are too narrow. It advised which forms to use, resampling by recording
+    and in blocks of at least 8 minutes, and sensitivity analyses at the 95% bounds.
+ Checked claim by claim, every number traced to the atlas; one was cited to the wrong item,
+ and one was the assistant’s own inference. The exchange also found three problems in the
+ atlas, all since fixed: two estimates of the ETCO2 delay that disagreed in sign, traced to a
+ fitting assumption that put one of them 3.5 s too low; wording that predated the corrected
+ sign of the BIS offset; and numerics stamped by the recording computer but filed under a
+ device’s clock domain. The full exchange and its check are in the supplementary material.
+ This is one worked example, not an evaluation.
+
+
+
+5.2     Labels and the availability rule
+Derived results are published as time-aware labels, each with a span, its parameters and an
+available_at: the earliest point its information could have been known. This enforces an
+availability rule, that no value is used before it could have been known, and so prevents a model
+built on the data from leaking information from the future [18]. The availability time is separate
+from the bias. A laboratory result is stamped minutes after its draw, a positive bias, but becomes
+available only after an unrecorded turnaround, so a model may not use it at its stamp.
+
+5.3     An AI assistant with the atlas file
+The machine-readable file holds every variable’s timing forms, biases, uncertainty budgets, shared
+errors, status and evidence links in one place. It is a compact way to give an AI assistant
+quantitative context about a dataset’s properties: one file, with every number tied to its evidence.
+A researcher can attach the file, or give its address, and ask a planning question about the
+signals and assumptions of a study. The assistant reads the schema, finds the forms, and answers
+with the numbers and the items they come from, so that each claim can be checked against the
+website (Box 1).
+    The assistant reads a snapshot. Its claims should be checked against the pages it cites, and
+an atlas’s numbers describe its own dataset: they do not transfer to another.
+
+
+6      Limitations and related work
+An atlas is a reconstruction. In the first application most of the model is inferred from the records,
+without access to the devices, their firmware or the recording computers; where a dataset’s
+devices and recording chain are known in detail, the model can rest more on the chain itself. The
+chain to UTC is linked only by rate, through the mains hum, so absolute times are not traceable.
+
+
+                                                  10
+Population results describe the release, not any one recording; a per-setup or per-recording
+estimate is given where the data support one. Several results are preliminary and are marked as
+such.
+    No timing result here is checked against an external ground truth. Every check is internal: a
+shared artefact, a second path, or a closed loop. The loops show that some stated uncertainties
+are still too small, and only the plethysmogram’s correction has been tested end to end, on
+sawtooths injected into real recordings. Bench recordings of the devices, or recordings with a
+known injected offset, would close this gap.
+    The work builds on the vocabulary and uncertainty framework of the VIM and the GUM [3,
+4, 7, 8], on their application to historical Earth observations [5], on statistical work on coarse
+and heaped data [10–12] and on change of support [9], on network time synchronisation [19],
+geodetic network adjustment [13] and electrical network frequency analysis [17], and on work on
+leakage in machine learning [18]. It extends earlier work on timing errors in clinical databases [1],
+EEG synchronisation in intensive care [2], data-quality modelling of high-frequency physiological
+data [20], pulse arrival time with bedside equipment [21], and the storage of high-frequency
+signals [22]. Delays in processed EEG indices were measured by Pilge et al. [23]. To our knowledge,
+no open dataset has previously been described as a complete measurement system in this way.
+
+
+7    Access, licences and contributing
+The VitalDB atlas is at https://vitaldb.metrology-atlas.org, with its machine-readable
+file on the site and in each release. The code is at https://github.com/metrology-atlas.
+The version this paper describes is archived on Zenodo ([TODO: version DOI]); the concept
+DOI doi:10.5281/zenodo.23494768 resolves to the latest version. VitalDB 1.0.0 is at https:
+//physionet.org/content/vitaldb/1.0.0/.
+     The atlas’s text, figures, machine-readable file and all results derived from VitalDB are shared
+under CC BY 4.0, the licence of the data; code is MIT. The atlas redistributes no recordings
+or per-case tables. It is a research resource, not for clinical use, and is not affiliated with or
+endorsed by the VitalDB team, PhysioNet or any device maker. Users should cite the atlas
+together with VitalDB and PhysioNet [6, 14, 15].
+     Corrections, new studies and better models are welcome. The most useful settle an open
+question; outside evidence would help most where the data cannot speak, above all the recording
+computers’ offset from UTC and the hospital records’ clock.
+
+
+Acknowledgements
+We thank the VitalDB team for making their dataset openly available, and Tom Pollard
+(PhysioNet) for his advice on releasing this work. Analysis code, figures and drafts of the text
+were developed with the assistance of an AI system (Claude, Anthropic); A.J.G. designed the
+work and checked the analyses, and both authors are responsible for all content.
+
+
+References
+ [1] A. J. Goodwin, D. Eytan, W. Dixon, S. D. Goodfellow, Z. Doherty, R. W. Greer, A. McEwan,
+     M. Tracy, P. C. Laussen, A. Assadi, and M. Mazwi. Timing errors and temporal uncertainty
+     in clinical databases – a narrative review. Frontiers in Digital Health, 4:932599, 2022. doi:
+     10.3389/fdgth.2022.932599.
+
+ [2] A. J. Goodwin, W. Dixon, M. Mazwi, C. D. Hahn, T. Meir, S. D. Goodfellow, V. Kazazian,
+     R. W. Greer, A. McEwan, P. C. Laussen, and D. Eytan. The truth Hertz – synchronization
+
+
+
+                                                 11
+    of electroencephalogram signals with physiological waveforms recorded in an intensive care
+    unit. Physiological Measurement, 44(8):085002, 2023. doi: 10.1088/1361-6579/ace49e.
+
+ [3] Joint Committee for Guides in Metrology. International vocabulary of metrology – Basic
+     and general concepts and associated terms (VIM). JCGM 200:2012, 2012. doi: 10.59161/
+     JCGM200-2012.
+
+ [4] Joint Committee for Guides in Metrology. Evaluation of measurement data – Guide
+     to the expression of uncertainty in measurement (GUM). JCGM 100:2008, 2008. doi:
+     10.59161/JCGM100-2008E.
+
+ [5] J. Mittaz, C. J. Merchant, and E. R. Woolliams. Applying principles of metrology to
+     historical Earth observations from satellites. Metrologia, 56(3):032002, 2019. doi: 10.1088/
+     1681-7575/ab1705.
+
+ [6] H.-C. Lee, Y. Park, S. B. Yoon, S. M. Yang, D. Park, and C.-W. Jung. VitalDB, a high-
+     fidelity multi-parameter vital signs database in surgical patients. Scientific Data, 9:279,
+     2022. doi: 10.1038/s41597-022-01411-5.
+
+ [7] Joint Committee for Guides in Metrology. Evaluation of measurement data – Supplement 1 to
+     the “Guide to the expression of uncertainty in measurement” – Propagation of distributions
+     using a Monte Carlo method. JCGM 101:2008, 2008. doi: 10.59161/JCGM101-2008.
+
+ [8] Joint Committee for Guides in Metrology. Evaluation of measurement data – Supplement 2
+     to the “Guide to the expression of uncertainty in measurement” – Extension to any number
+     of output quantities. JCGM 102:2011, 2011. doi: 10.59161/JCGM102-2011.
+
+ [9] C. A. Gotway and L. J. Young. Combining incompatible spatial data. Journal of the
+     American Statistical Association, 97(458):632–648, 2002. doi: 10.1198/016214502760047140.
+
+[10] D. F. Heitjan. Inference from grouped continuous data: a review. Statistical Science, 4(2):
+     164–179, 1989. doi: 10.1214/ss/1177012601.
+
+[11] D. F. Heitjan and D. B. Rubin. Ignorability and coarse data. The Annals of Statistics, 19
+     (4):2244–2253, 1991. doi: 10.1214/aos/1176348396.
+
+[12] H. Wang and D. F. Heitjan. Modeling heaping in self-reported cigarette counts. Statistics
+     in Medicine, 27(19):3789–3804, 2008. doi: 10.1002/sim.3281.
+
+[13] C. D. Ghilani. Adjustment Computations: Spatial Data Analysis. Wiley, 6th edition, 2017.
+     ISBN 9781119385981.
+
+[14] H.-C. Lee and C.-W. Jung. VitalDB, a high-fidelity multi-parameter vital signs database
+     in surgical patients (version 1.0.0). PhysioNet, 2022. doi: 10.13026/czw8-9p62. URL
+     https://physionet.org/content/vitaldb/1.0.0/. RRID:SCR_007345.
+
+[15] T. Pollard, B. E. Moody, L. Lehman, B. Gow, C. Fernandes, C. Xie, A. Johnson, R. G.
+     Mark, and T. Heldt. PhysioNet as a global platform for biomedical research. Nature Health,
+     2026. doi: 10.1038/s44360-026-00096-z.
+
+[16] H.-C. Lee and C.-W. Jung. Vital Recorder – a free research tool for automatic recording
+     of high-resolution time-synchronised physiological data from multiple anaesthesia devices.
+     Scientific Reports, 8:1527, 2018. doi: 10.1038/s41598-018-20062-4.
+
+[17] C. Grigoras. Digital audio recording analysis: the Electric Network Frequency (ENF)
+     criterion. International Journal of Speech, Language and the Law, 12(1):63–76, 2005.
+
+
+                                               12
+[18] S. Kaufman, S. Rosset, C. Perlich, and O. Stitelman. Leakage in data mining: formulation,
+     detection, and avoidance. ACM Transactions on Knowledge Discovery from Data, 6(4):15,
+     2012. doi: 10.1145/2382577.2382579.
+
+[19] D. Mills, J. Martin, J. Burbank, and W. Kasch. Network Time Protocol version 4: Protocol
+     and algorithms specification. RFC 5905, RFC Editor, 2010. doi: 10.17487/RFC5905.
+
+[20] A. J. Goodwin. High frequency physiological data quality modelling in the intensive care
+     unit. PhD thesis, School of Biomedical Engineering, The University of Sydney, 2023.
+
+[21] I. Ruffolo, A. Siddiqui, B. Nguyen, W. Dixon, A. Assadi, R. Greer, S. Schwartz, M. Brudno,
+     A. Mariakakis, and A. Goodwin. High-fidelity measurement of pulse arrival time in critically
+     ill children using standard bedside monitoring equipment. Physiological Measurement, 46
+     (11):115006, 2025. doi: 10.1088/1361-6579/ae1b70.
+
+[22] A. J. Goodwin, D. Eytan, R. W. Greer, M. Mazwi, A. Thommandram, S. D. Goodfellow,
+     A. Assadi, A. Jegatheeswaran, and P. C. Laussen. A practical approach to storage and
+     retrieval of high-frequency physiological signals. Physiological Measurement, 41(3):035008,
+     2020. doi: 10.1088/1361-6579/ab7cb5.
+
+[23] S. Pilge, R. Zanner, G. Schneider, J. Blum, M. Kreuzer, and E. F. Kochs. Time delay of index
+     calculation: analysis of cerebral state, bispectral, and Narcotrend indices. Anesthesiology,
+     104(3):488–494, 2006. doi: 10.1097/00000542-200603000-00016.
+
+
+
+
+                                               13
+

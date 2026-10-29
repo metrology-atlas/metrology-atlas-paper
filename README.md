@@ -1,8 +1,14 @@
 # The Metrology Atlas: paper
 
-LaTeX source of the paper "The Metrology Atlas: describing recorded physiological data as a measurement system, with VitalDB as a first application", which accompanies the atlas (vitaldb.metrology-atlas.org). Published as [arXiv:2610.29001](https://arxiv.org/abs/2610.29001).
+LaTeX source of the paper "The Metrology Atlas: describing recorded physiological data as a measurement system", which accompanies the atlas (vitaldb.metrology-atlas.org). Published as [arXiv:2610.29001](https://arxiv.org/abs/2610.29001).
 
 Build: `latexmk -pdf main.tex` (pdflatex + BibTeX).
+
+Numbers: every number in the paper that describes the dataset is a `\fact{id}`, defined in `facts/facts.tex`.
+`python facts/make_facts.py --resolution ../vitaldb/vitaldb-resolution` regenerates `facts/facts.tex` and
+`facts/facts.yaml` from the atlas file (built from `../metrology-atlas`, or pass the file's path); the YAML records
+each fact's value, the atlas item it comes from, and the atlas commit and file hash. An undefined fact prints a red
+?? in the PDF, and `make_arxiv.py` refuses it.
 
 arXiv: `python make_arxiv.py` writes `arxiv/arxiv.tar.gz` (main.tex, main.bbl and the figures), checks that it
 compiles on its own as arXiv compiles it, and writes the plain-text abstract and the comments line for the form.
