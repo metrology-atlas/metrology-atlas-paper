@@ -68,9 +68,15 @@ def main():
                        cwd=ATLAS_DIR, check=True, stdout=subprocess.DEVNULL)
     raw = path.read_bytes()
     J = json.loads(raw)
+    # rev-parse and status only: `git describe --dirty` refreshes the index and takes index.lock, which a checkout
+    # mounted from another machine may not be able to remove.
+    def git(*args):
+        return subprocess.run(["git", "--no-optional-locks", "-C", str(ATLAS_DIR), *args],
+                              capture_output=True, text=True).stdout.strip()
     try:
-        commit = subprocess.run(["git", "--no-optional-locks", "-C", str(ATLAS_DIR), "describe", "--always", "--dirty"],
-                                capture_output=True, text=True).stdout.strip()
+        commit = git("rev-parse", "--short", "HEAD")
+        if commit and git("status", "--porcelain", "--untracked-files=no"):
+            commit += "-dirty"
     except OSError:
         commit = ""
 

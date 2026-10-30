@@ -2,7 +2,7 @@ generated: '2026-10-30'
 atlas:
   file: built from metrology-atlas
   sha256: 7e850a73a78392259fc5153d2af43a7ea98501bb2cb6da373b22bc6be313df7c
-  commit: ba9a2ff-dirty
+  commit: 600869d
   schema: metrology-atlas/0.3
 facts:
   atlas.variables:
