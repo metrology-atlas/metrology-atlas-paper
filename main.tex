@@ -357,8 +357,10 @@ shows the timing network, and Table~\ref{tab:findings} the findings that most ch
   \includegraphics[width=\textwidth]{figures/fig4-timing-network.pdf}
   \caption{The VitalDB timing network. Each clock sits below the clock it is measured against, or beside it in the
     same row; solid links are
-    measured, dashed estimated, dotted assumed. The recorder computer and the mains grid hang from UTC by assumed
-    links; the computer's rate is measured against the grid (1) through the hum in the SNUADC waveforms. Generated
+    measured, dashed estimated, dotted assumed. The recorder computer hangs from UTC by an estimated link (2): the
+    dataset's creator reports that it was synchronised to UTC(KRIS), Korea's national time scale, with the UTCk
+    program of the Korea Research Institute of Standards and Science (KRISS). The mains grid
+    hangs from UTC by an assumed link (3); the computer's rate is measured against the grid (1) through the hum in the SNUADC waveforms. Generated
     from the atlas.}
   \label{fig:network}
 \end{figure}
@@ -402,7 +404,8 @@ recording. In recordings whose SNUADC stamps carry no correction, it gives the c
 cannot, and a second path through the BIS confirms that rate to \fact{snuadc.drift.hum}\,ppm. This applies to the \fact{snuadc.uncorr.hum} recordings
 without corrections that carry hum, about a fifth of the release. Mains hum as a clock is established in audio
 forensics, where the electrical network frequency dates recordings~\citep{grigoras2005enf}. The hum gives rates, not
-absolute times: the recording computers' offset from UTC remains unobserved.
+absolute times. The recording computers were synchronised to UTC(KRIS) with KRISS's UTCk
+program~\citep{kriss-utck} (H.-C. Lee, personal communication), but their offset from UTC is not observed in the release.
 
 The atlas also documents issues that differ from VitalDB's documentation or from common assumptions
 (Table~\ref{tab:quality}). None is a criticism of VitalDB, which remains the most detailed open intraoperative
@@ -417,7 +420,8 @@ dataset; most would be found in any multi-device recording examined this closely
     \toprule
     Issue & Documented or assumed & Found \\
     \midrule
-    SNUADC converter resolution & 12-bit & \fact{snuadc.bits}-bit codes in every channel \\
+    SNUADC converter resolution & 12-bit & \fact{snuadc.bits}-bit codes in every channel, from a 10-bit converter in the public
+      firmware~\citep{snuadc} \\
     Primus CO\textsubscript{2} gain & 0.1 & \fact{primus.co2.gain} \\
     Primus airway pressure continuity & Continuous & About \fact{primus.pause}\,s lost every \fact{primus.period}\,s, in \fact{primus.pause.n} recordings \\
     Laboratory time stamp & Result time & Specimen time; the result came later, by an unrecorded turnaround \\
@@ -493,10 +497,11 @@ describe its own dataset: they do not transfer to another.
 % ---------------------------------------------------------------------------
 \section{Limitations and related work}
 
-An atlas is a reconstruction. In the first application most of the model is inferred from the records, without
-access to the devices, their firmware or the recording computers; where a dataset's devices and recording chain
-are known in detail, the model can rest more on the chain itself. The chain to UTC is linked only by rate, through
-the mains hum, so absolute times are not traceable. Population results describe the release, not any one
+An atlas is a reconstruction. In the first application most of the model is inferred from the records and the
+public firmware of one device, without access to the devices or the recording computers; where a dataset's devices and recording chain
+are known in detail, the model can rest more on the chain itself. The chain to UTC rests on the computers' reported
+synchronisation to UTC(KRIS) and on rates through the mains hum; no offset from UTC is observed, so absolute times
+are not traceable. Population results describe the release, not any one
 recording; a per-setup or per-recording estimate is given where the data support one. Several results are
 preliminary and are marked as such.
 
@@ -540,7 +545,8 @@ records' clock.
 % ---------------------------------------------------------------------------
 \section*{Acknowledgements}
 
-We thank the VitalDB team for making their dataset openly available, and Tom Pollard (PhysioNet) for his advice on
+We thank the VitalDB team for making their dataset openly available, Hyung-Chul Lee for information on how the
+data were recorded, and Tom Pollard (PhysioNet) for his advice on
 releasing this work. Analysis code, figures and drafts of the text were developed with the assistance of an AI
 system (Claude, Anthropic); A.J.G. designed the work and checked the analyses, and both authors are responsible for
 all content.

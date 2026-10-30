@@ -1,8 +1,8 @@
 generated: '2026-10-30'
 atlas:
   file: built from metrology-atlas
-  sha256: f340a3a8dd55b1cb1536cb87602de91e368421cc93b4f76e74870a86218cadd4
-  commit: ba9a2ff
+  sha256: 7e850a73a78392259fc5153d2af43a7ea98501bb2cb6da373b22bc6be313df7c
+  commit: ba9a2ff-dirty
   schema: metrology-atlas/0.3
 facts:
   atlas.variables:
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 98
-    display: '98'
+    value: 100
+    display: '100'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
