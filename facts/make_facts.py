@@ -139,6 +139,8 @@ def main():
     lo, hi = form("bis-eeg", "bis-sync")["uncertainty"]["interval95_s"]
     fact("bis.sync.i95.lo", lo, num(lo * 1000, sign=True), "ms", "bis-eeg/bis-sync interval95_s", "95% interval, lower")
     fact("bis.sync.i95.hi", hi, num(hi * 1000, sign=True), "ms", "bis-eeg/bis-sync interval95_s", "95% interval, upper")
+    g = form("bis-eeg", "bis-sync")["grid_s"] * 1000
+    fact("bis.grid", g, num(g, 1), "ms", "bis-eeg/bis-sync grid_s", "sample grid of the BIS EEG (1 / 128 Hz)")
     nf = len(V["bis-eeg"]["timing"])
     fact("bis.forms", nf, word(nf, cap=True), "forms", "bis-eeg timing", "timing forms of the BIS EEG")
     ns = len(form("bis-eeg", "bis-sync").get("studies") or [])
@@ -186,6 +188,12 @@ def main():
          "recordings assigned to a delay group")
     fact("hr.groups.none", nlab - ng, num(nlab - ng), "recordings", "hr.lab.n minus hr.groups.n",
          "labelled recordings not assigned to a group", status="derived")
+    u = comp("solar8000-hr", "hr-lab", 0)["u_s"]
+    fact("hr.label.u", u, num(u, 2), "s", "solar8000-hr/hr-lab uncertainty.components[0].u_s",
+         "standard uncertainty of a recording's own delay label")
+    w = comp("lab-blood-gas", "lab-draw", 0)["u_s"] * math.sqrt(12)
+    fact("lab.access.width", w, num(w), "s", "lab-blood-gas/lab-draw components[0].u_s x sqrt(12)",
+         "length of the arterial-line access the draw lies in (uniform)", status="derived")
     saw = comp("snuadc-ecg-ii", "snu-raw", 0)["u_s"] * math.sqrt(12) * 1000
     fact("ecg.sawtooth", saw, num(saw), "ms", "snuadc-ecg-ii/snu-raw components[0].u_s x sqrt(12)",
          "span of the stamp sawtooth (uniform)", status="derived")

@@ -1,8 +1,8 @@
 generated: '2026-10-30'
 atlas:
   file: built from metrology-atlas
-  sha256: 7e850a73a78392259fc5153d2af43a7ea98501bb2cb6da373b22bc6be313df7c
-  commit: 600869d
+  sha256: 359c4402bfa450e490c6674b45f0cfeff0979c9eadfdb0c655c084dc44833292
+  commit: 7feba93
   schema: metrology-atlas/0.3
 facts:
   atlas.variables:
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 100
-    display: '100'
+    value: 101
+    display: '101'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -210,6 +210,13 @@ facts:
     status: measured
     source: bis-eeg/bis-sync interval95_s
     definition: 95% interval, upper
+  bis.grid:
+    value: 7.8
+    display: '7.8'
+    unit: ms
+    status: measured
+    source: bis-eeg/bis-sync grid_s
+    definition: sample grid of the BIS EEG (1 / 128 Hz)
   bis.forms:
     value: 4
     display: Four
@@ -341,6 +348,20 @@ facts:
     status: derived
     source: hr.lab.n minus hr.groups.n
     definition: labelled recordings not assigned to a group
+  hr.label.u:
+    value: 0.256
+    display: '0.26'
+    unit: s
+    status: measured
+    source: solar8000-hr/hr-lab uncertainty.components[0].u_s
+    definition: standard uncertainty of a recording's own delay label
+  lab.access.width:
+    value: 89.0000451062807
+    display: '89'
+    unit: s
+    status: derived
+    source: lab-blood-gas/lab-draw components[0].u_s x sqrt(12)
+    definition: length of the arterial-line access the draw lies in (uniform)
   ecg.sawtooth:
     value: 480.12448385809273
     display: '480'

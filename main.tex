@@ -18,6 +18,9 @@
 
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \newcommand{\atlasurl}{\url{https://vitaldb.metrology-atlas.org}}
+\newcommand{\homeurl}{\url{https://metrology-atlas.org}}
+\renewcommand{\topfraction}{0.85}
+\renewcommand{\floatpagefraction}{0.75}
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
 % Numbers about the dataset come only from facts/facts.tex (python facts/make_facts.py); an undefined fact prints a red ??.
 \IfFileExists{facts/facts.tex}{\input{facts/facts.tex}}{}
@@ -47,11 +50,11 @@ states its measurement model, the interval of time each value describes, the bia
 its time and value, which errors are shared with other signals, and the evidence behind each number, marked as
 measured, derived, estimated or assumed. A schema and an engine, independent of any dataset, check an atlas and
 publish it as a website and a single machine-readable file, and the atlas is revised as evidence comes in. Our
-first application, to VitalDB (\fact{vitaldb.cases} surgical patients), shows what the approach finds. Against the working
-reference the BIS EEG stamps sit \fact{bis.bias.early}\,s early; after per-recording synchronisation their standard uncertainty is
-\fact{bis.sync.uc}\,ms (an upper bound), against \fact{bis.shift.uc}\,ms with a shift known in advance. The mains hum links the recording's clocks
-to an outside reference, and more than halves the drift of the working reference in the fifth of recordings where
-its own stamps cannot measure it. An atlas can be read, loaded by analysis code, or given to an AI assistant as
+first application, to VitalDB (\fact{vitaldb.cases} surgical patients), reconstructs the timing of a multi-device recording
+system largely from its own records: \fact{atlas.variables} variables from \fact{atlas.devices} devices on \fact{atlas.clocks} clocks, joined into one timing network by
+\fact{atlas.studies.current} current studies. It corrects the synchronisation between devices to a stated uncertainty, ties the recording's
+clocks to an outside reference through the mains hum, and documents where the data depart from their documentation.
+An atlas can be read, loaded by analysis code, or given to an AI assistant as
 compact, checkable context for planning a study. The approach will be applied to further datasets.
 \end{abstract}
 
@@ -59,7 +62,8 @@ compact, checkable context for planning a study. The approach will be applied to
 \section{Introduction: a record is a measurement}
 
 Open physiological datasets are now the training ground for clinical machine learning and time-series foundation
-models. Their users mostly treat each record as exact: a value that happened at its time stamp. In a multi-device
+models. Their users mostly treat each record as exact: a value that happened at its time stamp, the time the recording system attached to it (its stamp, for short). In a
+multi-device
 recording that assumption fails in ways that matter. Device clocks drift by tens to hundreds of parts per million
 against the recording computer and are pulled back to it in jumps, so their time error grows and resets: a
 sawtooth. Monitor numerics describe a window of signal that closed seconds before their stamp. Values are
@@ -67,32 +71,47 @@ truncated, rounded or heaped by hand. Converters store fewer bits than documente
 loader's output, and an analysis that relates two signals in time (pulse arrival time, coupling between the EEG and
 haemodynamics, an alarm against its cause) inherits all of it.
 
-What a record tells us is not a point but a region (Figure~\ref{fig:record}). A heart rate recorded as 72 per
-minute by a monitor that truncates lies somewhere in $[72, 73)$, and it describes several seconds of ECG that ended
+What a record tells us is not a point but a probability density function (PDF): how likely each true time and
+true value is, given the record (Figure~\ref{fig:record}). A heart rate recorded as 72 beats per minute (bpm) by a
+monitor that rounds down (truncates) could be anything from 72 up to, but not including, 73,
+and it describes several seconds of ECG that ended
 a variable delay before its stamp. A laboratory haematocrit of 35\% means 35$\pm$0.5 or 35$\pm$0.05 depending on
 which analyser made it, which the record does not say, and the blood was drawn minutes before the stamp, by an
-amount that also depends on the analyser. These shapes are uniform, bimodal, mixed and skewed. Few are Gaussian.
+amount that also depends on the analyser. Before correction these shapes are uniform, bimodal, mixed and skewed, and few are Gaussian; for one record, the
+atlas narrows each to what is known about that record.
 
-\begin{figure}[t]
+\begin{figure}[tp]
   \centering
   \includegraphics[width=\textwidth]{figures/fig1-record-distributions.pdf}
-  \caption{A record is a point; what it tells us is a region, here drawn from the VitalDB atlas's own data. Each
-    panel shows what is known about the true time (across) and true value (up) behind one recorded pair (white
-    dot); the curves are the two marginals. (A) A monitor heart rate of 72 per minute is truncated, so its true
-    value is uniform on $[72, 73)$; it describes \fact{hr.support}\,s of ECG (orange: its support), which closed before the
-    stamp by a delay that differs between two groups of recording computers (\fact{hr.lab.n} recordings: \fact{hr.groups.n} in the two
-    groups, \fact{hr.groups.none} not assigned). (B) An ECG sample on the stored stamps lies anywhere in the \fact{ecg.sawtooth}\,ms of a clock
-    sawtooth; its value is one converter code. In recordings with stamp corrections, the stamp model places it to
-    \fact{ecg.model.uc}\,ms against the working reference; without them the reference itself drifts (Table~\ref{tab:findings}).
-    (C) A laboratory haematocrit of 35\% came from a blood-gas analyser (whole percent) or the central laboratory
-    (0.1\%), which the record does not say; the weights, \fact{hct.weight.bg}\% and \fact{hct.weight.cbc}\%, come from the value model in
-    vitaldb-resolution. The draw preceded the lab stamp by that analyser's delay, so value and time are a joint
-    mixture (shaded on a square-root scale).}
+  \caption{A record is a point in time--value space; what it tells us is a joint PDF describing the true times and
+    values that could have produced that recorded pair, and how likely each is. It is drawn here from the VitalDB
+    atlas's own data, and a worked example on the atlas gives the source of every element
+    (\url{https://vitaldb.metrology-atlas.org/worked-example-record-pdf.html}). Top row: before correction, what the
+    stored record alone allows, across the release. Bottom row: after correction, what the atlas gives for one typical
+    record, from that record's own labels. In each panel the white dot is the recorded pair, the shading is the joint
+    PDF, and the curves along the top and right of each panel are its marginal PDFs of time and value; each column
+    keeps the same axes in both rows.
+    (A, C) A monitor heart rate of 72\,bpm. The monitor computes it from the intervals between R peaks in the last few
+    seconds of ECG (orange: the stretch of ECG it summarises, its support), and rounds it down (truncates), so its
+    true value is equally likely to be anywhere from 72 up to, but not including, 73, before and after correction.
+    The value is stamped a delay after that stretch of ECG ends. Before correction the support is \fact{hr.support}\,s
+    and the delay is bimodal, because the recording computers fall into two groups (A). After correction the
+    recording's label gives its group, its window and its delay, with a standard uncertainty of
+    \fact{hr.label.u}\,s (C).
+    (B, D) A laboratory haematocrit of 35\%. The value alone does not say which analyser measured it. A blood-gas
+    analyser reports whole percent, so 35\% means anything from 34.5\% to 35.5\% (the wide band). The central
+    laboratory reports to 0.1\%, so it means 34.95\% to 35.05\% (the thin line). The value model in vitaldb-resolution
+    estimates that about three in four recorded values of 35\% come from the blood-gas analyser. The blood was drawn
+    some minutes before the stamp, by a delay that depends on the analyser (B; shaded on a square-root scale). After
+    correction the panel stamped with the value names the analyser, here blood gas, and the draw's label places the
+    draw within one arterial-line access about \fact{lab.access.width}\,s long (D). The value stays the blood-gas
+    band, 34.5\% to 35.5\%.}
   \label{fig:record}
 \end{figure}
 
 Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved, such
-as aligning the EEG with bedside waveforms~\citep{goodwin2023}. What is missing is a complete, checkable description
+as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the relative alignment of the ECG and
+photoplethysmogram for pulse arrival time~\citep{ruffolo2025high}. What is missing is a complete, checkable description
 of a dataset's measurement system that others can read, reuse and correct. Metrology already has the language: a
 measurand, a measurement model, and a stated uncertainty with its evidence~\citep{jcgm-200-2012,jcgm-100-2008}.
 Earth observation has shown how to apply it to historical data whose instruments can no longer be
@@ -140,12 +159,16 @@ value, which can be propagated through any later calculation~\citep{jcgm-101-200
 
 \subsection{The interval each value describes}
 
-Most values describe an interval of time, not an instant: a heart rate averages several beats, an end-tidal CO$_2$
-takes the last breath, a laboratory result describes the blood at the moment of the draw. An atlas states this
-interval as part of what the value is: its \emph{support}, a term borrowed from geostatistics, where a value's
+Every value describes an interval of time, not an instant: a heart rate is computed from one or more R--R
+intervals, an end-tidal CO$_2$ from the last breath, and a laboratory result describes the blood at the moment of the
+draw. Even a single waveform sample is taken over a short acquisition window, shaped by the analogue filtering
+before the converter. An atlas states this interval as part of what the value is: its \emph{support}, a term borrowed from geostatistics, where a value's
 support is the region it averages over~\citep{gotway2002combining}. The support is not an error, and counting it as
 uncertainty, as many descriptions do, overstates how badly a value is timed. An atlas also states where in the
-interval the stamp sits.
+interval the stamp sits. Separately, a recorded time is itself a reading on a grid: a stamp from a clock that ticks
+every millisecond places the support only to within that millisecond, just as a recorded 72\,bpm places the heart
+rate only within 72 to 73. The grid enters as uncertainty, not as support, so no record locates its value more
+finely than one tick of the clock that stamped it.
 
 Two times then matter. A value \emph{describes} its support, and by convention its time is the support's close. It
 becomes \emph{available} at or after that close: at once for a monitor's numeric, only after analysis for a
@@ -292,7 +315,7 @@ variable, the part a new atlas fills in.
     Part & Fields & Example: BIS EEG, after synchronisation \\
     \midrule
     Measurand & What is measured; device; the clock that stamps it & EEG voltage; BIS monitor; recorder PC \\
-    Support & Length of the interval each value describes; where the stamp sits in it & An instant (one sample) \\
+    Support & Length of the interval each value describes; where the stamp sits in it & One sample: shorter than its \fact{bis.grid}\,ms sample grid, which enters as uncertainty \\
     Timing forms & As stored, shifted by a value known in advance, or corrected per recording; usable in real time or
       not & \fact{bis.forms} forms; this one uses data from later in the recording \\
     Bias & Stamp minus the close of the support, against the working reference: one value or a distribution between
@@ -336,7 +359,8 @@ the same engine. What carries over to a new dataset is the schema, the engine an
 machine-readable output, the planner, and the dataset-independent timing tools; what is written afresh is the
 dataset's folder and the studies behind it. The approach will be applied to further datasets, including ones whose
 recording chain can be reverse-engineered in more detail than VitalDB's, and a shared schema will let datasets be
-compared on the same terms.
+compared on the same terms. Each atlas has its own site; the project's home page, \homeurl, lists them with the
+software, papers and news.
 
 % ---------------------------------------------------------------------------
 \section{VitalDB: the first application}
@@ -529,7 +553,8 @@ been described as a complete measurement system in this way.
 \section{Access, licences and contributing}
 \label{sec:access}
 
-The VitalDB atlas is at \atlasurl, with its machine-readable file on the site and in each release. The code is at
+The VitalDB atlas is at \atlasurl, with its machine-readable file on the site and in each release, and the
+project's home page is \homeurl. The code is at
 \url{https://github.com/metrology-atlas}. The version this paper describes is archived on Zenodo
 (\todo{version DOI}); the concept DOI \href{https://doi.org/10.5281/zenodo.23494768}{doi:10.5281/zenodo.23494768}
 resolves to the latest version. VitalDB 1.0.0 is at \url{https://physionet.org/content/vitaldb/1.0.0/}.
