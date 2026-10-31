@@ -1,8 +1,8 @@
-generated: '2026-10-30'
+generated: '2026-10-31'
 atlas:
   file: built from metrology-atlas
-  sha256: 359c4402bfa450e490c6674b45f0cfeff0979c9eadfdb0c655c084dc44833292
-  commit: 7feba93
+  sha256: 4c86b8abf35f47728c9f524a050827dc0f8bf01416e50a8a239d6e4904e83d02
+  commit: 360e02f
   schema: metrology-atlas/0.3
 facts:
   atlas.variables:
@@ -62,8 +62,8 @@ facts:
     source: 'atlas file: studies[].status'
     definition: studies with status current
   atlas.forms:
-    value: 47
-    display: '47'
+    value: 48
+    display: '48'
     unit: forms
     status: measured
     source: 'atlas file: variables[].timing'

@@ -34,8 +34,10 @@ V = ds.items["variable"]
 # --- A: as stored -------------------------------------------------------------------------------------------------
 rows = []
 for vid, v in V.items():
-    for f in forms(v):
-        if f["kind"] == "as_stored":
+    fv = forms(v)
+    raw = any(f["kind"] == "as_stored" and f["name"] == "raw stamps" for f in fv)
+    for f in fv:
+        if f["kind"] == "as_stored" and (not raw or f["name"] == "raw stamps"):   # the stored stamps, where stated
             rows.append((v["name"] + ("" if f["name"] in ("as stamped", "as recorded", "raw stamps") else f" ({f['name']})"),
                          v["type"], f))
 uniq = []

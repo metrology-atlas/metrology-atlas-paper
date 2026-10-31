@@ -243,20 +243,26 @@ mapped the true value onto it: rounding to the nearest step, truncation, or heap
 Truncation is a bias as well as a spread: a monitor that truncates records half a step low on average. Where a
 value's resolution is a mixture, as with hand-charted volumes or a test that two analysers report differently, the
 distribution of the true value is a mixture too~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}.
+Values drift as clocks do. A transducer's offset and gain wander between calibrations, the instrument's
+drift~\citep[4.21]{jcgm-200-2012}, and each calibration~\citep[2.39]{jcgm-200-2012} pulls them back: the same pattern
+of drift and correction the clocks show. An atlas can describe it the same way, as a drift rate, a correction
+schedule and the evidence for each. The VitalDB release records no calibrations, but the atlas detects one kind made
+in theatre, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
 
 \subsection{Forms of the times}
 
-A signal's times can be used in more than one form, and an atlas states each: the stamps as stored; the stamps
-shifted by a value known in advance, such as the release median, which can be used in real time; and the stamps
-after a correction fitted to each recording, which uses data from later in the recording and so cannot. Each form
-has its own bias and uncertainty, so a user chooses the form that suits the analysis and knows what it costs
-(Figures~\ref{fig:bias} and~\ref{fig:corrected}).
+A signal's times can be used in more than one form, and an atlas states each of them. There are three. The first
+is the stamps as stored. The second shifts the stored stamps by an amount known in advance, such as the median delay
+across the release. Because that shift is fixed before any data arrive, this form can be used in real time. The
+third applies a correction fitted to each recording separately. That correction is estimated from the whole
+recording, including data recorded after the values it corrects, so it cannot be used in real time: a corrected time
+is available only once the recording has ended. Each form has its own bias and uncertainty, so a user can choose the
+form that suits the analysis and see what that choice costs (Figures~\ref{fig:bias} and~\ref{fig:corrected}).
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig3-bias-uncertainty.pdf}
-  \caption{Every kind of time stamp in VitalDB in its stored form (the plethysmogram's is already on the working
-    reference): bias (stamp minus the close of the interval the value describes, against the working reference; the
+  \caption{Every kind of time stamp in VitalDB in its stored form: bias (stamp minus the close of the interval the value describes, against the working reference; the
     bar spans the 5th to 95th percentile between recordings, a spread the uncertainty also contains) against
     combined standard uncertainty.
     Left of zero, the stamp comes before the value could exist. Waveform samples sit at milliseconds; numerics
@@ -536,7 +542,10 @@ public firmware of one device, without access to the devices or the recording co
 are known in detail, the model can rest more on the chain itself. The chain to UTC rests on the computers' reported
 synchronisation to UTC(KRIS) and on rates through the mains hum; no offset from UTC is observed, so absolute times
 are not traceable. Population results describe the release, not any one
-recording; a per-setup or per-recording estimate is given where the data support one. Several results are
+recording; a per-setup or per-recording estimate is given where the data support one. The value side is described by
+resolution and rounding, not by calibration. The devices' calibration and maintenance records are not part of the
+release; with them, an atlas could carry each device's drift in value and its calibration schedule as it carries
+the clocks' drift and corrections, and future work may add them. Several results are
 preliminary and are marked as such.
 
 No timing result here is checked against an external ground truth. Every check is internal: a shared artefact, a
