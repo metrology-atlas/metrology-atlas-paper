@@ -360,17 +360,45 @@ timing form whose bias and uncertainty do not follow the conventions of Section~
 identifier outside a deliberate link, so that no per-recording table leaves by accident. Each variable's page states its timing forms with their
 budgets, its value model, and the chain of clocks behind its stamp; each study links to the code that produced it.
 
-An atlas is a living document. Studies are added, models refitted and numbers revised as evidence comes in, and
-each release is archived with a DOI, so that a paper can quote a fixed version while the website moves on. This paper is one such quote: every number
-in it that describes VitalDB is generated from the atlas file of the archived version (Section~\ref{sec:access}),
-and its build records the atlas commit. Adding
-a study is the system working, not a new edition. Contributions are pull requests against the folder, checked by
+Adding a study to an atlas is the system working, not a new edition. Contributions are pull requests against the folder, checked by
 the same engine. What carries over to a new dataset is the schema, the engine and its checks, the website and the
 machine-readable output, the planner, and the dataset-independent timing tools; what is written afresh is the
 dataset's folder and the studies behind it. The approach will be applied to further datasets, including ones whose
 recording chain can be reverse-engineered in more detail than VitalDB's, and a shared schema will let datasets be
 compared on the same terms. Each atlas has its own site; the project's home page, \homeurl, lists them with the
 software, papers and news.
+
+\subsection{Keeping papers derived from the atlas in step}
+\label{sec:instep}
+
+An atlas is a living document. Studies are added, models refitted and numbers revised as evidence comes in. A
+paper, by contrast, is fixed once published. The two are reconciled by treating each paper as a snapshot: each
+release of an atlas is archived with its own identifier, and a paper quotes one release. The atlas moves on, and the
+paper stays an accurate record of what was known when it was written.
+
+The atlas is the source of truth, and numbers flow one way: from the atlas into the papers, the website and any
+other output, never back. A paper may interpret and argue from the atlas's numbers, but it does not hold numbers of
+its own about the dataset.
+
+That only works if the numbers a paper quotes really come from the release it cites. In practice they drift. An
+analysis is rerun on a changed population, a value is rounded by hand, a draft is written from an older output, and
+nothing compares the text with the analysis, so the disagreement goes unnoticed. Generating every number, rather
+than typing it, closes this gap. Each number lives in the atlas as a parameter or a field of a timing form, tied to
+the study that produced it. A script reads the atlas file and writes a registry of \emph{facts}: each with its
+value, the form in which it is printed, its unit, its status, and the item it came from, and the registry records
+which release of the atlas it was built from. A paper draws its numbers from that registry. If it refers to a fact
+the registry does not define, it fails to build, so a number cannot be printed without a source in the atlas. Every
+number in this paper that describes VitalDB is produced this way.
+
+When a number changes, the atlas does not overwrite it. The old value is kept, marked as superseded, with the date
+and the reason, so a reader of an older paper can see what has moved since and why. Whether a change calls for
+anything beyond the atlas's own record depends on what it touches. A change that leaves a paper's argument intact
+needs nothing further. A change that alters an argument calls for a revised version of the paper.
+
+Generation guarantees agreement, not correctness. A wrong analysis, faithfully generated, passes every check of
+this kind. Correctness rests on the studies themselves, and on the atlas's other checks: the loops of the clock
+network must close, corrections are tested on data held out from their fit, and anyone can read the
+machine-readable file independently and compare it with the website, as an AI assistant does in Box~1.
 
 % ---------------------------------------------------------------------------
 \section{VitalDB: the first application}
