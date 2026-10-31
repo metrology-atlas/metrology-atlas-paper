@@ -48,7 +48,8 @@ dataset-independent way to describe a recorded dataset as a measurement system, 
 Vocabulary of Metrology and the Guide to the Expression of Uncertainty in Measurement. For every variable, an atlas
 states its measurement model, the interval of time each value describes, the bias and the standard uncertainty of
 its time and value, which errors are shared with other signals, and the evidence behind each number, marked as
-measured, derived, estimated or assumed. A schema and an engine, independent of any dataset, check an atlas and
+measured, derived, estimated or assumed. It also records how variables relate, what each measures and which it was
+derived from, so that derived features carry their inputs' uncertainty and availability. A schema and an engine, independent of any dataset, check an atlas and
 publish it as a website and a single machine-readable file, and the atlas is revised as evidence comes in. Our
 first application, to VitalDB (\fact{vitaldb.cases} surgical patients), reconstructs the timing of a multi-device recording
 system largely from its own records: \fact{atlas.variables} variables from \fact{atlas.devices} devices on \fact{atlas.clocks} clocks, joined into one timing network by
@@ -249,6 +250,25 @@ of drift and correction the clocks show. An atlas can describe it the same way, 
 schedule and the evidence for each. The VitalDB release records no calibrations, but the atlas detects one kind made
 in theatre, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
 
+Values are also related to one another. Some measure the same quantity by different routes: arterial pressure from
+an invasive line and from a cuff, oxygen saturation from a pulse oximeter and from a blood gas, comparisons we have
+quantified before~\citep{goodwin2021blood,eytan2019revisiting}. Others are derived from other values, in one of two
+ways: computed from data the dataset stores, as a length of stay is from two dates, or computed inside a device from
+a signal the dataset also records, as a monitor computes its heart rate from the ECG it exports. A model can also
+\emph{estimate} a quantity it never measures, as when arterial pressure is estimated from the ECG and the
+plethysmogram; its uncertainty then includes the model's own error, which only validation against a reference
+measurement gives. An atlas records these relations explicitly: what each variable measures or estimates, which
+variables it was derived from and how, and the algorithm, code and version behind it. Along each derivation it
+carries what the inputs imply. A derived value describes at least the intervals its inputs describe and cannot be
+available before its latest input, and if any input can be known only after the fact, as a correction fitted on the
+whole recording can, so can the derived value. Its uncertainty follows by the law of
+propagation~\citep[5.1--5.2]{jcgm-100-2008}, with the covariance of errors its inputs share, or, for a value defined
+by code, from the study that measured it. Features derived for machine learning are values like any other, so the
+atlas describes the variables never measured directly from the patient as fully as those that were, and a feature
+store can take them from it as a paper takes its numbers (Section~\ref{sec:instep}). In the VitalDB atlas,
+\fact{atlas.measured} variables measure \fact{atlas.measurands} measurands, and \fact{atlas.derived} are derived
+from others.
+
 \subsection{Forms of the times}
 
 A signal's times can be used in more than one form, and an atlas states each of them. There are three. The first
@@ -309,7 +329,7 @@ outside reference.
 
 An atlas is a folder of YAML files, one per item, from which an engine builds a website and a single
 machine-readable file. The engine knows nothing about any one dataset; another dataset is another folder. Items are
-of \fact{atlas.kinds} kinds: variables, clocks, links between clocks, devices, parameters, studies, observations, the methods
+of \fact{atlas.kinds} kinds: variables, the measurands they measure, clocks, links between clocks, devices, parameters, studies, observations, the methods
 and techniques the studies use, worked examples, software and references. Each fact lives in one place, and every
 relation is written once and linked both ways. Table~\ref{tab:schema} shows what an atlas records for each
 variable, the part a new atlas fills in.
@@ -337,6 +357,9 @@ variable, the part a new atlas fills in.
       exponential, \fact{bis.sync.length}\,min); sample grid \fact{bis.sync.u.grid}\,ms (independent, rectangular); combined \fact{bis.sync.uc}\,ms, an upper bound; 95\%
       \fact{bis.sync.i95.lo} to \fact{bis.sync.i95.hi}\,ms \\
     Value & Resolution, rounding rule, bias and uncertainty of the value & An exact \fact{bis.eeg.step}\,$\mu$V grid \\
+    Relations & What it measures or estimates; the variables it was derived from (computed from, or same source
+      as), with algorithm, code and version; how its uncertainty propagates & Measures scalp EEG voltage; the BIS
+      index comes from the same source, and the BIS smoothing label is computed from it \\
     Clock domain & The domain whose drift remains, with its rate and its spread between recordings & The working
       reference \\
     Evidence & Status (measured, derived, estimated, assumed), the studies behind each number, the correction and the
@@ -519,7 +542,10 @@ correction fitted on a whole recording, such as the stamp model, draws on data r
 corrects, so a corrected time is available only at the end of the recording: usable offline, not in real time. The
 availability time is also separate from the bias. A laboratory result is stamped minutes after its draw, a positive
 bias, but becomes available only after an unrecorded turnaround, an honest lag, so a model may not use it at its
-stamp.
+stamp. The labels are themselves variables in the atlas, derived from the signals they were made from, whether by an
+algorithm, as all of VitalDB's are, or by a person annotating them. Each has a timing form stamped at its
+availability time, and one as stored, which the engine flags as look-ahead when it starts before the values it
+depends on.
 
 \subsection{An AI assistant with the atlas file}
 

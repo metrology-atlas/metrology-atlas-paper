@@ -1,13 +1,13 @@
-generated: '2026-10-31'
+generated: '2026-11-01'
 atlas:
   file: built from metrology-atlas
-  sha256: 4c86b8abf35f47728c9f524a050827dc0f8bf01416e50a8a239d6e4904e83d02
-  commit: 360e02f
-  schema: metrology-atlas/0.3
+  sha256: c0adae969903c2fe43bc742e94bf23e9e16238a619c1ae9d5dabb48d9e9bb797
+  commit: 61c2957
+  schema: metrology-atlas/0.4
 facts:
   atlas.variables:
-    value: 136
-    display: '136'
+    value: 143
+    display: '143'
     unit: variables
     status: measured
     source: 'atlas file: variables'
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 68
-    display: '68'
+    value: 69
+    display: '69'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -62,33 +62,54 @@ facts:
     source: 'atlas file: studies[].status'
     definition: studies with status current
   atlas.forms:
-    value: 48
-    display: '48'
+    value: 62
+    display: '62'
     unit: forms
     status: measured
     source: 'atlas file: variables[].timing'
     definition: timing forms
   atlas.timed:
-    value: 25
-    display: '25'
+    value: 32
+    display: '32'
     unit: variables
     status: measured
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 101
-    display: '101'
+    value: 110
+    display: '110'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
     definition: open questions listed
   atlas.kinds:
-    value: 12
-    display: twelve
+    value: 13
+    display: '13'
     unit: kinds
     status: measured
     source: 'atlas file: top-level keys'
     definition: kinds of item
+  atlas.measurands:
+    value: 34
+    display: '34'
+    unit: measurands
+    status: measured
+    source: 'atlas file: measurands'
+    definition: number of measurands
+  atlas.measured:
+    value: 50
+    display: '50'
+    unit: variables
+    status: measured
+    source: 'atlas file: variables[].measures'
+    definition: variables that state the measurand they measure
+  atlas.derived:
+    value: 13
+    display: '13'
+    unit: variables
+    status: measured
+    source: 'atlas file: variables[].origin'
+    definition: variables derived from other variables
   atlas.methods:
     value: 9
     display: nine

@@ -108,6 +108,14 @@ def main():
          "open questions listed")
     kinds = [k for k in J if k not in ("schema", "dataset")]
     fact("atlas.kinds", len(kinds), word(len(kinds)), "kinds", f"{src}: top-level keys", "kinds of item")
+    fact("atlas.measurands", len(J["measurands"]), num(len(J["measurands"])), "measurands", f"{src}: measurands",
+         "number of measurands")
+    measured = sum(1 for v in V.values() if v.get("measures"))
+    fact("atlas.measured", measured, num(measured), "variables", f"{src}: variables[].measures",
+         "variables that state the measurand they measure")
+    derived = sum(1 for v in V.values() if v.get("origin") == "derived")
+    fact("atlas.derived", derived, num(derived), "variables", f"{src}: variables[].origin",
+         "variables derived from other variables")
     fact("atlas.methods", len(J["methods"]), word(len(J["methods"])), "methods", f"{src}: methods",
          "general methods")
     cases = J["dataset"]["records"]["max"]
