@@ -1,8 +1,8 @@
 generated: '2026-11-01'
 atlas:
   file: built from metrology-atlas
-  sha256: c0adae969903c2fe43bc742e94bf23e9e16238a619c1ae9d5dabb48d9e9bb797
-  commit: 61c2957
+  sha256: 0677c66edbd39c1f08219703ab004e47ed71afc2b69c3c77bb86808acadab126
+  commit: 8e29cce
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 69
-    display: '69'
+    value: 77
+    display: '77'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -48,15 +48,15 @@ facts:
     source: 'atlas file: observations'
     definition: number of observations
   atlas.studies:
-    value: 80
-    display: '80'
+    value: 82
+    display: '82'
     unit: studies
     status: measured
     source: 'atlas file: studies'
     definition: number of studies
   atlas.studies.current:
-    value: 70
-    display: '70'
+    value: 72
+    display: '72'
     unit: studies
     status: measured
     source: 'atlas file: studies[].status'
@@ -111,8 +111,8 @@ facts:
     source: 'atlas file: variables[].origin'
     definition: variables derived from other variables
   atlas.methods:
-    value: 9
-    display: nine
+    value: 10
+    display: ten
     unit: methods
     status: measured
     source: 'atlas file: methods'

@@ -368,14 +368,47 @@ variable, the part a new atlas fills in.
   \end{tabularx}
 \end{table}
 
-Studies are grouped by \fact{atlas.methods} general methods, which another dataset can reuse: reading a device's drift and
-corrections from its own stamps, as a sawtooth; one event seen by two clocks, such as an electrocautery burst in two
-devices' signals, aligned by windowed cross-correlation; clocks carried in the signal, such as a pacemaker, an
-oximeter's frames or the mains hum, used as a third clock; delays and averaging windows, found by recomputing a
-numeric from its own waveform; rounding, heaping and value resolution; the continuity of data and of signals;
-clinical and laboratory times; and reading the source documentation. Each method's page in the atlas describes its
-techniques, such as sawtooth fits, null controls and predictions tested against the data, and the studies that use
-them. The loops of the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
+Studies are grouped by \fact{atlas.methods} general methods, which another dataset can reuse
+(Table~\ref{tab:methods}). One, method comparison, is the classic design for two measurements of one
+quantity~\citep{bland1986statistical,bland2007agreement}; what an atlas adds is the pairing, taken at the moment each
+value describes, which its timing supplies. Each method's page in the atlas describes its techniques, such as
+sawtooth fits, null controls and predictions tested against the data, and the studies that use them. The loops of
+the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{The general methods of the VitalDB atlas's studies, each with one example. A method's page in the atlas
+    lists its techniques and the studies that use it; the methods carry over to other datasets.}
+  \label{tab:methods}
+  \begin{tabularx}{\textwidth}{@{}p{0.2\textwidth}Lp{0.27\textwidth}@{}}
+    \toprule
+    Method & How it works & Example in VitalDB \\
+    \midrule
+    Reading the stamps & Fit a device's drift and corrections from its own record stamps, against the samples each
+      record holds & The SNUADC and BIS stamp model \\
+    One event, two clocks & Find an event that two independently clocked signals both record, and read the offset
+      from where each puts it & Electrocautery bursts in the ECG and the EEG \\
+    Clocks carried in the signal & Use a regular rhythm inside a signal, such as a pacemaker, an oximeter's frames or
+      the mains hum, as a third clock & The mains hum, tying the recording PCs to the grid \\
+    Does the waveform run on? & Test whether a waveform continues smoothly across a junction, reset or gap, to tell
+      lost samples from lost time & About 20\,ms of signal lost at each SNUADC reset \\
+    Data continuity & Map where each signal's gaps are and how long its unbroken stretches run & Recording pauses of
+      about 20\,s \\
+    Delays and averaging windows & Recompute a monitor's numeric from its own waveform, to find the window it
+      summarises and its delay & Heart rate's two delay groups, one poll apart \\
+    Clinical and laboratory times & Find what a time in the clinical and lab tables marks, from signatures the event
+      leaves in the signals & The lab time marks the specimen, not the draw or the result \\
+    Rounding, heaping and value resolution & Find the resolution a number was recorded at, its rounding rule and its
+      heaping & Heart rate truncated; hand-charted volumes heaped \\
+    Method comparison & Compare two variables measuring one quantity, paired at the moment each describes: bias,
+      limits of agreement, and the parts fixed per patient and varying within one & Cuff against arterial mean
+      pressure \\
+    Reading the source & Read firmware, manuals and loader code to explain a behaviour, or predict one to test & The
+      SNUADC firmware \\
+    \bottomrule
+  \end{tabularx}
+\end{table}
 
 The engine checks every field and cross-reference before it builds. It refuses unknown and retired fields, a
 timing form whose bias and uncertainty do not follow the conventions of Section~\ref{sec:approach}, the word
