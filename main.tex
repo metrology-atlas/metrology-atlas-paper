@@ -165,18 +165,22 @@ draw. Even a single waveform sample is taken over a short acquisition window, sh
 before the converter. An atlas states this interval as part of what the value is: its \emph{support}, a term borrowed from geostatistics, where a value's
 support is the region it averages over~\citep{gotway2002combining}. The support is not an error, and counting it as
 uncertainty, as many descriptions do, overstates how badly a value is timed. An atlas also states where in the
-interval the stamp sits. Separately, a recorded time is itself a reading on a grid: a stamp from a clock that ticks
-every millisecond places the support only to within that millisecond, just as a recorded 72\,bpm places the heart
-rate only within 72 to 73. The grid enters as uncertainty, not as support, so no record locates its value more
-finely than one tick of the clock that stamped it.
+interval the stamp sits. Separately, every recorded time is itself an interval, the \emph{resolution interval} of
+the clock that stamped it: a stamp from a clock that ticks every millisecond places the support only to within that
+millisecond, just as a recorded 72\,bpm places the heart rate only within 72 to 73. Nothing is known before that
+interval closes, and an atlas carries it as a rectangular uncertainty, not as part of the support, so no record
+locates its value more finely than one tick of the clock that stamped it.
 
-Two times then matter. A value \emph{describes} its support, and by convention its time is the support's close. It
-becomes \emph{available} at or after that close: at once for a monitor's numeric, only after analysis for a
-laboratory result. An atlas states both. The \emph{bias} of a stamp is the stamp minus the close of the support. A
+Two times then matter. A value \emph{describes} its support, and by convention its time is the support's close
+(close-stamping). It becomes \emph{available} at or after that close: its \emph{availability time} is the earliest
+moment at which it could have been produced in real time, once every input it depends on has arrived. The
+difference is an \emph{honest lag}, the processing, buffering or analysis between the close of the support and the
+moment the value exists: seconds for a monitor's numeric, an unrecorded turnaround for a laboratory result. An atlas
+states both. The \emph{bias} of a stamp is the stamp minus the close of the support. A
 negative bias means the stamp comes before the interval it describes has closed. That is look-ahead: real if the
 value was computed from later data, apparent if the reference the bias is measured against is itself late. A
-non-negative bias does not make a value safe to use at its stamp; that is the job of its availability time
-(Section~\ref{sec:labels}).
+non-negative bias does not make a value safe to use at its stamp, since a stamp after the support's close can still
+come before the availability time; that is the job of the availability time itself (Section~\ref{sec:labels}).
 
 \subsection{Bias and uncertainty}
 
@@ -315,7 +319,7 @@ variable, the part a new atlas fills in.
     Part & Fields & Example: BIS EEG, after synchronisation \\
     \midrule
     Measurand & What is measured; device; the clock that stamps it & EEG voltage; BIS monitor; recorder PC \\
-    Support & Length of the interval each value describes; where the stamp sits in it & One sample: shorter than its \fact{bis.grid}\,ms sample grid, which enters as uncertainty \\
+    Support & Length of the interval each value describes; where the stamp sits in it & One sample; its resolution interval is the \fact{bis.grid}\,ms sample grid, which enters as uncertainty \\
     Timing forms & As stored, shifted by a value known in advance, or corrected per recording; usable in real time or
       not & \fact{bis.forms} forms; this one uses data from later in the recording \\
     Bias & Stamp minus the close of the support, against the working reference: one value or a distribution between
@@ -473,11 +477,15 @@ it says which shift each form needs and in which direction.
 \label{sec:labels}
 
 Derived results are published as time-aware labels, each with a span, its parameters and an
-\texttt{available\_at}: the earliest point its information could have been known. This enforces an availability
-rule, that no value is used before it could have been known, and so prevents a model built on the data from leaking
-information from the future~\citep{kaufman2012leakage}. The availability time is separate from the bias. A
-laboratory result is stamped minutes after its draw, a positive bias, but becomes available only after an
-unrecorded turnaround, so a model may not use it at its stamp.
+\texttt{available\_at}, its availability time. This enforces the \emph{availability rule}, that a value may not be
+used before its availability time, and so prevents temporal information leakage into a model built on the
+data~\citep{kaufman2012leakage}. The rule is checked against the \emph{reference time}, the instant at which a model
+is taken to act, with both times read on one reference clock; in an atlas that clock is the working reference. A
+correction fitted on a whole recording, such as the stamp model, draws on data recorded after the values it
+corrects, so a corrected time is available only at the end of the recording: usable offline, not in real time. The
+availability time is also separate from the bias. A laboratory result is stamped minutes after its draw, a positive
+bias, but becomes available only after an unrecorded turnaround, an honest lag, so a model may not use it at its
+stamp.
 
 \subsection{An AI assistant with the atlas file}
 
