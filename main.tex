@@ -347,7 +347,7 @@ variable, the part a new atlas fills in.
     Measurand & What is measured; device; the clock that stamps it & EEG voltage; BIS monitor; recorder PC \\
     Support & Length of the interval each value describes; where the stamp sits in it & One sample; its resolution interval is the \fact{bis.grid}\,ms sample grid, which enters as uncertainty \\
     Timing forms & As stored, shifted by a value known in advance, or corrected per recording; usable in real time or
-      not & \fact{bis.forms} forms; this one uses data from later in the recording \\
+      not & \fact{bis.forms} forms, from as stored to corrected per recording. This one is fitted over the whole recording: offline use only \\
     Bias & Stamp minus the close of the support, against the working reference: one value or a distribution between
       recordings (median, 5th--95th percentile, number), its scope and status & Removed by the correction; as
       stored \fact{bis.bias.exact}\,s (\fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
@@ -361,7 +361,8 @@ variable, the part a new atlas fills in.
       as), with algorithm, code and version; how its uncertainty propagates & Measures scalp EEG voltage; the BIS
       index comes from the same source, and the BIS smoothing label is computed from it \\
     Clock domain & The domain whose drift remains, with its rate and its spread between recordings & The working
-      reference \\
+      reference: the SNUADC sample clock, on the recorder PC's timeline. It drifts \fact{snuadc.drift}\,ppm between
+      recordings where the SNUADC stamps carry no corrections (\fact{snuadc.uncorr.share}\%) \\
     Evidence & Status (measured, derived, estimated, assumed), the studies behind each number, the correction and the
       code & Measured; \fact{bis.sync.studies} studies \\
     \bottomrule
@@ -395,8 +396,8 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
       lost samples from lost time & About 20\,ms of signal lost at each SNUADC reset \\
     Data continuity & Map where each signal's gaps are and how long its unbroken stretches run & Recording pauses of
       about 20\,s \\
-    Delays and averaging windows & Recompute a monitor's numeric from its own waveform, to find the window it
-      summarises and its delay & Heart rate's two delay groups, one poll apart \\
+    Delays and averaging windows & Recompute a monitor's numeric from its own waveform, or read it from how the
+      numeric disagrees with another measurement of the same rate, to find the window it summarises and its delay & Heart rate's two delay groups, one poll apart \\
     Clinical and laboratory times & Find what a time in the clinical and lab tables marks, from signatures the event
       leaves in the signals & The lab time marks the specimen, not the draw or the result \\
     Rounding, heaping and value resolution & Find the resolution a number was recorded at, its rounding rule and its
