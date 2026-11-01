@@ -69,8 +69,7 @@ recording that assumption fails in ways that matter. Device clocks drift by tens
 against the recording computer and are pulled back to it in jumps, so their time error grows and resets: a
 sawtooth. Monitor numerics describe a window of signal that closed seconds before their stamp. Values are
 truncated, rounded or heaped by hand. Converters store fewer bits than documented. None of this shows in a typical
-loader's output, and an analysis that relates two signals in time (pulse arrival time, coupling between the EEG and
-haemodynamics, an alarm against its cause) inherits all of it.
+loader's output.
 
 What a record tells us is not a point but a probability density function (PDF): how likely each true time and
 true value is, given the record (Figure~\ref{fig:record}). A heart rate recorded as 72 beats per minute (bpm) by a
@@ -110,7 +109,7 @@ atlas narrows each to what is known about that record.
   \label{fig:record}
 \end{figure}
 
-The uncertainty of these data is rarely considered. It can be quantified, as it is when a sensor is validated against
+This uncertainty can be quantified, as it is when a sensor is validated against
 a reference, yet it is typically underestimated if considered at all, and rarely carried into the analyses and models
 built on the data~\citep{ansermino2023measurement}. Synchronisation is a case in point. Two signals are not simply
 synchronised or not: their relative timing is a measurement, with a bias and an uncertainty. A statement that a
@@ -118,17 +117,14 @@ dataset's signals are synchronised, without that uncertainty and the statistic i
 objectively, nor used in a quantitative analysis.
 
 Analyses that relate signals beat by beat, or at a sub-second scale, need synchronisation that many clinical datasets
-do not support or do not document. ECG and PPG are now learned together by foundation models pretrained on open datasets
-from different sites and devices, and a recent review of these models lists 13 datasets that record both
-signals~\citep[Table~S12]{han2026review}. Yet the offset between the two signals is a property of each recording system. In VitalDB the plethysmogram
-reaches the converter \fact{pleth.delay}\,s after the ECG; in a paediatric intensive care unit it lagged by 1.30\,s, and
-by 0.97\,s after the monitors were replaced~\citep{ruffolo2025high}. The larger of these offsets exceed an R--R
-interval: at 120 beats per minute, usual in a child, 1.30\,s spans more than two beats, so the beats of the two signals
-are out of phase. Any analysis that pairs events across modalities inherits the same error, whether it is the pulse
-arrival time, the swing in arterial pressure with each ventilator breath, or the response of the EEG to a drug bolus.
-It is quite possible that the datasets pooled for such models differ from each other in this way. Their descriptions
-rarely say whether they do, and a model cannot be expected to reconcile such differences on its own~\citep{ruffolo2025high}.
-If each dataset were described by an atlas, the question would be settled by reading it.
+do not document. ECG and PPG are now learned together by foundation models pretrained on open datasets from many
+sites and devices; a recent review lists 13 that record both~\citep[Table~S12]{han2026review}. Yet the offset between
+the two is a property of each recording system: \fact{pleth.delay}\,s in VitalDB, 1.30\,s in a paediatric intensive
+care unit~\citep{ruffolo2025high}. At 120 beats per minute, usual in a child, an R--R interval lasts 0.5\,s, so an
+offset of 1.30\,s puts the beats of the two signals out of phase. The same holds for any pairing across modalities,
+from pulse arrival time to the EEG's response to a drug. The datasets pooled for such models may well differ in this
+way, and their descriptions rarely say whether they do. If each were described by an atlas, the question would be
+settled by reading it.
 
 Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved, such
 as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the ECG with the
