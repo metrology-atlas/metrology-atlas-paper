@@ -1,8 +1,8 @@
 generated: '2026-11-01'
 atlas:
   file: built from metrology-atlas
-  sha256: 0677c66edbd39c1f08219703ab004e47ed71afc2b69c3c77bb86808acadab126
-  commit: 8e29cce
+  sha256: 8e7cb479e5b78c8d841d7efcec06120410a678db804a600cdaef3f78658f70dd
+  commit: 62a5ea6
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 77
-    display: '77'
+    value: 105
+    display: '105'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -48,15 +48,15 @@ facts:
     source: 'atlas file: observations'
     definition: number of observations
   atlas.studies:
-    value: 82
-    display: '82'
+    value: 86
+    display: '86'
     unit: studies
     status: measured
     source: 'atlas file: studies'
     definition: number of studies
   atlas.studies.current:
-    value: 72
-    display: '72'
+    value: 76
+    display: '76'
     unit: studies
     status: measured
     source: 'atlas file: studies[].status'
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 110
-    display: '110'
+    value: 113
+    display: '113'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -183,8 +183,8 @@ facts:
     source: bis-eeg/bis-own components (combined)
     definition: combined standard uncertainty, form bis-own
   bis.shift.uc:
-    value: 160.67417340692933
-    display: '161'
+    value: 170.65298122212806
+    display: '171'
     unit: ms
     status: measured
     source: bis-eeg/bis-shift components (combined)
@@ -341,48 +341,57 @@ facts:
     definition: recordings
   hr.support:
     value:
-    - 6
-    - 10
-    display: 6--10
+    - 4.9
+    - 8.3
+    display: 4.9--8.3
     unit: s
     status: measured
     source: solar8000-hr/hr-lab support_s
     definition: support of the HR
   hr.lab.n:
-    value: 6222
-    display: 6,222
+    value: 6233
+    display: 6,233
     unit: recordings
     status: measured
     source: solar8000-hr/hr-lab removes_bias_s.n
     definition: recordings with a label
   hr.groups.n:
-    value: 5427
-    display: 5,427
+    value: 5999
+    display: 5,999
     unit: recordings
     status: measured
     source: parameters hr-delay-early + hr-delay-late spread.n
     definition: recordings assigned to a delay group
   hr.groups.none:
-    value: 795
-    display: '795'
+    value: 234
+    display: '234'
     unit: recordings
     status: derived
     source: hr.lab.n minus hr.groups.n
     definition: labelled recordings not assigned to a group
   hr.label.u:
-    value: 0.256
-    display: '0.26'
+    value: 0.219
+    display: '0.22'
     unit: s
     status: measured
     source: solar8000-hr/hr-lab uncertainty.components[0].u_s
     definition: standard uncertainty of a recording's own delay label
   lab.access.width:
-    value: 89.0000451062807
-    display: '89'
+    value: 53
+    display: '53'
     unit: s
-    status: derived
-    source: lab-blood-gas/lab-draw components[0].u_s x sqrt(12)
-    definition: length of the arterial-line access the draw lies in (uniform)
+    status: measured
+    source: parameter lab-access-length
+    definition: median length of the arterial-line access matched to a blood gas
+    n: 4742
+  pleth.delay:
+    value: 0.385
+    display: '0.385'
+    unit: s
+    status: measured
+    source: parameter pleth-chain-delay
+    definition: delay of the SNUADC plethysmogram behind the ECG from the monitor's
+      processing (one value for the release)
   ecg.sawtooth:
     value: 480.12448385809273
     display: '480'
@@ -533,8 +542,8 @@ facts:
     source: parameter snuadc-uncorrected-drift spread.n
     definition: recordings in the BIS check
   loop.bis:
-    value: 1.3
-    display: $+$1.3
+    value: 0.97
+    display: $+$1.0
     unit: ppm
     status: measured
     source: parameter loop-bis-misclosure
@@ -563,8 +572,8 @@ facts:
     source: parameter loop-variance-factor spread.min
     definition: smallest variance factor
   loop.vf.max:
-    value: 5.19
-    display: '5.2'
+    value: 5.14
+    display: '5.1'
     unit: ''
     status: measured
     source: parameter loop-variance-factor spread.max
@@ -577,7 +586,7 @@ facts:
     source: sqrt of loop-variance-factor spread.min
     definition: factor by which standard errors are too small
   loop.se.max:
-    value: 2.2781571499789037
+    value: 2.2671568097509267
     display: '2.3'
     unit: ''
     status: derived
