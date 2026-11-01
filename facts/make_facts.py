@@ -87,6 +87,11 @@ def main():
     def uc(vid, fid):
         return math.sqrt(sum(c["u_s"] ** 2 for c in form(vid, fid)["uncertainty"]["components"]))
 
+    def uc_core(vid, fid):
+        """Combined standard uncertainty without mixture components (a whole-breath error is stated as a share)."""
+        return math.sqrt(sum(c["u_s"] ** 2 for c in form(vid, fid)["uncertainty"]["components"]
+                             if c.get("distribution") != "mixture"))
+
     def comp(vid, fid, i):
         return form(vid, fid)["uncertainty"]["components"][i]
 
@@ -162,9 +167,12 @@ def main():
     u = uc("primus-awp", "primus-shift")
     fact("primus.shift.uc", u, num(u, 2), "s", "primus-awp/primus-shift components (combined)",
          "combined standard uncertainty with a shift known in advance")
-    u = uc("primus-awp", "primus-sync") * 1000
-    fact("primus.sync.uc", u, num(u), "ms", "primus-awp/primus-sync components (combined)",
-         "combined standard uncertainty after breath matching")
+    u = uc_core("primus-awp", "primus-sync") * 1000
+    fact("primus.sync.uc", u, num(u), "ms", "primus-awp/primus-sync components without the mixture (combined)",
+         "combined standard uncertainty after breath matching, for a stretch on its right breath")
+    p = P["primus-breath-error-share"]
+    fact("primus.sync.breath", p["value"], num(p["value"], 1), "%", "parameter primus-breath-error-share", p["quantity"],
+         status=p["status"])
     n = form("primus-awp", "primus-sync")["removes_bias_s"]["n"]
     fact("primus.sync.n", n, num(n), "recordings", "primus-awp/primus-sync removes_bias_s.n",
          "recordings with breath matching (with CVP)")

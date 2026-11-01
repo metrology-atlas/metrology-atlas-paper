@@ -1,8 +1,8 @@
-generated: '2026-11-01'
+generated: '2026-11-02'
 atlas:
   file: built from metrology-atlas
-  sha256: 8e7cb479e5b78c8d841d7efcec06120410a678db804a600cdaef3f78658f70dd
-  commit: 62a5ea6
+  sha256: 723916214b77d9bd8dffb4aa5593c94fa4e4c9e01ae26a639f3351a7ca391d84
+  commit: f45684d
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 105
-    display: '105'
+    value: 109
+    display: '109'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -48,8 +48,8 @@ facts:
     source: 'atlas file: observations'
     definition: number of observations
   atlas.studies:
-    value: 86
-    display: '86'
+    value: 87
+    display: '87'
     unit: studies
     status: measured
     source: 'atlas file: studies'
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 113
-    display: '113'
+    value: 116
+    display: '116'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -267,8 +267,8 @@ facts:
     source: device bis tracks EEG1_WAV step
     definition: value grid of the BIS EEG
   primus.shift.uc:
-    value: 1.3585378169193525
-    display: '1.36'
+    value: 0.7634160071677827
+    display: '0.76'
     unit: s
     status: measured
     source: primus-awp/primus-shift components (combined)
@@ -278,8 +278,17 @@ facts:
     display: '78'
     unit: ms
     status: measured
-    source: primus-awp/primus-sync components (combined)
-    definition: combined standard uncertainty after breath matching
+    source: primus-awp/primus-sync components without the mixture (combined)
+    definition: combined standard uncertainty after breath matching, for a stretch
+      on its right breath
+  primus.sync.breath:
+    value: 12.4
+    display: '12.4'
+    unit: '%'
+    status: estimated
+    source: parameter primus-breath-error-share
+    definition: Probability that a stretch's breath-matched AWP lag is still a whole
+      breath off after the breath rule, averaged over the windows.
   primus.sync.n:
     value: 1067
     display: 1,067

@@ -516,8 +516,9 @@ shows the timing network, and Table~\ref{tab:findings} the findings that most ch
       \fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
     Synchronisation, EEG to ECG & Standard uncertainty \fact{bis.shift.uc}\,ms with a shift known in advance; \fact{bis.sync.uc}\,ms after
       per-recording synchronisation (an upper bound); \fact{bis.own.uc}\,ms with the recording's own bursts (\fact{bis.sync.n} recordings) \\
-    Synchronisation, ventilator to monitor & \fact{primus.shift.uc}\,s with a shift known in advance; \fact{primus.sync.uc}\,ms after breath matching (an
-      upper bound; \fact{primus.sync.n} recordings) \\
+    Synchronisation, ventilator to monitor & \fact{primus.shift.uc}\,s with a shift known in advance; \fact{primus.sync.uc}\,ms after breath matching, for a
+      stretch on its right breath (an upper bound; \fact{primus.sync.n} recordings), and still a whole breath off for
+      \fact{primus.sync.breath}\% of the matched time \\
     Monitor heart rate is truncated & In \fact{hr.trunc.share}\% of \fact{hr.trunc.n} recordings; it describes \fact{hr.support}\,s of ECG \\
     The CO$_2$ waveform trails the breath & \fact{co2.line}\,s median (interquartile range \fact{co2.line.q1}--\fact{co2.line.q3}\,s; \fact{co2.line.n} recordings):
       the gas sampling line \\
