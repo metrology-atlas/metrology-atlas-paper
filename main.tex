@@ -35,7 +35,7 @@
   \small $^{1}$School of Biomedical Engineering, The University of Sydney, Sydney, Australia\\
   \small $^{2}$The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology, Haifa, Israel\\
   \small $^{3}$Pediatric Intensive Care Unit, Rambam Health Care Campus, Haifa, Israel}
-\date{\todo{month} 2026}
+\date{November 2026}
 
 \begin{document}
 \maketitle
@@ -105,14 +105,34 @@ atlas narrows each to what is known about that record.
     estimates that about three in four recorded values of 35\% come from the blood-gas analyser. The blood was drawn
     some minutes before the stamp, by a delay that depends on the analyser (B; shaded on a square-root scale). After
     correction the panel stamped with the value names the analyser, here blood gas, and the draw's label places the
-    draw within one arterial-line access about \fact{lab.access.width}\,s long (D). The value stays the blood-gas
+    draw within its own arterial-line access, typically \fact{lab.access.width}\,s long (D). The value stays the blood-gas
     band, 34.5\% to 35.5\%.}
   \label{fig:record}
 \end{figure}
 
+The uncertainty of these data is rarely considered. It can be quantified, as it is when a sensor is validated against
+a reference, yet it is typically underestimated if considered at all, and rarely carried into the analyses and models
+built on the data~\citep{ansermino2023measurement}. Synchronisation is a case in point. Two signals are not simply
+synchronised or not: their relative timing is a measurement, with a bias and an uncertainty. A statement that a
+dataset's signals are synchronised, without that uncertainty and the statistic it is expressed in, cannot be verified
+objectively, nor used in a quantitative analysis.
+
+Analyses that relate signals beat by beat, or at a sub-second scale, need synchronisation that many clinical datasets
+do not support or do not document. ECG and PPG are now learned together by foundation models pretrained on open datasets
+from different sites and devices, and a recent review of these models lists 13 datasets that record both
+signals~\citep[Table~S12]{han2026review}. Yet the offset between the two signals is a property of each recording system. In VitalDB the plethysmogram
+reaches the converter \fact{pleth.delay}\,s after the ECG; in a paediatric intensive care unit it lagged by 1.30\,s, and
+by 0.97\,s after the monitors were replaced~\citep{ruffolo2025high}. The larger of these offsets exceed an R--R
+interval: at 120 beats per minute, usual in a child, 1.30\,s spans more than two beats, so the beats of the two signals
+are out of phase. Any analysis that pairs events across modalities inherits the same error, whether it is the pulse
+arrival time, the swing in arterial pressure with each ventilator breath, or the response of the EEG to a drug bolus.
+It is quite possible that the datasets pooled for such models differ from each other in this way. Their descriptions
+rarely say whether they do, and a model cannot be expected to reconcile such differences on its own~\citep{ruffolo2025high}.
+If each dataset were described by an atlas, the question would be settled by reading it.
+
 Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved, such
-as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the relative alignment of the ECG and
-photoplethysmogram for pulse arrival time~\citep{ruffolo2025high}. What is missing is a complete, checkable description
+as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the ECG with the
+photoplethysmogram~\citep{ruffolo2025high}. What is missing is a complete, checkable description
 of a dataset's measurement system that others can read, reuse and correct. Metrology already has the language: a
 measurand, a measurement model, and a stated uncertainty with its evidence~\citep{jcgm-200-2012,jcgm-100-2008}.
 Earth observation has shown how to apply it to historical data whose instruments can no longer be
@@ -127,8 +147,9 @@ VitalDB~\citep{lee2022vitaldb}, to show what it finds. Its contributions are:
   \item a dataset-independent schema and engine that check an atlas and publish it as a website and one
     machine-readable file, revised as evidence comes in (Section~\ref{sec:system});
   \item a first atlas, of VitalDB, with 80 studies behind it (Section~\ref{sec:vitaldb});
-  \item three ways to use an atlas: a planner for combining signals, labels that respect when a value could first
-    be known, and the machine-readable file as context for an AI assistant (Section~\ref{sec:use}).
+  \item two ways to use an atlas: a planner for combining signals, and labels that respect when a value could first
+    be known (Section~\ref{sec:use}), with what the machine-readable file offers AI assistants and machine learning
+    (Section~\ref{sec:limits}).
 \end{itemize}
 The detail lives in the atlas, at \atlasurl; this paper quotes its numbers and points to it. The numbers are
 VitalDB's, measured on its devices and recording set-up. They show the kinds of error the approach describes, not
@@ -455,7 +476,7 @@ needs nothing further. A change that alters an argument calls for a revised vers
 Generation guarantees agreement, not correctness. A wrong analysis, faithfully generated, passes every check of
 this kind. Correctness rests on the studies themselves, and on the atlas's other checks: the loops of the clock
 network must close, corrections are tested on data held out from their fit, and anyone can read the
-machine-readable file independently and compare it with the website, as an AI assistant does in Box~1.
+machine-readable file independently and compare it with the website.
 
 % ---------------------------------------------------------------------------
 \section{VitalDB: the first application}
@@ -581,49 +602,9 @@ algorithm, as all of VitalDB's are, or by a person annotating them. Each has a t
 availability time, and one as stored, which the engine flags as look-ahead when it starts before the values it
 depends on.
 
-\subsection{An AI assistant with the atlas file}
-
-The machine-readable file holds every variable's timing forms, biases, uncertainty budgets, shared errors, status
-and evidence links in one place. It is a compact way to give an AI assistant quantitative context about a
-dataset's properties: one file, with every number tied to its evidence. A researcher can attach the file, or give its address, and ask a planning question about the
-signals and assumptions of a study. The assistant reads the schema, finds the forms, and answers with the numbers
-and the items they come from, so that each claim can be checked against the website (Box~1).
-
-\begin{figure}[tp]
-\begin{boxed}
-\textbf{Box 1. A planning question, answered from the atlas file alone.} A fresh AI assistant (Claude), given only
-the VitalDB atlas file and Python, with no web access, was asked:
-
-\smallskip
-\emph{``I'm planning to use signals ECG, BIS EEG and ETCO2 from VitalDB, and I have made these assumptions about
-synchronisation and uncertainty: the three signals are synchronised to within 50\,ms as stored, and their timing
-uncertainties are independent of each other. What does the atlas tell me about my assumptions, and how might they
-affect my research?''}
-
-\smallskip
-Its answer (abridged): neither assumption holds. As stored, the EEG stamps sit 0.79\,s from the ECG's, the ECG's
-own stamps carry a 0--480\,ms sawtooth, and ETCO$_2$ is stamped seconds after its breath, with a further 3.6\,s
-sampling line in the CO$_2$ waveform. After correction only the EEG gets near 50\,ms (42\,ms median; 62\,ms, an
-upper bound). The errors are not independent: the corrections share the SNUADC reference, the BIS and ventilator
-errors persist for 7--8\,minutes, and some are fixed for a whole recording, so confidence intervals that assume
-independence are too narrow. It advised which forms to use, resampling by recording and in blocks of at least
-8\,minutes, and sensitivity analyses at the 95\% bounds.
-
-\smallskip
-Checked claim by claim, every number traced to the atlas; one was cited to the wrong item, and one was the
-assistant's own inference. The exchange also found three problems in the atlas, all since fixed: two estimates of the
-ETCO$_2$ delay that disagreed in sign, traced to a fitting assumption that put one of them \fact{primus.numgap.half}\,s too low; wording
-that predated the corrected sign of the BIS offset; and numerics stamped by the recording computer but filed under a
-device's clock domain. The full exchange and its check are in the supplementary material. This is one worked
-example, not an evaluation.
-\end{boxed}
-\end{figure}
-
-The assistant reads a snapshot. Its claims should be checked against the pages it cites, and an atlas's numbers
-describe its own dataset: they do not transfer to another.
-
 % ---------------------------------------------------------------------------
 \section{Limitations and related work}
+\label{sec:limits}
 
 An atlas is a reconstruction. In the first application most of the model is inferred from the records and the
 public firmware of one device, without access to the devices or the recording computers; where a dataset's devices and recording chain
@@ -640,6 +621,7 @@ No timing result here is checked against an external ground truth. Every check i
 second path, or a closed loop. The loops show that some stated uncertainties are still too small, and only the
 plethysmogram's correction has been tested end to end, on sawtooths injected into real recordings. Bench
 recordings of the devices, or recordings with a known injected offset, would close this gap.
+
 
 The work builds on the vocabulary and uncertainty framework of the VIM and the
 GUM~\citep{jcgm-200-2012,jcgm-100-2008,jcgm-101-2008,jcgm-102-2011}, on their application to historical Earth

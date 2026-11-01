@@ -8,8 +8,7 @@ describes the dataset comes from here as \\fact{id}; an undefined fact prints a 
 the atlas item it comes from. The only other source is vitaldb-resolution (Figure 1C's analyser weights), which the
 atlas names as the value model of the laboratory variables; without --resolution those two facts are left undefined.
 
-Kept literal in main.tex: the AI assistant's own words in Box 1 (they quote the atlas file it was given), the
-illustrative values (a heart rate of 72, a haematocrit of 35%), clause numbers of the VIM and GUM, version numbers,
+Kept literal in main.tex: numbers quoted from other papers, the illustrative values (a heart rate of 72, a haematocrit of 35%), clause numbers of the VIM and GUM, version numbers,
 DOIs, and what VitalDB's documentation says (Table 4, middle column).
 """
 import argparse
@@ -199,9 +198,13 @@ def main():
     u = comp("solar8000-hr", "hr-lab", 0)["u_s"]
     fact("hr.label.u", u, num(u, 2), "s", "solar8000-hr/hr-lab uncertainty.components[0].u_s",
          "standard uncertainty of a recording's own delay label")
-    w = comp("lab-blood-gas", "lab-draw", 0)["u_s"] * math.sqrt(12)
-    fact("lab.access.width", w, num(w), "s", "lab-blood-gas/lab-draw components[0].u_s x sqrt(12)",
-         "length of the arterial-line access the draw lies in (uniform)", status="derived")
+    p = P["lab-access-length"]
+    fact("lab.access.width", p["value"], num(p["value"]), "s", "parameter lab-access-length",
+         "median length of the arterial-line access matched to a blood gas", n=p["spread"]["n"])
+    # ---- ECG and plethysmogram: the system's offset
+    p = P["pleth-chain-delay"]
+    fact("pleth.delay", p["value"] / 1000, num(p["value"] / 1000, 3), "s", "parameter pleth-chain-delay",
+         "delay of the SNUADC plethysmogram behind the ECG from the monitor's processing (one value for the release)")
     saw = comp("snuadc-ecg-ii", "snu-raw", 0)["u_s"] * math.sqrt(12) * 1000
     fact("ecg.sawtooth", saw, num(saw), "ms", "snuadc-ecg-ii/snu-raw components[0].u_s x sqrt(12)",
          "span of the stamp sawtooth (uniform)", status="derived")
