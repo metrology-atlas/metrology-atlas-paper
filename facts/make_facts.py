@@ -213,8 +213,8 @@ def main():
     p = P["pleth-chain-delay"]
     fact("pleth.delay", p["value"] / 1000, num(p["value"] / 1000, 3), "s", "parameter pleth-chain-delay",
          "delay of the SNUADC plethysmogram behind the ECG from the monitor's processing (one value for the release)")
-    saw = comp("snuadc-ecg-ii", "snu-raw", 0)["u_s"] * math.sqrt(12) * 1000
-    fact("ecg.sawtooth", saw, num(saw), "ms", "snuadc-ecg-ii/snu-raw components[0].u_s x sqrt(12)",
+    saw = comp("snuadc-ecg-ii", "snu-raw-step", 0)["u_s"] * math.sqrt(12) * 1000
+    fact("ecg.sawtooth", saw, num(saw), "ms", "snuadc-ecg-ii/snu-raw-step components[0].u_s x sqrt(12)",
          "span of the stamp sawtooth (uniform)", status="derived")
     u = uc("snuadc-ecg-ii", "snu-model") * 1000
     fact("ecg.model.uc", u, num(u, 1), "ms", "snuadc-ecg-ii/snu-model components (combined)",
