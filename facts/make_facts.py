@@ -12,6 +12,7 @@ Kept literal in main.tex: numbers quoted from other papers, the illustrative val
 DOIs, and what VitalDB's documentation says (Table 4, middle column).
 """
 import argparse
+from decimal import ROUND_HALF_UP, Decimal
 import datetime
 import hashlib
 import json
@@ -219,6 +220,14 @@ def main():
     u = uc("snuadc-ecg-ii", "snu-model") * 1000
     fact("ecg.model.uc", u, num(u, 1), "ms", "snuadc-ecg-ii/snu-model components (combined)",
          "combined standard uncertainty after the stamp model")
+    # the plethysmogram's sawtooth correction, end to end against the arterial line (recordings with a sawtooth)
+    p, q = P["ppg-uncorrected-art-spread"], P["ppg-correction-art-spread"]
+    assert p["spread"]["n"] == q["spread"]["n"]
+    fact("ppg.art.n", q["spread"]["n"], num(q["spread"]["n"]), "recordings", "parameter ppg-correction-art-spread spread.n",
+         "recordings with a sawtooth compared with the arterial line")
+    half_up = lambda x: float(Decimal(str(x)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))  # 13.95 -> 14.0, as the atlas
+    fact("ppg.art.none", p["value"], num(half_up(p["value"]), 1), "ms", "parameter ppg-uncorrected-art-spread", p["quantity"])
+    fact("ppg.art.rebuilt", q["value"], num(half_up(q["value"]), 1), "ms", "parameter ppg-correction-art-spread", q["quantity"])
     bits = {t.get("bits_to_store") for t in J["devices"]["snuadc"]["tracks"] if t.get("bits_to_store")}
     assert len(bits) == 1, bits
     nb = bits.pop()

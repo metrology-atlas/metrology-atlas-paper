@@ -1,8 +1,8 @@
-generated: '2026-11-02'
+generated: '2026-11-05'
 atlas:
   file: built from metrology-atlas
-  sha256: 723916214b77d9bd8dffb4aa5593c94fa4e4c9e01ae26a639f3351a7ca391d84
-  commit: f45684d
+  sha256: 5651cd6ff315b62143592d88e1470e2ea38d1477b34b83688c50c8d6de0719b5
+  commit: 84374f6
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 109
-    display: '109'
+    value: 112
+    display: '112'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -48,8 +48,8 @@ facts:
     source: 'atlas file: observations'
     definition: number of observations
   atlas.studies:
-    value: 87
-    display: '87'
+    value: 90
+    display: '90'
     unit: studies
     status: measured
     source: 'atlas file: studies'
@@ -62,8 +62,8 @@ facts:
     source: 'atlas file: studies[].status'
     definition: studies with status current
   atlas.forms:
-    value: 62
-    display: '62'
+    value: 65
+    display: '65'
     unit: forms
     status: measured
     source: 'atlas file: variables[].timing'
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 116
-    display: '116'
+    value: 132
+    display: '132'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -402,11 +402,11 @@ facts:
     definition: delay of the SNUADC plethysmogram behind the ECG from the monitor's
       processing (one value for the release)
   ecg.sawtooth:
-    value: 480.12448385809273
-    display: '480'
+    value: 495.3665309646988
+    display: '495'
     unit: ms
     status: derived
-    source: snuadc-ecg-ii/snu-raw components[0].u_s x sqrt(12)
+    source: snuadc-ecg-ii/snu-raw-step components[0].u_s x sqrt(12)
     definition: span of the stamp sawtooth (uniform)
   ecg.model.uc:
     value: 1.6155494421403511
@@ -415,6 +415,31 @@ facts:
     status: measured
     source: snuadc-ecg-ii/snu-model components (combined)
     definition: combined standard uncertainty after the stamp model
+  ppg.art.n:
+    value: 1867
+    display: 1,867
+    unit: recordings
+    status: measured
+    source: parameter ppg-correction-art-spread spread.n
+    definition: recordings with a sawtooth compared with the arterial line
+  ppg.art.none:
+    value: 13.95
+    display: '14.0'
+    unit: ms
+    status: measured
+    source: parameter ppg-uncorrected-art-spread
+    definition: Spread of finger minus arterial pulse arrival time without a sawtooth
+      correction (robust SD of 30 s window medians), median over recordings with a
+      sawtooth.
+  ppg.art.rebuilt:
+    value: 9.46
+    display: '9.5'
+    unit: ms
+    status: measured
+    source: parameter ppg-correction-art-spread
+    definition: Spread of finger minus arterial pulse arrival time after the rebuilt
+      sawtooth correction (robust SD of 30 s window medians), median over recordings
+      with a sawtooth.
   snuadc.bits:
     value: 10
     display: '10'
