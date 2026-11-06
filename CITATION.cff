@@ -7,6 +7,9 @@ authors:
     given-names: "Andrew J."
     affiliation: "School of Biomedical Engineering, The University of Sydney"
     orcid: "https://orcid.org/0000-0002-2776-7039"
+  - family-names: Lee
+    given-names: "Hyung-Chul"
+    affiliation: "Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul National University College of Medicine; Healthcare AI Research Institute, Seoul National University Hospital"
   - family-names: Eytan
     given-names: "Danny"
     affiliation: "The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology; Pediatric Intensive Care Unit, Rambam Health Care Campus"
@@ -28,6 +31,9 @@ preferred-citation:
       given-names: "Andrew J."
       affiliation: "School of Biomedical Engineering, The University of Sydney"
       orcid: "https://orcid.org/0000-0002-2776-7039"
+    - family-names: Lee
+      given-names: "Hyung-Chul"
+      affiliation: "Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul National University College of Medicine; Healthcare AI Research Institute, Seoul National University Hospital"
     - family-names: Eytan
       given-names: "Danny"
       affiliation: "The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology; Pediatric Intensive Care Unit, Rambam Health Care Campus"
