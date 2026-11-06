@@ -274,6 +274,11 @@ def main():
          "loops")
     p = P["loop-bis-z3-share"]
     fact("loop.bis.z3", p["value"], num(p["value"]), "%", "parameter loop-bis-z3-share", p["quantity"])
+    p = P["loop-solar-bis-misclosure"]
+    fact("loop.solar.bis", p["value"], num(p["value"], 1, sign=True), "ppm", "parameter loop-solar-bis-misclosure",
+         p["quantity"])
+    fact("loop.solar.bis.n", p["spread"]["n"], num(p["spread"]["n"]), "loops",
+         "parameter loop-solar-bis-misclosure spread.n", "loops")
     s = P["loop-variance-factor"]["spread"]
     fact("loop.vf.min", s["min"], num(s["min"]), "", "parameter loop-variance-factor spread.min",
          "smallest variance factor")

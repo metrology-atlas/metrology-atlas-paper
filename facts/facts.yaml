@@ -1,8 +1,8 @@
-generated: '2026-11-05'
+generated: '2026-11-06'
 atlas:
   file: built from metrology-atlas
-  sha256: 5651cd6ff315b62143592d88e1470e2ea38d1477b34b83688c50c8d6de0719b5
-  commit: 84374f6
+  sha256: 307039a2e5337e180a06e1f94b151f8424efc1b8df51aa191e09f11f0acc613d
+  commit: adac713
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 112
-    display: '112'
+    value: 114
+    display: '114'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -55,8 +55,8 @@ facts:
     source: 'atlas file: studies'
     definition: number of studies
   atlas.studies.current:
-    value: 76
-    display: '76'
+    value: 75
+    display: '75'
     unit: studies
     status: measured
     source: 'atlas file: studies[].status'
@@ -598,6 +598,22 @@ facts:
     source: parameter loop-bis-z3-share
     definition: Share of BIS-SNUADC-PC loops whose misclosure is more than three stated
       standard errors.
+  loop.solar.bis:
+    value: 4.11
+    display: $+$4.1
+    unit: ppm
+    status: measured
+    source: parameter loop-solar-bis-misclosure
+    definition: Misclosure of the fundamental BIS-SNUADC-PC loops that close through
+      the Solar8000 route instead of the SNUADC stamps (BIS steps against ECG-EEG
+      bursts and the Solar8000 route), after network adjustment.
+  loop.solar.bis.n:
+    value: 245
+    display: '245'
+    unit: loops
+    status: measured
+    source: parameter loop-solar-bis-misclosure spread.n
+    definition: loops
   loop.vf.min:
     value: 1.97
     display: '2'
@@ -606,8 +622,8 @@ facts:
     source: parameter loop-variance-factor spread.min
     definition: smallest variance factor
   loop.vf.max:
-    value: 5.14
-    display: '5.1'
+    value: 6.84
+    display: '6.8'
     unit: ''
     status: measured
     source: parameter loop-variance-factor spread.max
@@ -620,8 +636,8 @@ facts:
     source: sqrt of loop-variance-factor spread.min
     definition: factor by which standard errors are too small
   loop.se.max:
-    value: 2.2671568097509267
-    display: '2.3'
+    value: 2.615339366124404
+    display: '2.6'
     unit: ''
     status: derived
     source: sqrt of loop-variance-factor spread.max
