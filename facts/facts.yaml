@@ -1,8 +1,8 @@
 generated: '2026-11-06'
 atlas:
   file: built from metrology-atlas
-  sha256: 307039a2e5337e180a06e1f94b151f8424efc1b8df51aa191e09f11f0acc613d
-  commit: adac713
+  sha256: d338d0711335cc0c4bc67b88c1836a79c07d3db77c99eb9b4f683ec458c448f9
+  commit: 863a579
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 114
-    display: '114'
+    value: 117
+    display: '117'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -48,15 +48,15 @@ facts:
     source: 'atlas file: observations'
     definition: number of observations
   atlas.studies:
-    value: 90
-    display: '90'
+    value: 92
+    display: '92'
     unit: studies
     status: measured
     source: 'atlas file: studies'
     definition: number of studies
   atlas.studies.current:
-    value: 75
-    display: '75'
+    value: 84
+    display: '84'
     unit: studies
     status: measured
     source: 'atlas file: studies[].status'
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 132
-    display: '132'
+    value: 133
+    display: '133'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -402,8 +402,8 @@ facts:
     definition: delay of the SNUADC plethysmogram behind the ECG from the monitor's
       processing (one value for the release)
   ecg.sawtooth:
-    value: 495.3665309646988
-    display: '495'
+    value: 500.0
+    display: '500'
     unit: ms
     status: derived
     source: snuadc-ecg-ii/snu-raw-step components[0].u_s x sqrt(12)
