@@ -9,7 +9,9 @@ A. Forms as stored (the raw stamps where a signal has them, in each mode; labels
    p5-p95 between recordings. Up: combined standard uncertainty (log). Solid marker measured, hollow estimated.
 B. Corrected sources: standard uncertainty with the bias removed by a shift known in advance (the release median;
    or the as-stored spread where no shift is given, in the stored stamps' worst mode), against after the per-recording correction (headline, an upper
-   bound where so labelled; the likely value where two references exist).
+   bound where so labelled; the likely value where two references exist). For the Primus waveforms, the uncertainty
+   for stretches on their right breath, without the whole-breath component (the share a whole breath off is in the
+   caption, from the atlas, as in Table 3).
 """
 import sys
 from pathlib import Path
@@ -122,7 +124,13 @@ for vid, v in V.items():
             continue          # same before and after as the signal's default form (e.g. differs only in drift rate)
         seen[f["id"]] = k_v
         short = {"draw time from arterial access": "draw time", "after sync with the recording's own bursts": "own bursts"}
-        pairs.append((v["name"] + ("" if f["default"] else f" ({short.get(f['name'], f['name'])})"), v["type"], ub, f["u_c"], f["likely_u"], f["upper_bound"]))
+        # stretches on their right breath: the uncertainty without the whole-breath component, which the caption gives
+        # as a share (as Table 3 does); a whole breath off is a gross error, not a spread about the right answer
+        ua, note = f["u_c"], ""
+        wb = [c["u_s"] for c in f["components"] if str(c.get("name", "")).startswith("breath identity")]
+        if wb:
+            ua, note = (max(f["u_c"] ** 2 - sum(u * u for u in wb), 0.0)) ** 0.5, ", right breath"
+        pairs.append((v["name"] + ("" if f["default"] else f" ({short.get(f['name'], f['name'])})") + note, v["type"], ub, ua, f["likely_u"], f["upper_bound"]))
 P = []
 for p in sorted(pairs, key=lambda p: p[3]):
     k = (round(p[2], 4), round(p[3], 4))
