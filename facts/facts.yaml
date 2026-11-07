@@ -1,8 +1,8 @@
 generated: '2026-11-07'
 atlas:
   file: built from metrology-atlas
-  sha256: 8bb622d98335cb948a52d0747955298032a343cd3195f741c81fa4ee3a76ce2d
-  commit: 3cd0227
+  sha256: 0d228804c6fec236e1af395960cd66b5eecead15c41d7dffcf1624559ca61c2c
+  commit: 7e8d8d6
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 119
-    display: '119'
+    value: 126
+    display: '126'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -385,6 +385,122 @@ facts:
     status: measured
     source: solar8000-hr/hr-lab uncertainty.components[0].u_s
     definition: standard uncertainty of a recording's own delay label
+  hr.window:
+    value: 8
+    display: eight
+    unit: intervals
+    status: measured
+    source: parameter hr-window
+    definition: Number of R–R intervals the Solar8000 heart rate averages (60 over
+      the mean of those within about 10–25% of the window's median, truncated), from
+      recomputing HR from the ECG's R peaks.
+  hr.band:
+    value: 15
+    display: '15'
+    unit: '%'
+    status: measured
+    source: parameter hr-outlier-band
+    definition: Largest distance from the window's median R–R interval, as a share
+      of it, at which an interval still enters the Solar8000 heart rate's mean (best
+      fit).
+  hr.early.d:
+    value: 1.88
+    display: '1.88'
+    unit: s
+    status: measured
+    source: parameter hr-delay-early
+    definition: Delay from the end of the HR window to its stamp, in the early group
+      of cases.
+    n: 2228
+  hr.early.share:
+    value: 37.139523253875645
+    display: '37'
+    unit: '%'
+    status: derived
+    source: parameters hr-delay-early, hr-delay-late spread.n
+    definition: share of the recordings assigned to a group that are in the early
+      group
+  hr.late.d:
+    value: 4.17
+    display: '4.17'
+    unit: s
+    status: measured
+    source: parameter hr-delay-late
+    definition: Delay from the end of the HR window to its stamp, in the late group
+      of cases.
+    n: 3771
+  hr.late.share:
+    value: 62.860476746124355
+    display: '63'
+    unit: '%'
+    status: derived
+    source: parameters hr-delay-early, hr-delay-late spread.n
+    definition: share of the recordings assigned to a group that are in the late group
+  hr.example.d:
+    value: 4.2
+    display: '4.2'
+    unit: s
+    status: measured
+    source: parameter hr-late-label-delay
+    definition: 'the example recording''s delay in Figure 1: the late group''s median
+      label'
+  solar.poll:
+    value: 2.0
+    display: '2'
+    unit: s
+    status: measured
+    source: parameter solar8000-poll-gap
+    definition: 'The gap between consecutive records of a Solar8000 numeric (the recorder''s
+      poll): a value waits between none and all of it before it is stamped.'
+  uo.on100:
+    value: 22.1
+    display: '22'
+    unit: '%'
+    status: derived
+    source: parameter uo-share-on-100
+    definition: Urine output records on a multiple of 100 mL.
+  uo.on50:
+    value: 20.6
+    display: '21'
+    unit: '%'
+    status: derived
+    source: parameter uo-share-on-50
+    definition: Urine output records on a multiple of 50 mL but not of 100 mL.
+  uo.100.lo:
+    value: 60.6
+    display: '61'
+    unit: mL
+    status: derived
+    source: parameter uo-recorded-100-low
+    definition: Recorded 100 mL urine output, lower end of the true volume's 95% interval.
+  uo.100.hi:
+    value: 136.6
+    display: '137'
+    unit: mL
+    status: derived
+    source: parameter uo-recorded-100-high
+    definition: Recorded 100 mL urine output, upper end of the true volume's 95% interval.
+  uo.260.lo:
+    value: 255.4
+    display: '255'
+    unit: mL
+    status: derived
+    source: parameter uo-recorded-260-low
+    definition: Recorded 260 mL urine output, lower end of the true volume's 95% interval.
+  uo.260.hi:
+    value: 264.6
+    display: '265'
+    unit: mL
+    status: derived
+    source: parameter uo-recorded-260-high
+    definition: Recorded 260 mL urine output, upper end of the true volume's 95% interval.
+  uo.100.fine:
+    value: 22.6
+    display: '23'
+    unit: '%'
+    status: derived
+    source: parameter uo-recorded-100-fine
+    definition: Recorded 100 mL urine output, share read to 10 mL or finer.
   lab.access.width:
     value: 53
     display: '53'

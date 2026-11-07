@@ -19,6 +19,8 @@
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
 \newcommand{\atlasurl}{\url{https://vitaldb.metrology-atlas.org}}
 \newcommand{\homeurl}{\url{https://metrology-atlas.org}}
+% A page of the VitalDB atlas, by its path and title, with its address written out for print; the atlas version the paper quotes is cited in the Access section.
+\newcommand{\atlaspage}[2]{\emph{#2}, \url{https://vitaldb.metrology-atlas.org/#1.html}}
 \renewcommand{\topfraction}{0.85}
 \renewcommand{\floatpagefraction}{0.75}
 \newcommand{\todo}[1]{\textcolor{red}{[TODO: #1]}}
@@ -32,13 +34,15 @@
 
 \title{The Metrology Atlas: describing clinical time-series data as a measurement system}
 \author{Andrew J. Goodwin$^{1}$, Hyung-Chul Lee$^{2,3,4}$, Danny Eytan$^{5,6}$\\[6pt]
-  \small $^{1}$School of Biomedical Engineering, The University of Sydney, Sydney, Australia\\
-  \small $^{2}$Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul, Republic of Korea\\
-  \small $^{3}$Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul National University
+  % the affiliations in a box of the text width, so the long ones wrap instead of running off the page
+  \parbox{\textwidth}{\centering\footnotesize
+  $^{1}$School of Biomedical Engineering, The University of Sydney, Sydney, Australia\\
+  $^{2}$Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul, Republic of Korea\\
+  $^{3}$Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul National University
   College of Medicine, 101 Daehak-ro, Jongno-gu, Seoul, 03080, Republic of Korea\\
-  \small $^{4}$Healthcare AI Research Institute, Seoul National University Hospital, Seoul, Republic of Korea\\
-  \small $^{5}$The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology, Haifa, Israel\\
-  \small $^{6}$Pediatric Intensive Care Unit, Rambam Health Care Campus, Haifa, Israel}
+  $^{4}$Healthcare AI Research Institute, Seoul National University Hospital, Seoul, Republic of Korea\\
+  $^{5}$The Ruth and Bruce Rappaport Faculty of Medicine, Technion-Israel Institute of Technology, Haifa, Israel\\
+  $^{6}$Pediatric Intensive Care Unit, Rambam Health Care Campus, Haifa, Israel}}
 \date{November 2026}
 
 \begin{document}
@@ -76,10 +80,10 @@ truncated, rounded or heaped by hand. Converters store fewer bits than documente
 loader's output.
 
 A record is best read not as a point but as a probability density function (PDF): how likely each true time and
-true value is, given the record and what is known about how it was made (Figure~\ref{fig:record}). A heart rate recorded as 72 beats per minute (bpm) by a
+true value is, given the record and what is known about how it was made (Figure~\ref{fig:concept}). A heart rate recorded as 72 beats per minute (bpm) by a
 monitor that rounds down (truncates) could be anything from 72 up to, but not including, 73,
-and it describes several seconds of ECG that ended
-a variable delay before its stamp. A laboratory haematocrit of 35\% means 35$\pm$0.5 or 35$\pm$0.05 depending on
+and it describes the last \fact{hr.window} R--R intervals of ECG, which ended a variable delay before its stamp,
+plus a wait for the recorder's next poll. A laboratory haematocrit of 35\% means 35$\pm$0.5 or 35$\pm$0.05 depending on
 which analyser made it, which the record does not say, and the blood was drawn minutes before the stamp, by an
 amount that also depends on the analyser. Before correction these shapes are uniform, bimodal, mixed and skewed, and few are Gaussian; for one record, the
 atlas narrows each to what is known about that record, by measuring and undoing the steps of the record's
@@ -87,31 +91,21 @@ making that can be undone (Section~\ref{sec:correct}).
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig1-record-distributions.pdf}
-  \caption{A record is a point in time--value space, best read as a joint PDF over the true times and values that
-    could have produced that recorded pair, given what is known about how it was made. It is drawn here from the VitalDB
-    atlas's own data, and a worked example on the atlas gives the source of every element
-    (\url{https://vitaldb.metrology-atlas.org/worked-example-record-pdf.html}). Top row: before correction, what the
-    stored record alone allows, across the release. Bottom row: after correction (Section~\ref{sec:correct}), what the atlas gives for one typical
-    record, from that record's own labels. In each panel the white dot is the recorded pair, the shading is the joint
-    PDF, and the curves along the top and right of each panel are its marginal PDFs of time and value; each column
-    keeps the same axes in both rows.
-    (A, C) A monitor heart rate of 72\,bpm. The monitor computes it from the intervals between R peaks in the last few
-    seconds of ECG (orange: the stretch of ECG it summarises, its support), and rounds it down (truncates), so its
-    true value is equally likely to be anywhere from 72 up to, but not including, 73, before and after correction.
-    The value is stamped a delay after that stretch of ECG ends. Before correction the support is \fact{hr.support}\,s
-    and the delay is bimodal, because the recording computers fall into two groups (A). After correction the
-    recording's label gives its group, its window and its delay, with a standard uncertainty of
-    \fact{hr.label.u}\,s (C).
-    (B, D) A laboratory haematocrit of 35\%. The value alone does not say which analyser measured it. A blood-gas
-    analyser reports whole percent, so 35\% means anything from 34.5\% to 35.5\% (the wide band). The central
-    laboratory reports to 0.1\%, so it means 34.95\% to 35.05\% (the thin line). The value model in vitaldb-resolution
-    estimates that about three in four recorded values of 35\% come from the blood-gas analyser. The blood was drawn
-    some minutes before the stamp, by a delay that depends on the analyser (B; shaded on a square-root scale). After
-    correction the panel stamped with the value names the analyser, here blood gas, and the draw's label places the
-    draw within its own arterial-line access, typically \fact{lab.access.width}\,s long (D). The value stays the blood-gas
-    band, 34.5\% to 35.5\%.}
-  \label{fig:record}
+  \includegraphics[width=\textwidth]{figures/fig1-concept-hr.pdf}
+  \caption{How one heart-rate record was made, and how it can be read. (A--D) The measurement model, run forward. The
+    heart beats (A; an illustrative ECG). The monitor averages the last \fact{hr.window} R--R intervals, leaving out any
+    more than about \fact{hr.band}\% from their median, and truncates the result (B); those intervals are the value's
+    support. The value is ready at the recorder a delay $d$ after the window closes (C), and waits for the recorder's
+    next poll, 0 to \fact{solar.poll}\,s, before it is stamped (D). (E, F) The joint PDF over the true time the window
+    closed and the true heart rate, given the recorded pair (white dot), on one density scale in both panels, with its
+    marginal PDFs (purple): time along the top, value on the right. The value is uniform over [72, 73) in both, because
+    the monitor truncates. From the stored record alone (E), the time is the sum of two groups of VitalDB recordings,
+    early (median delay \fact{hr.early.d}\,s, \fact{hr.early.share}\%) and late (\fact{hr.late.d}\,s,
+    \fact{hr.late.share}\%), each spread by the wait for the poll. With the atlas (F), the recording's own label gives
+    its delay, here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, and only the wait for
+    the poll remains. Every step and its source: \atlaspage{worked-example-heart-rate}{Worked example: one heart-rate
+    record}.}
+  \label{fig:concept}
 \end{figure}
 
 This uncertainty can be quantified, as it is when a sensor is validated against
@@ -167,6 +161,30 @@ values to assume for another dataset.
 % ---------------------------------------------------------------------------
 \section{Describing a dataset as a measurement system}
 \label{sec:approach}
+
+Figure~\ref{fig:urine} shows the same idea on the value side. Intraoperative urine output is a total charted by
+hand: a recorded volume may have been read to 5 or 10\,mL or rounded to 50 or 100\,mL, and which of these happened is
+not recorded. The atlas's value model separates the rounding from the volumes, so each recorded value maps back to a
+PDF of its own: wide for a round number, narrow for one that can only have been read finely. Time and value can also
+depend on each other. A laboratory haematocrit of 35\% means 34.5--35.5\% if a blood-gas analyser measured it and
+34.95--35.05\% if the central laboratory did, and the analyser also sets how long before the stamp the blood was
+drawn, so the record's joint PDF is a mixture of two shapes in time and value together
+(\atlaspage{worked-example-record-pdf}{Worked example: a record as a PDF}).
+
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig2-urine-heaping.pdf}
+  \caption{What a rounded value means: intraoperative urine output in VitalDB, a total charted by hand. (A) The
+    recorded volumes, per 5\,mL, pile up on round numbers: \fact{uo.on100}\% of records sit on a multiple of 100\,mL and
+    \fact{uo.on50}\% on another multiple of 50\,mL. The red curve is the distribution of true volumes that the value
+    model infers from them, with four ways of charting a volume: read to 5 or 10\,mL, or rounded to 50 or 100\,mL. (B)
+    The PDF of the true volume for two recorded values, stacked by the way of charting that could have produced each.
+    A recorded 100\,mL lies anywhere from \fact{uo.100.lo} to \fact{uo.100.hi}\,mL (95\%), and has a \fact{uo.100.fine}\%
+    chance of having been read to 10\,mL or finer; a recorded 260\,mL, which only the 5 and 10\,mL readings can produce,
+    lies from \fact{uo.260.lo} to \fact{uo.260.hi}\,mL. Every step and its source: \atlaspage{worked-example-urine-output}{Worked
+    example: a rounded urine volume}.}
+  \label{fig:urine}
+\end{figure}
 
 \subsection{Measurand and measurement model}
 

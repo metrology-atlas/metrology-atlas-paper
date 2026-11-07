@@ -207,6 +207,30 @@ def main():
     u = comp("solar8000-hr", "hr-lab", 0)["u_s"]
     fact("hr.label.u", u, num(u, 2), "s", "solar8000-hr/hr-lab uncertainty.components[0].u_s",
          "standard uncertainty of a recording's own delay label")
+    # Figure 1 (the conceptual heart-rate record; drawn by metrology-atlas tools/fig_concept_hr.py from the same parameters)
+    p = P["hr-window"]
+    fact("hr.window", p["value"], word(int(p["value"])), "intervals", "parameter hr-window", p["quantity"])
+    p = P["hr-outlier-band"]
+    fact("hr.band", p["value"], num(p["value"]), "%", "parameter hr-outlier-band", p["quantity"])
+    for g in ("early", "late"):
+        p = P[f"hr-delay-{g}"]
+        fact(f"hr.{g}.d", p["value"], num(p["value"], 2), "s", f"parameter hr-delay-{g}", p["quantity"],
+             n=p["spread"]["n"])
+        share = 100 * p["spread"]["n"] / ng
+        fact(f"hr.{g}.share", share, num(share), "%", "parameters hr-delay-early, hr-delay-late spread.n",
+             f"share of the recordings assigned to a group that are in the {g} group", status="derived")
+    p = P["hr-late-label-delay"]
+    fact("hr.example.d", p["value"], num(p["value"], 1), "s", "parameter hr-late-label-delay",
+         "the example recording's delay in Figure 1: the late group's median label")
+    p = P["solar8000-poll-gap"]
+    fact("solar.poll", p["value"], num(p["value"]), "s", "parameter solar8000-poll-gap", p["quantity"])
+    # Figure 2 (urine output; drawn by metrology-atlas tools/fig_urine_heaping.py, numbers from its summary)
+    for fid, pid, nd in (("uo.on100", "uo-share-on-100", 0), ("uo.on50", "uo-share-on-50", 0),
+                         ("uo.100.lo", "uo-recorded-100-low", 0), ("uo.100.hi", "uo-recorded-100-high", 0),
+                         ("uo.260.lo", "uo-recorded-260-low", 0), ("uo.260.hi", "uo-recorded-260-high", 0),
+                         ("uo.100.fine", "uo-recorded-100-fine", 0)):
+        p = P[pid]
+        fact(fid, p["value"], num(p["value"], nd), p["unit"], f"parameter {pid}", p["quantity"], status=p["status"])
     p = P["lab-access-length"]
     fact("lab.access.width", p["value"], num(p["value"]), "s", "parameter lab-access-length",
          "median length of the arterial-line access matched to a blood gas", n=p["spread"]["n"])
