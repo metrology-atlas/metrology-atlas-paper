@@ -154,8 +154,8 @@ VitalDB~\citep{lee2022vitaldb}, to show what it finds. Its contributions are:
   \item a dataset-independent schema and engine that check an atlas and publish it as a website and one
     machine-readable file, revised as evidence comes in (Section~\ref{sec:system});
   \item a first atlas, of VitalDB, with \fact{atlas.studies} studies behind it (Section~\ref{sec:vitaldb});
-  \item two ways to use an atlas: a planner for combining signals, and labels that respect when a value could first
-    be known (Section~\ref{sec:use}).
+  \item two ways to use an atlas beyond reading it: a planner for combining signals (Section~\ref{sec:use}), and
+    labels that carry when each value could first be known (Section~\ref{sec:system}).
 \end{itemize}
 The detail lives in the atlas, at \atlasurl; this paper quotes its numbers and points to it. The numbers are
 VitalDB's, measured on its devices and recording set-up. They show the kinds of error the approach describes, not
@@ -265,7 +265,10 @@ states both. The \emph{bias} of a stamp is the stamp minus the close of the supp
 negative bias means the stamp comes before the interval it describes has closed. That is look-ahead: real if the
 value was computed from later data, apparent if the reference the bias is measured against is itself late. A
 non-negative bias does not make a value safe to use at its stamp, since a stamp after the support's close can still
-come before the availability time; that is the job of the availability time itself (Section~\ref{sec:labels}).
+come before the availability time; that is the job of the availability time itself. The \emph{availability rule}
+is that no value may be used before its availability time. It is judged against the \emph{reference time}, the
+instant at which a model is taken to act, with both times read on one clock, in an atlas the working reference;
+breaking it leaks information from the future into a model built on the data~\citep{kaufman2012leakage}.
 
 \subsection{Bias and uncertainty}
 
@@ -508,6 +511,11 @@ timing form whose bias and uncertainty do not follow the conventions of Section~
 \emph{accuracy} next to a number~\citep[2.13]{jcgm-200-2012}, and patterns the dataset forbids, such as a case
 identifier outside a deliberate link, so that no per-recording table leaves by accident. Each variable's page states its timing forms with their
 budgets, its value model, and the chain of clocks behind its stamp; each study links to the code that produced it.
+Derived results are published as time-aware labels: per-recording values, each with its span, its parameters and
+its availability time (\texttt{available\_at}). The labels are themselves variables in the atlas, derived from the
+signals they were made from, whether by an algorithm, as all of VitalDB's are, or by a person annotating them. Each
+has a timing form stamped at its availability time, and one as stored, which the engine flags as look-ahead where
+it starts before the values it depends on.
 
 Adding a study to an atlas is the system working, not a new edition. Contributions are pull requests against the folder, checked by
 the same engine. What carries over to a new dataset is the schema, the engine and its checks, the website and the
@@ -651,31 +659,19 @@ dataset; most would be found in any multi-device recording examined this closely
 \section{Using an atlas}
 \label{sec:use}
 
-\subsection{Planning a synchronised analysis}
-
-The planner combines any set of signals' timing forms. For each pair it gives the standard uncertainty of the
+An atlas is read on its website or loaded by analysis code. For combining signals, its planner takes any set of
+signals' timing forms. For each pair it gives the standard uncertainty of the
 difference between their times, $\sqrt{u_a^2 + u_b^2 - 2\,\mathrm{cov}}$, where the covariance is the sum of the
 products of the components with the same shared key; shared errors cancel. From the largest pair it gives the finest useful shared time grid and, from the clock domains'
 drift rates and their spread between recordings, how long a window can be before drift adds another standard
 deviation. A switch restricts the forms to those usable in real time. The planner never shifts a signal silently:
 it says which shift each form needs and in which direction.
 
-\subsection{Labels and the availability rule}
-\label{sec:labels}
-
-Derived results are published as time-aware labels, each with a span, its parameters and an
-\texttt{available\_at}, its availability time. This enforces the \emph{availability rule}, that a value may not be
-used before its availability time, and so prevents temporal information leakage into a model built on the
-data~\citep{kaufman2012leakage}. The rule is checked against the \emph{reference time}, the instant at which a model
-is taken to act, with both times read on one reference clock; in an atlas that clock is the working reference. A
-correction fitted on a whole recording, such as the stamp model, draws on data recorded after the values it
-corrects, so a corrected time is available only at the end of the recording: usable offline, not in real time. The
-availability time is also separate from the bias. A laboratory result is stamped minutes after its draw, a positive
-bias, but becomes available only after an unrecorded turnaround, an honest lag, so a model may not use it at its
-stamp. The labels are themselves variables in the atlas, derived from the signals they were made from, whether by an
-algorithm, as all of VitalDB's are, or by a person annotating them. Each has a timing form stamped at its
-availability time, and one as stored, which the engine flags as look-ahead when it starts before the values it
-depends on.
+An atlas is also compact enough to give an AI assistant as context. Given the VitalDB atlas file alone, an
+assistant answered a researcher's question about synchronising the ECG, the BIS EEG and the end-tidal CO$_2$, naming
+the atlas item behind each claim and saying where the atlas is silent; checked claim by claim, every number traced
+to the atlas, and the exchange found four problems in the atlas itself, since fixed. The question, the answer and
+the check are in the supplementary material.
 
 % ---------------------------------------------------------------------------
 \section{Limitations and related work}
