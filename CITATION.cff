@@ -1,7 +1,7 @@
 cff-version: 1.2.0
 message: "If you use this work, please cite it as below."
 type: software
-title: "The Metrology Atlas: describing recorded physiological data as a measurement system"
+title: "The Metrology Atlas: describing clinical time-series data as a measurement system"
 authors:
   - family-names: Goodwin
     given-names: "Andrew J."
@@ -25,7 +25,7 @@ keywords:
   - "VitalDB"
 preferred-citation:
   type: article
-  title: "The Metrology Atlas: describing recorded physiological data as a measurement system"
+  title: "The Metrology Atlas: describing clinical time-series data as a measurement system"
   authors:
     - family-names: Goodwin
       given-names: "Andrew J."
