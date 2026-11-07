@@ -3,11 +3,12 @@ source's standard uncertainty before and after correction. Read from the metrolo
 
     python figures/src/fig_bias_uncertainty.py ATLAS_REPO figures/fig3-bias-uncertainty.pdf figures/fig3b-corrected-uncertainty.pdf
 
-A. Forms as stored. Across: bias, the stamp minus the end of the interval its value describes, against the working
+A. Forms as stored (the raw stamps where a signal has them, in each mode; labels, which have no stamp error, left
+   out). Across: bias, the stamp minus the end of the interval its value describes, against the working
    reference (symmetric log axis, linear within 1 ms; left of zero the stamp comes early, look-ahead); the bar spans
    p5-p95 between recordings. Up: combined standard uncertainty (log). Solid marker measured, hollow estimated.
 B. Corrected sources: standard uncertainty with the bias removed by a shift known in advance (the release median;
-   or the as-stored spread where no shift is given), against after the per-recording correction (headline, an upper
+   or the as-stored spread where no shift is given, in the stored stamps' worst mode), against after the per-recording correction (headline, an upper
    bound where so labelled; the likely value where two references exist).
 """
 import sys
@@ -35,11 +36,13 @@ V = ds.items["variable"]
 rows = []
 for vid, v in V.items():
     fv = forms(v)
-    raw = any(f["kind"] == "as_stored" and f["name"] == "raw stamps" for f in fv)
+    raw = any(f["kind"] == "as_stored" and f["name"].startswith("raw stamps") for f in fv)
     for f in fv:
-        if f["kind"] == "as_stored" and (not raw or f["name"] == "raw stamps"):   # the stored stamps, where stated
-            rows.append((v["name"] + ("" if f["name"] in ("as stamped", "as recorded", "raw stamps") else f" ({f['name']})"),
-                         v["type"], f))
+        if f["u_c"] <= 0:          # per-recording labels: stored over an interval, with no stamp error to plot
+            continue
+        if f["kind"] == "as_stored" and (not raw or f["name"].startswith("raw stamps")):   # the stored stamps, where stated
+            name = f["name"].removeprefix("raw stamps").lstrip(", ")
+            rows.append((v["name"] + ("" if name in ("as stamped", "as recorded", "") else f" ({name})"), v["type"], f))
 uniq = []
 for r in sorted(rows, key=lambda r: r[2]["u_c"]):
     key = (r[2]["id"], round(r[2]["bias"]["mid"], 4), round(r[2]["u_c"], 4))
@@ -57,7 +60,7 @@ for i, (label, typ, f, _) in enumerate(uniq):
     ax.plot(b["mid"], f["u_c"], "o", ms=5, color=c, mfc=c if measured else "white", mew=1.2)
 ax.set_xscale("symlog", linthresh=1e-3, linscale=0.3)
 ax.set_yscale("log")
-ax.set_xlim(-3, 7200); ax.set_ylim(6e-3, 2.5e4)
+ax.set_xlim(-3, 7200); ax.set_ylim(6e-4, 2.5e4)
 # number labels placed so they do not overlap each other or the markers (display coordinates)
 fig.canvas.draw()
 pts = [ax.transData.transform((u[2]["bias"]["mid"], u[2]["u_c"])) for u in uniq]
@@ -78,8 +81,8 @@ ticks = [-1, -0.1, -0.01, 0, 0.01, 0.1, 1, 10, 60, 600, 3600]
 ax.set_xticks(ticks)
 ax.set_xticklabels(["−1 s", "−100 ms", "−10 ms", "0", "10 ms", "100 ms", "1 s", "10 s", "1 min", "10 min", "1 h"])
 ax.set_xlim(-3, 7200)
-yt = [1e-2, 1e-1, 1, 10, 60, 600, 3600, 86400]
-ax.set_yticks(yt); ax.set_yticklabels(["10 ms", "100 ms", "1 s", "10 s", "1 min", "10 min", "1 h", "1 d"])
+yt = [1e-3, 1e-2, 1e-1, 1, 10, 60, 600, 3600, 86400]
+ax.set_yticks(yt); ax.set_yticklabels(["1 ms", "10 ms", "100 ms", "1 s", "10 s", "1 min", "10 min", "1 h", "1 d"])
 ax.axvline(0, color=INK, lw=1.3, zorder=1)
 ax.axvspan(-3, 0, color="#f3e7e1", alpha=0.5, lw=0)
 ax.text(-2.6, 1.5e4, "stamp before the\nvalue could exist\n(look-ahead)", fontsize=6.5, color=MUTED, va="top")
@@ -105,13 +108,15 @@ for vid, v in V.items():
     fs = forms(v)
     seen = {}
     for f in sorted(fs, key=lambda g: not g["default"]):
-        if f["kind"] != "per_recording":
+        if f["kind"] != "per_recording" or f["u_c"] <= 0:     # labels have no stamp error to plot
             continue
         before = [g for g in fs if g["id"] in f["corrects"] or (g["kind"] == "fixed_shift" and set(g["corrects"]) & set(f["corrects"]))]
         shifted = [g for g in before if g["kind"] == "fixed_shift"]
-        b = (shifted or before)
+        b = [g for g in (shifted or before) if g["u_c"] > 0]
         if not b: continue
-        ub = min(g["u_c"] for g in b)
+        # a shift known in advance: the best of them; otherwise the stored stamps, in their worst mode (the one the
+        # correction is needed for; SNUADC's frequent-correction mode needs almost none)
+        ub = min(g["u_c"] for g in b) if shifted else max(g["u_c"] for g in b)
         k_v = (round(ub, 4), round(f["u_c"], 4))
         if not f["default"] and k_v in seen.values():
             continue          # same before and after as the signal's default form (e.g. differs only in drift rate)
