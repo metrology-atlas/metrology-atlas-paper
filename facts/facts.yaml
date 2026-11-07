@@ -385,6 +385,38 @@ facts:
     status: measured
     source: solar8000-hr/hr-lab uncertainty.components[0].u_s
     definition: standard uncertainty of a recording's own delay label
+  lab.bg.lag:
+    value: 6.83
+    display: '6.8'
+    unit: min
+    status: measured
+    source: parameter lab-bg-lag
+    definition: Time from the start of the arterial line access (the draw) to the
+      blood gas lab timestamp.
+    n: 4742
+  lab.bg.lag.p10:
+    value: 3.02
+    display: '3.0'
+    unit: min
+    status: measured
+    source: parameter lab-bg-lag spread.p10
+    definition: p10 of the time from the draw to the blood-gas lab stamp
+  lab.bg.lag.p90:
+    value: 12.0
+    display: '12.0'
+    unit: min
+    status: measured
+    source: parameter lab-bg-lag spread.p90
+    definition: p90 of the time from the draw to the blood-gas lab stamp
+  lab.central.lag:
+    value:
+    - 8
+    - 24
+    display: 8--24
+    unit: min
+    status: estimated
+    source: parameter lab-central-lag display
+    definition: Time from the draw to the central-lab specimen timestamp.
   hr.window:
     value: 8
     display: eight

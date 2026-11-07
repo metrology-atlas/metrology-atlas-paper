@@ -16,6 +16,7 @@ from decimal import ROUND_HALF_UP, Decimal
 import datetime
 import hashlib
 import json
+import re
 import math
 import os
 import subprocess
@@ -207,6 +208,16 @@ def main():
     u = comp("solar8000-hr", "hr-lab", 0)["u_s"]
     fact("hr.label.u", u, num(u, 2), "s", "solar8000-hr/hr-lab uncertainty.components[0].u_s",
          "standard uncertainty of a recording's own delay label")
+    # Table 5, laboratory time stamp: from the draw to the lab stamp
+    p = P["lab-bg-lag"]
+    fact("lab.bg.lag", p["value"], num(p["value"], 1), "min", "parameter lab-bg-lag", p["quantity"], n=p["spread"]["n"])
+    for q in ("p10", "p90"):
+        fact(f"lab.bg.lag.{q}", p["spread"][q], num(p["spread"][q], 1), "min", f"parameter lab-bg-lag spread.{q}",
+             f"{q} of the time from the draw to the blood-gas lab stamp")
+    p = P["lab-central-lag"]
+    m = re.search(r"(\d+)\s*[\u2013-]\s*(\d+)\s*min", p["display"])
+    fact("lab.central.lag", [int(m.group(1)), int(m.group(2))], f"{m.group(1)}--{m.group(2)}", "min",
+         "parameter lab-central-lag display", p["quantity"], status=p["status"])
     # Figure 1 (the conceptual heart-rate record; drawn by metrology-atlas tools/fig_concept_hr.py from the same parameters)
     p = P["hr-window"]
     fact("hr.window", p["value"], word(int(p["value"])), "intervals", "parameter hr-window", p["quantity"])

@@ -17,6 +17,9 @@
 \usepackage[colorlinks=true,linkcolor=blue!50!black,citecolor=blue!50!black,urlcolor=blue!50!black]{hyperref}
 
 \newcolumntype{L}{>{\raggedright\arraybackslash}X}
+% fixed-width table columns set ragged right, so they neither stretch the spaces nor hyphenate headings
+\newcolumntype{P}[1]{>{\raggedright\arraybackslash}p{#1}}
+\setlength{\extrarowheight}{1.5pt}
 \newcommand{\atlasurl}{\url{https://vitaldb.metrology-atlas.org}}
 \newcommand{\homeurl}{\url{https://metrology-atlas.org}}
 % A page of the VitalDB atlas, by its path and title, with its address written out for print; the atlas version the paper quotes is cited in the Access section.
@@ -302,7 +305,7 @@ those of version~1 of this paper, and why.
     resolution; version~2 uses the VIM's terms, so that the atlas's numbers combine and propagate as the GUM
     intends. The atlas keeps the version~1 values on its pages, marked as superseded.}
   \label{tab:terms}
-  \begin{tabularx}{\textwidth}{@{}p{0.17\textwidth}p{0.22\textwidth}Lp{0.17\textwidth}@{}}
+  \begin{tabularx}{\textwidth}{@{}P{0.17\textwidth}P{0.22\textwidth}LP{0.17\textwidth}@{}}
   \toprule
   Version 1 & Version 2 & Why & Source \\
   \midrule
@@ -429,7 +432,7 @@ variable, the part a new atlas fills in.
   \caption{What an atlas records for each variable, with the BIS EEG after synchronisation in the VitalDB atlas as
     the example. The combined standard uncertainty is computed by the engine from the components, never typed.}
   \label{tab:schema}
-  \begin{tabularx}{\textwidth}{@{}p{0.17\textwidth}p{0.4\textwidth}L@{}}
+  \begin{tabularx}{\textwidth}{@{}P{0.17\textwidth}P{0.4\textwidth}L@{}}
     \toprule
     Part & Fields & Example: BIS EEG, after synchronisation \\
     \midrule
@@ -471,7 +474,7 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
   \caption{The general methods of the VitalDB atlas's studies, each with one example. A method's page in the atlas
     lists its techniques and the studies that use it; the methods carry over to other datasets.}
   \label{tab:methods}
-  \begin{tabularx}{\textwidth}{@{}p{0.2\textwidth}Lp{0.27\textwidth}@{}}
+  \begin{tabularx}{\textwidth}{@{}P{0.2\textwidth}LP{0.27\textwidth}@{}}
     \toprule
     Method & How it works & Example in VitalDB \\
     \midrule
@@ -581,7 +584,7 @@ shows the timing network, and Table~\ref{tab:findings} the findings that most ch
   \caption{Findings from the VitalDB atlas that change how its data should be used. Each links to its study on the
     website.}
   \label{tab:findings}
-  \begin{tabularx}{\textwidth}{@{}p{0.3\textwidth}L@{}}
+  \begin{tabularx}{\textwidth}{@{}P{0.3\textwidth}L@{}}
     \toprule
     Finding & Number \\
     \midrule
@@ -628,7 +631,7 @@ dataset; most would be found in any multi-device recording examined this closely
   \small
   \caption{Issues that differ from VitalDB's documentation or from common assumptions.}
   \label{tab:quality}
-  \begin{tabularx}{\textwidth}{@{}p{0.3\textwidth}p{0.2\textwidth}L@{}}
+  \begin{tabularx}{\textwidth}{@{}P{0.27\textwidth}P{0.23\textwidth}L@{}}
     \toprule
     Issue & Documented or assumed & Found \\
     \midrule
@@ -636,7 +639,9 @@ dataset; most would be found in any multi-device recording examined this closely
       firmware~\citep{snuadc} \\
     Primus CO\textsubscript{2} gain & 0.1 & \fact{primus.co2.gain} \\
     Primus airway pressure continuity & Continuous & About \fact{primus.pause}\,s lost every \fact{primus.period}\,s, in \fact{primus.pause.n} recordings \\
-    Laboratory time stamp & Result time & Specimen time; the result came later, by an unrecorded turnaround \\
+    Laboratory time stamp & Commonly taken as the result time & The specimen's time: blood gases a median \fact{lab.bg.lag}\,min
+      after the draw (10th--90th percentile \fact{lab.bg.lag.p10}--\fact{lab.bg.lag.p90}), central-lab panels about
+      \fact{lab.central.lag}\,min; the result came later, by an unrecorded turnaround \\
     Operation end & Charted & Set 10\,min before the recording end in \fact{opend.imputed} cases (\fact{opend.imputed.share}\%) \\
     \bottomrule
   \end{tabularx}
