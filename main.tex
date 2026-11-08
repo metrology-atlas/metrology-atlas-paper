@@ -165,30 +165,6 @@ values to assume for another dataset.
 \section{Describing a dataset as a measurement system}
 \label{sec:approach}
 
-Figure~\ref{fig:urine} shows the same idea on the value side. Intraoperative urine output is a total charted by
-hand: a recorded volume may have been read to 5 or 10\,mL or rounded to 50 or 100\,mL, and which of these happened is
-not recorded. The atlas's value model separates the rounding from the volumes, so each recorded value maps back to a
-PDF of its own: wide for a round number, narrow for one that can only have been read finely. Time and value can also
-depend on each other. A laboratory haematocrit of 35\% means 34.5--35.5\% if a blood-gas analyser measured it and
-34.95--35.05\% if the central laboratory did, and the analyser also sets how long before the stamp the blood was
-drawn, so the record's joint PDF is a mixture of two shapes in time and value together
-(\atlaspage{worked-example-record-pdf}{Worked example: a record as a PDF}).
-
-\begin{figure}[tp]
-  \centering
-  \includegraphics[width=\textwidth]{figures/fig2-urine-heaping.pdf}
-  \caption{What a rounded value means: intraoperative urine output in VitalDB, a total charted by hand. (A) The
-    recorded volumes, per 5\,mL, pile up on round numbers: \fact{uo.on100}\% of records sit on a multiple of 100\,mL and
-    \fact{uo.on50}\% on another multiple of 50\,mL. The red curve is the distribution of true volumes that the value
-    model infers from them, with four ways of charting a volume: read to 5 or 10\,mL, or rounded to 50 or 100\,mL. (B)
-    The PDF of the true volume for two recorded values, stacked by the way of charting that could have produced each.
-    A recorded 100\,mL lies anywhere from \fact{uo.100.lo} to \fact{uo.100.hi}\,mL (95\%), and has a \fact{uo.100.fine}\%
-    chance of having been read to 10\,mL or finer; a recorded 260\,mL, which only the 5 and 10\,mL readings can produce,
-    lies from \fact{uo.260.lo} to \fact{uo.260.hi}\,mL. Every step and its source: \atlaspage{worked-example-urine-output}{Worked
-    example: a rounded urine volume}.}
-  \label{fig:urine}
-\end{figure}
-
 \subsection{Measurand and measurement model}
 
 Each record indicates two measurands: when something happened and what its value was. The measurement model describes how the
@@ -336,6 +312,30 @@ mapped the true value onto it: rounding to the nearest step, truncation, or heap
 Truncation is a bias as well as a spread: a monitor that truncates records half a step low on average. Where a
 value's resolution is a mixture, as with hand-charted volumes or a test that two analysers report differently, the
 distribution of the true value is a mixture too~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}.
+Figure~\ref{fig:urine} shows such a mixture. Intraoperative urine output is a total charted by
+hand: a recorded volume may have been read to 5 or 10\,mL or rounded to 50 or 100\,mL, and which of these happened is
+not recorded. The atlas's value model separates the rounding from the volumes, so each recorded value maps back to a
+PDF of its own: wide for a round number, narrow for one that can only have been read finely. Time and value can also
+depend on each other. A laboratory haematocrit of 35\% means 34.5--35.5\% if a blood-gas analyser measured it and
+34.95--35.05\% if the central laboratory did, and the analyser also sets how long before the stamp the blood was
+drawn, so the record's joint PDF is a mixture of two shapes in time and value together
+(\atlaspage{worked-example-record-pdf}{Worked example: a record as a PDF}).
+
+\begin{figure}[tp]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig2-urine-heaping.pdf}
+  \caption{What a rounded value means: intraoperative urine output in VitalDB, a total charted by hand. (A) The
+    recorded volumes, per 5\,mL, pile up on round numbers: \fact{uo.on100}\% of records sit on a multiple of 100\,mL and
+    \fact{uo.on50}\% on another multiple of 50\,mL. The red curve is the distribution of true volumes that the value
+    model infers from them, with four ways of charting a volume: read to 5 or 10\,mL, or rounded to 50 or 100\,mL. (B)
+    The PDF of the true volume for two recorded values, stacked by the way of charting that could have produced each.
+    A recorded 100\,mL lies anywhere from \fact{uo.100.lo} to \fact{uo.100.hi}\,mL (95\%), and has a \fact{uo.100.fine}\%
+    chance of having been read to 10\,mL or finer; a recorded 260\,mL, which only the 5 and 10\,mL readings can produce,
+    lies from \fact{uo.260.lo} to \fact{uo.260.hi}\,mL. Every step and its source: \atlaspage{worked-example-urine-output}{Worked
+    example: a rounded urine volume}.}
+  \label{fig:urine}
+\end{figure}
+
 Values drift as clocks do. A transducer's offset and gain wander between calibrations, the instrument's
 drift~\citep[4.21]{jcgm-200-2012}, and each calibration~\citep[2.39]{jcgm-200-2012} pulls them back: the same pattern
 of drift and resynchronisation the clocks show. An atlas can describe it the same way, as a drift rate, a calibration
@@ -370,7 +370,8 @@ across the release. Because that shift is fixed before any data arrive, this for
 third applies a correction fitted to each recording separately. That correction is estimated from the whole
 recording, including data recorded after the values it corrects, so it cannot be used in real time: a corrected time
 is available only once the recording has ended. Each form has its own bias and uncertainty, so a user can choose the
-form that suits the analysis and see what that choice costs (Figures~\ref{fig:bias} and~\ref{fig:corrected}).
+form that suits the analysis and see what that choice costs (Figure~\ref{fig:bias}; for the uncertainty left after
+correction, Section~\ref{sec:sync} and Figure~\ref{fig:corrected}).
 
 \begin{figure}[t]
   \centering
@@ -382,17 +383,6 @@ form that suits the analysis and see what that choice costs (Figures~\ref{fig:bi
     describe windows of seconds that closed seconds earlier; records and hand-entered times span minutes to days.
     Solid markers measured, hollow estimated or assumed. Drawn from the atlas file.}
   \label{fig:bias}
-\end{figure}
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.92\textwidth]{figures/fig3b-corrected-uncertainty.pdf}
-  \caption{Residual uncertainty after correction. For each signal with a per-recording correction: its standard
-    uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; $\leq$
-    marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after
-    breath matching, the uncertainty is for stretches on their right breath; \fact{primus.sync.breath}\% of the matched time
-    is still a whole breath off (Table~\ref{tab:findings}). Drawn from the atlas file.}
-  \label{fig:corrected}
 \end{figure}
 
 \subsection{Evidence}
@@ -648,6 +638,19 @@ misclosures also scatter more widely than the links' stated uncertainties allow,
 
 The waveforms come from four clocks, and each pair raises a different problem. Together they show the main ways a
 recording system mistimes its signals, and how a correction can be checked against a signal it did not use.
+Figure~\ref{fig:corrected} shows, for every signal with a per-recording correction, how far it narrows the
+uncertainty.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/fig3b-corrected-uncertainty.pdf}
+  \caption{Residual uncertainty after correction. For each signal with a per-recording correction: its standard
+    uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; $\leq$
+    marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after
+    breath matching, the uncertainty is for stretches on their right breath; \fact{primus.sync.breath}\% of the matched time
+    is still a whole breath off (Table~\ref{tab:findings}). Drawn from the atlas file.}
+  \label{fig:corrected}
+\end{figure}
 
 \emph{The plethysmogram.} The ECG and the plethysmogram are both sampled by the SNUADC, yet the pulse arrives
 \fact{pleth.delay}\,s late: a fixed delay in the monitor's analogue path, which must be removed before a pulse arrival
