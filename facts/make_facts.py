@@ -230,6 +230,9 @@ def main():
         share = 100 * p["spread"]["n"] / ng
         fact(f"hr.{g}.share", share, num(share), "%", "parameters hr-delay-early, hr-delay-late spread.n",
              f"share of the recordings assigned to a group that are in the {g} group", status="derived")
+    gap = P["hr-delay-late"]["value"] - P["hr-delay-early"]["value"]
+    fact("hr.groups.gap", gap, num(gap, 1), "s", "parameters hr-delay-late minus hr-delay-early",
+         "separation of the two HR delay groups (Table 3)", status="derived")
     p = P["hr-late-label-delay"]
     fact("hr.example.d", p["value"], num(p["value"], 1), "s", "parameter hr-late-label-delay",
          "the example recording's delay in Figure 1: the late group's median label")
@@ -242,10 +245,15 @@ def main():
              status=p["status"])
     p = P["snuadc-reset-loss"]
     fact("snuadc.reset.loss", p["value"], str(math.floor(p["value"])), "ms",
-         "parameter snuadc-reset-loss, shown as about its whole millisecond (17.7 adopted for v2)", p["quantity"])
+         "parameter snuadc-reset-loss, shown as about 18: measured 18.7, while the stamp model uses 17.7 for v2", p["quantity"])
     # Table 3 (methods), data continuity example
     p = P["recording-pause"]
     fact("rec.pause", p["value"], num(p["value"]), "s", "parameter recording-pause", p["quantity"])
+    # Section 4.2, the SNUADC's two resynchronisation modes
+    p = P["snuadc-step-correction-size"]
+    fact("snuadc.step.size", p["value"], num(p["value"], 1), "s", "parameter snuadc-step-correction-size", p["quantity"])
+    p = P["snuadc-step-period"]
+    fact("snuadc.step.period", p["value"], num(p["value"], 1), "h", "parameter snuadc-step-period", p["quantity"])
     p = P["solar8000-poll-gap"]
     fact("solar.poll", p["value"], num(p["value"]), "s", "parameter solar8000-poll-gap", p["quantity"])
     # Figure 2 (urine output; drawn by metrology-atlas tools/fig_urine_heaping.py, numbers from its summary)
@@ -261,7 +269,7 @@ def main():
     # ---- ECG and plethysmogram: the system's offset
     p = P["pleth-chain-delay"]
     fact("pleth.delay", p["value"] / 1000, num(p["value"] / 1000, 3), "s", "parameter pleth-chain-delay",
-         "delay of the SNUADC plethysmogram behind the ECG from the monitor's processing (one value for the release)")
+         "offset of the SNUADC plethysmogram from the ECG: the monitor's fixed delay behind the pulse at the finger (one value for the release)")
     saw = comp("snuadc-ecg-ii", "snu-raw-step", 0)["u_s"] * math.sqrt(12) * 1000
     fact("ecg.sawtooth", saw, num(saw), "ms", "snuadc-ecg-ii/snu-raw-step components[0].u_s x sqrt(12)",
          "span of the stamp sawtooth (uniform)", status="derived")
@@ -292,8 +300,7 @@ def main():
     # ---- mains hum and the working reference
     fact("pc.grid.multi", P["pc-grid-rate-multi"]["value"], num(P["pc-grid-rate-multi"]["value"], sign=True), "ppm",
          "parameter pc-grid-rate-multi", P["pc-grid-rate-multi"]["quantity"])
-    fact("pc.grid.single", P["pc-grid-rate-single"]["value"], num(P["pc-grid-rate-single"]["value"], sign=True), "ppm",
-         "parameter pc-grid-rate-single", P["pc-grid-rate-single"]["quantity"])
+    # pc-grid-rate-single was withdrawn on 9 Nov 2026 (a line fit through one step, not a rate): no fact
     s = P["pc-grid-rate-setups"]["spread"]
     fact("pc.grid.setups.min", s["min"], num(s["min"], sign=True), "ppm", "parameter pc-grid-rate-setups spread.min",
          "lowest setup median")
@@ -306,6 +313,9 @@ def main():
     p = P["snuadc-uncorrected-hum"]
     fact("snuadc.uncorr.hum", p["value"], num(p["value"]), "recordings", "parameter snuadc-uncorrected-hum",
          p["quantity"])
+    share = 100 * p["value"] / cases
+    fact("snuadc.hum.rate.share", share, num(share), "%", "parameter snuadc-uncorrected-hum / vitaldb.cases",
+         "share of the release whose SNUADC rate comes from the mains hum (Section 4.1)", status="derived")
     for fid, pid in (("snuadc.drift", "snuadc-uncorrected-drift"), ("snuadc.drift.hum", "snuadc-uncorrected-drift-hum"),
                      ("snuadc.drift.hourly", "snuadc-uncorrected-drift-hourly"),
                      ("snuadc.drift.hum.hourly", "snuadc-uncorrected-drift-hum-hourly")):

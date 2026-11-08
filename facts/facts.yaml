@@ -1,8 +1,8 @@
 generated: '2026-11-08'
 atlas:
   file: built from metrology-atlas
-  sha256: d600aa46257253faf66d098e49f20fc6bf72030e06dcb8b688d15630675f53b5
-  commit: 827b565
+  sha256: abdb719722b7038464fca812738949feaa99f81825c006d67d7512d2589dbcbe
+  commit: 61d7540
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -468,6 +468,13 @@ facts:
     status: derived
     source: parameters hr-delay-early, hr-delay-late spread.n
     definition: share of the recordings assigned to a group that are in the late group
+  hr.groups.gap:
+    value: 2.29
+    display: '2.3'
+    unit: s
+    status: derived
+    source: parameters hr-delay-late minus hr-delay-early
+    definition: separation of the two HR delay groups (Table 3)
   hr.example.d:
     value: 4.2
     display: '4.2'
@@ -504,8 +511,8 @@ facts:
     display: '18'
     unit: ms
     status: measured
-    source: parameter snuadc-reset-loss, shown as about its whole millisecond (17.7
-      adopted for v2)
+    source: 'parameter snuadc-reset-loss, shown as about 18: measured 18.7, while
+      the stamp model uses 17.7 for v2'
     definition: Signal time that is never sampled at each step-mode correction, on
       the sample count.
   rec.pause:
@@ -515,6 +522,21 @@ facts:
     status: measured
     source: parameter recording-pause
     definition: Length of the pauses in which every device jumps forward together.
+  snuadc.step.size:
+    value: 0.5
+    display: '0.5'
+    unit: s
+    status: measured
+    source: parameter snuadc-step-correction-size
+    definition: True size of a step-mode correction, from the pacing train on stamp
+      time.
+  snuadc.step.period:
+    value: 2.08
+    display: '2.1'
+    unit: h
+    status: measured
+    source: parameter snuadc-step-period
+    definition: Time between successive step-mode corrections.
   solar.poll:
     value: 2.0
     display: '2'
@@ -586,8 +608,8 @@ facts:
     unit: s
     status: measured
     source: parameter pleth-chain-delay
-    definition: delay of the SNUADC plethysmogram behind the ECG from the monitor's
-      processing (one value for the release)
+    definition: 'offset of the SNUADC plethysmogram from the ECG: the monitor''s fixed
+      delay behind the pulse at the finger (one value for the release)'
   ecg.sawtooth:
     value: 500.0
     display: '500'
@@ -664,31 +686,24 @@ facts:
     source: parameter co2-sampling-line-lag spread.n
     definition: n
   pc.grid.multi:
-    value: -13.8
+    value: -14.0
     display: $-$14
     unit: ppm
     status: measured
     source: parameter pc-grid-rate-multi
-    definition: Rate of the recorder PC against the mains grid in recordings with
-      two or more SNUADC stamp corrections.
-  pc.grid.single:
-    value: 1.6
-    display: $+$2
-    unit: ppm
-    status: measured
-    source: parameter pc-grid-rate-single
-    definition: Rate of the recorder PC against the mains grid in recordings with
-      one SNUADC stamp correction.
+    definition: Rate of the recorder PC against the mains grid in recordings whose
+      SNUADC rate comes from at least one whole tooth (two stamp corrections in one
+      stretch).
   pc.grid.setups.min:
-    value: -47
-    display: $-$47
+    value: -24.8
+    display: $-$25
     unit: ppm
     status: measured
     source: parameter pc-grid-rate-setups spread.min
     definition: lowest setup median
   pc.grid.setups.max:
-    value: 18
-    display: $+$18
+    value: -3.3
+    display: $-$3
     unit: ppm
     status: measured
     source: parameter pc-grid-rate-setups spread.max
@@ -717,6 +732,14 @@ facts:
     source: parameter snuadc-uncorrected-hum
     definition: Recordings without SNUADC stamp corrections that carry hum, and so
       get their own SNUADC rate from it.
+  snuadc.hum.rate.share:
+    value: 19.536631183469005
+    display: '20'
+    unit: '%'
+    status: derived
+    source: parameter snuadc-uncorrected-hum / vitaldb.cases
+    definition: share of the release whose SNUADC rate comes from the mains hum (Section
+      4.1)
   snuadc.drift:
     value: 31.3
     display: '31'
