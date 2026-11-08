@@ -752,7 +752,11 @@ second path, or a closed loop. The loops show that some stated uncertainties are
 plethysmogram's correction has been tested end to end, on sawtooths injected into real recordings and against the
 arterial line (Section~\ref{sec:sync}); the arterial line also helps place the slips, so that check is not wholly
 independent of the correction. Bench recordings of the devices, or recordings with a known injected offset, would
-close this gap.
+close this gap. One check is still open. Recomputed from the waveforms, the monitor's heart rate and
+pulse rate change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their timing forms predict,
+although the same test recovers known delays on synthetic data; the polled numerics' delays may be up to about
+1\,s longer than stated (\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}).
+The cause has not been found.
 
 
 The work builds on the vocabulary and uncertainty framework of the VIM and the

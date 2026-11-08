@@ -1,8 +1,8 @@
 generated: '2026-11-08'
 atlas:
   file: built from metrology-atlas
-  sha256: 0d228804c6fec236e1af395960cd66b5eecead15c41d7dffcf1624559ca61c2c
-  commit: 7e8d8d6
+  sha256: d600aa46257253faf66d098e49f20fc6bf72030e06dcb8b688d15630675f53b5
+  commit: 827b565
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 126
-    display: '126'
+    value: 129
+    display: '129'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -48,15 +48,15 @@ facts:
     source: 'atlas file: observations'
     definition: number of observations
   atlas.studies:
-    value: 92
-    display: '92'
+    value: 93
+    display: '93'
     unit: studies
     status: measured
     source: 'atlas file: studies'
     definition: number of studies
   atlas.studies.current:
-    value: 84
-    display: '84'
+    value: 85
+    display: '85'
     unit: studies
     status: measured
     source: 'atlas file: studies[].status'
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 134
-    display: '134'
+    value: 136
+    display: '136'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -484,6 +484,21 @@ facts:
     source: parameter hr-window-span
     definition: Span of ECG the Solar8000 heart rate's 8 R–R intervals cover, at each
       recording's median R–R interval.
+  hr.recompute.lag:
+    value: 0.96
+    display: '1.0'
+    unit: s
+    status: measured
+    source: parameter hr-recompute-lag
+    definition: Monitor HR behind its recomputation, in the change-agreement test.
+  pr.recompute.lag:
+    value: 1.24
+    display: '1.2'
+    unit: s
+    status: measured
+    source: parameter pr-recompute-lag
+    definition: Monitor PLETH_HR behind its recomputation, in the change-agreement
+      test.
   snuadc.reset.loss:
     value: 18.7
     display: '18'

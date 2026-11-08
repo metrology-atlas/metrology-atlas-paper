@@ -235,6 +235,11 @@ def main():
          "the example recording's delay in Figure 1: the late group's median label")
     p = P["hr-window-span"]
     fact("hr.span", p["value"], num(p["value"], 1), "s", "parameter hr-window-span", p["quantity"])
+    # Section 6, the open check of the polled numerics' delays
+    for k in ("hr", "pr"):
+        p = P[f"{k}-recompute-lag"]
+        fact(f"{k}.recompute.lag", p["value"], num(p["value"], 1), "s", f"parameter {k}-recompute-lag", p["quantity"],
+             status=p["status"])
     p = P["snuadc-reset-loss"]
     fact("snuadc.reset.loss", p["value"], str(math.floor(p["value"])), "ms",
          "parameter snuadc-reset-loss, shown as about its whole millisecond (17.7 adopted for v2)", p["quantity"])
