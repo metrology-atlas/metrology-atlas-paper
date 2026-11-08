@@ -102,7 +102,7 @@ making that can be undone (Section~\ref{sec:correct}).
     next poll, 0 to \fact{solar.poll}\,s, before it is stamped (D). (E, F) The joint PDF over the true time the window
     closed and the true heart rate, given the recorded pair (white dot), on one density scale in both panels, with its
     marginal PDFs (purple): time along the top, value on the right. The value is uniform over [72, 73) in both, because
-    the monitor truncates. From the stored record alone (E), the time is the sum of two groups of VitalDB recordings,
+    the monitor truncates. From the stored record alone (E), the time is a mixture of two groups of VitalDB recordings,
     early (median delay \fact{hr.early.d}\,s, \fact{hr.early.share}\%) and late (\fact{hr.late.d}\,s,
     \fact{hr.late.share}\%), each spread by the wait for the poll. With the atlas (F), the recording's own label gives
     its delay, here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, and only the wait for
@@ -209,10 +209,10 @@ The correction's own error and the steps it cannot undo become the components of
 (Section~\ref{sec:forms}), and the correction is recorded with its evidence like any other result. Steps that are
 many-to-one stay as they are: a truncated value remains an interval, however well its time is corrected.
 
-The plethysmogram in VitalDB shows the five steps. Its offset from the ECG drifts and jumps back by one frame at a
+The plethysmogram in VitalDB shows the five steps. Its offset from the ECG drifts and jumps back one frame at a
 time; each slip is found from the pulse shapes, the teeth between slips are fitted and removed, and the correction
 is tested on sawtooths injected into real recordings and against the arterial line, a second path on the ECG's
-clock (Section~\ref{sec:limits}). The tools are open and dataset-independent where they can be: physiosync fits
+clock (Section~\ref{sec:sync}). The tools are open and dataset-independent where they can be: physiosync fits
 drifts, resynchronisations and frame slips from times and samples a caller supplies; vitaldb-reader reads the
 release at native resolution with each correction as a separate, versioned step; and vitaldb-bench holds the
 studies that measured and tested each correction (\url{https://github.com/metrology-atlas}). Each study names
@@ -291,7 +291,7 @@ those of version~1 of this paper, and why.
   Accuracy, as a number & Bias and standard uncertainty, stated separately &
     Accuracy is a qualitative concept and is not given a number; a known systematic effect is a bias, corrected
     where possible, and what remains is uncertainty & VIM 2.13, 2.18, 2.26; GUM 3.2.3--3.2.4 \\
-  Offset & Bias: stamp minus the working reference, negative early & Sign and reference made explicit; an offset without a sign was
+  Offset & Bias: stamp minus the close of the support, on the working reference; negative is early & Sign and reference made explicit; an offset without a sign was
     applied the wrong way in version~1's planner for the BIS & VIM 2.18 \\
   Residual & Standard uncertainty after correction, an upper bound with a likely value & Separates what a
     correction removes from what it leaves & GUM 3.2.4; VIM 2.53 (correction) \\
@@ -336,10 +336,10 @@ drawn, so the record's joint PDF is a mixture of two shapes in time and value to
   \label{fig:urine}
 \end{figure}
 
-Values drift as clocks do. A transducer's offset and gain wander between calibrations, the instrument's
-drift~\citep[4.21]{jcgm-200-2012}, and each calibration~\citep[2.39]{jcgm-200-2012} pulls them back: the same pattern
-of drift and resynchronisation the clocks show. An atlas can describe it the same way, as a drift rate, a calibration
-schedule and the evidence for each. The VitalDB release records no calibrations, but the atlas detects one kind made
+Values drift as clocks do. A transducer's offset and gain wander between adjustments, the instrument's
+drift~\citep[4.21]{jcgm-200-2012}, and each adjustment~\citep[3.11]{jcgm-200-2012}, such as a zeroing, pulls them back: the same pattern
+of drift and resynchronisation the clocks show. An atlas can describe it the same way, as a drift rate, an adjustment
+schedule and the evidence for each. The VitalDB release records no adjustments, but the atlas detects one kind made
 in theatre, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
 
 Values are also related to one another. Some measure the same quantity by different routes: arterial pressure from
@@ -364,14 +364,14 @@ from others.
 \subsection{Forms of the times}
 \label{sec:forms}
 
-A signal's times can be used in more than one form, and an atlas states each of them. There are three. The first
+A signal's times can be used in more than one form, and an atlas states each of them. There are three kinds, and a signal may have more than one form of a kind. The first
 is the stamps as stored. The second shifts the stored stamps by an amount known in advance, such as the median delay
 across the release. Because that shift is fixed before any data arrive, this form can be used in real time. The
 third applies a correction fitted to each recording separately. That correction is estimated from the whole
 recording, including data recorded after the values it corrects, so it cannot be used in real time: a corrected time
 is available only once the recording has ended. Each form has its own bias and uncertainty, so a user can choose the
 form that suits the analysis and see what that choice costs (Figure~\ref{fig:bias}; for the uncertainty left after
-correction, Section~\ref{sec:sync} and Figure~\ref{fig:corrected}).
+correction, Section~\ref{sec:sync}).
 
 \begin{figure}[t]
   \centering
@@ -446,7 +446,7 @@ variable, the part a new atlas fills in.
       as), with algorithm, code and version; how its uncertainty propagates & Measures scalp EEG voltage; the BIS
       index comes from the same source, and the BIS smoothing label is computed from it \\
     Clock domain & The domain whose drift remains, with its rate and its spread between recordings & The working
-      reference: the SNUADC sample clock, on the recorder PC's timeline. It drifts \fact{snuadc.drift}\,ppm between
+      reference: the SNUADC sample clock, on the recorder PC's timeline. Its rate is uncertain by \fact{snuadc.drift}\,ppm between
       recordings where the SNUADC stamps carry no resynchronisations (\fact{snuadc.uncorr.share}\%) \\
     Evidence & Status (measured, derived, estimated, assumed), the studies behind each number, the correction and the
       code & Measured; \fact{bis.sync.studies} studies \\
@@ -488,7 +488,7 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
     Rounding, heaping and value resolution & Find the resolution a number was recorded at, its rounding rule and its
       heaping & Heart rate truncated; hand-charted volumes heaped \\
     Method comparison & Compare two variables measuring one quantity, paired at the moment each describes: bias,
-      limits of agreement, and the parts fixed per patient and varying within one & Cuff against arterial mean
+      limits of agreement, and the parts fixed per patient and varying within one & Cuff against arterial-line mean
       pressure \\
     Reading the source & Read firmware, manuals and loader code to explain a behaviour, or predict one to test & The
       SNUADC firmware \\
@@ -571,7 +571,7 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
   \includegraphics[width=\textwidth]{figures/fig5-timing-network.pdf}
   \caption{The VitalDB timing network. Each clock sits below the clock it is measured against, or beside it in the
     same row; solid links are
-    measured, dashed estimated, dotted assumed. The recorder computer hangs from UTC by an estimated link (2): it was
+    measured, dashed estimated, dotted assumed. Each number is a pair of clocks; a pair measured more than one way carries one number. The recorder computer hangs from UTC by an estimated link (2): it was
     synchronised by hand, at irregular times, to UTC(KRIS), Korea's national time scale, with the UTCk
     program of the Korea Research Institute of Standards and Science (KRISS), and no logs were kept. The mains grid
     hangs from UTC by an assumed link (3); the computer's rate is measured against the grid (1) through the hum in the SNUADC waveforms. Generated
@@ -582,17 +582,16 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
 \begin{table}[t]
   \centering
   \small
-  \caption{Findings from the VitalDB atlas that change how its data should be used. Each links to its study on the
-    website.}
+  \caption{Findings from the VitalDB atlas that change how its data should be used. Each has a study page in the atlas.}
   \label{tab:findings}
   \begin{tabularx}{\textwidth}{@{}P{0.3\textwidth}L@{}}
     \toprule
     Finding & Number \\
     \midrule
     Synchronisation, plethysmogram to ECG & A fixed delay of \fact{pleth.delay}\,s in the monitor's analogue path; the
-      frame-slip correction narrows finger minus arterial pulse arrival time from \fact{ppg.art.none} to
+      frame-slip correction narrows the spread of finger minus arterial pulse arrival time from \fact{ppg.art.none} to
       \fact{ppg.art.rebuilt}\,ms (median; \fact{ppg.art.n} recordings with a sawtooth) \\
-    BIS EEG stamps sit early against the ECG (the working reference) & \fact{bis.bias}\,s median (5th--95th percentile
+    BIS EEG stamps sit early against the ECG (on the working reference) & \fact{bis.bias}\,s median (5th--95th percentile
       \fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
     Synchronisation, EEG to ECG & Standard uncertainty \fact{bis.shift.uc}\,ms with a shift known in advance; \fact{bis.sync.uc}\,ms after
       per-recording synchronisation (an upper bound); \fact{bis.own.uc}\,ms with the recording's own bursts (\fact{bis.sync.n} recordings) \\
@@ -628,7 +627,7 @@ UTC(KRIS) by hand, at irregular times and without logs~\citep{kriss-utck}, and t
 the release.
 
 The network is tested by its loops. Each device's rate is measured against another clock, so around any loop of links
-the rates should sum to zero, as the angles of a surveyed traverse do. In VitalDB they close to about
+the rates should sum to zero, as the height differences around a levelling loop do. In VitalDB they close to about
 \fact{loop.bis}\,ppm (median, over \fact{loop.bis.n} loops through the BIS), so the links agree with one another. The
 misclosures also scatter more widely than the links' stated uncertainties allow, by a factor of \fact{loop.se.min} to
 \fact{loop.se.max}, so those uncertainties are too small, and the atlas says so beside them.
@@ -637,14 +636,14 @@ misclosures also scatter more widely than the links' stated uncertainties allow,
 \label{sec:sync}
 
 The waveforms come from four clocks, and each pair raises a different problem. Together they show the main ways a
-recording system mistimes its signals, and how a correction can be checked against a signal it did not use.
-Figure~\ref{fig:corrected} shows, for every signal with a per-recording correction, how far it narrows the
+recording system mistimes its signals, and how a correction can be checked against a second path.
+Figure~\ref{fig:corrected} shows, for every signal with a per-recording timing form, how far it narrows the
 uncertainty.
 
 \begin{figure}[t]
   \centering
   \includegraphics[width=0.92\textwidth]{figures/fig6-corrected-uncertainty.pdf}
-  \caption{Residual uncertainty after correction. For each signal with a per-recording correction: its standard
+  \caption{Standard uncertainty after correction. For each signal with a per-recording timing form: its standard
     uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; $\leq$
     marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after
     breath matching, the uncertainty is for stretches on their right breath; \fact{primus.sync.breath}\% of the matched time
@@ -661,7 +660,7 @@ against the arterial line, a second path on the ECG's clock that carries no sawt
 
 \emph{The EEG.} The BIS monitor stamps its EEG \fact{bis.bias.early}\,s before the ECG shows the same event, so its
 stamps look ahead. Electrocautery and muscle bursts, which both signals record, synchronise them to
-\fact{bis.sync.uc}\,ms.
+\fact{bis.sync.uc}\,ms (an upper bound), or \fact{bis.own.uc}\,ms with each recording's own bursts.
 
 \emph{The ventilator.} The anaesthesia machine sends its airway pressure in stretches, each anchored too early, so its
 stamps also run ahead of the breaths they record. The breath cycle, seen in airway pressure and in central venous
@@ -670,15 +669,15 @@ pressure, synchronises them to \fact{primus.sync.uc}\,ms, but a periodic signal 
 folded into a standard deviation.
 
 \emph{The reference itself.} Even the working reference is not a perfect clock. Where the recorder resynchronises the
-SNUADC, about \fact{snuadc.reset.loss}\,ms of signal is lost at each step; where it does not, the converter drifts at its
-own rate, by \fact{snuadc.drift}\,ppm between recordings.
+SNUADC, about \fact{snuadc.reset.loss}\,ms of signal is lost at each step; where it does not, the converter runs at its
+own rate, known only to \fact{snuadc.drift}\,ppm between recordings.
 
 \subsection{Numerics and records}
 \label{sec:records}
 
-Monitor numerics describe windows of signal, not instants. The Solar8000's heart rate is the mean of its last
-\fact{hr.window} R--R intervals, leaving out outliers, truncated; its support is therefore a count of beats, not a span
-of seconds. It is ready a delay after the window closes, a delay that falls in one of two groups of recordings, and
+Monitor numerics describe windows of signal, not instants. The Solar8000's heart rate is computed from the mean of its last
+\fact{hr.window} R--R intervals, leaving out outliers, and truncated; its support is therefore its last \fact{hr.window} beats,
+whose length in seconds changes with the rate. It is ready a delay after the window closes, a delay that falls in one of two groups of recordings, and
 then waits for the recorder's poll (Figure~\ref{fig:concept}). The other polled numerics wait in the same way.
 
 Records made by people or by other systems carry their own timing. A laboratory value is stamped at the specimen,
@@ -754,7 +753,7 @@ arterial line (Section~\ref{sec:sync}); the arterial line also helps place the s
 independent of the correction. Bench recordings of the devices, or recordings with a known injected offset, would
 close this gap. One check is still open. Recomputed from the waveforms, the monitor's heart rate and
 pulse rate change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their timing forms predict,
-although the same test recovers known delays on synthetic data; the polled numerics' delays may be up to about
+although the same test recovers known delays on synthetic data; the polled numerics' delays may be about
 1\,s longer than stated (\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}).
 The cause has not been found.
 
