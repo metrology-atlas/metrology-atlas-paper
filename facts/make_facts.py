@@ -233,6 +233,11 @@ def main():
     p = P["hr-late-label-delay"]
     fact("hr.example.d", p["value"], num(p["value"], 1), "s", "parameter hr-late-label-delay",
          "the example recording's delay in Figure 1: the late group's median label")
+    p = P["hr-window-span"]
+    fact("hr.span", p["value"], num(p["value"], 1), "s", "parameter hr-window-span", p["quantity"])
+    p = P["snuadc-reset-loss"]
+    fact("snuadc.reset.loss", p["value"], str(math.floor(p["value"])), "ms",
+         "parameter snuadc-reset-loss, shown as about its whole millisecond (17.7 adopted for v2)", p["quantity"])
     p = P["solar8000-poll-gap"]
     fact("solar.poll", p["value"], num(p["value"]), "s", "parameter solar8000-poll-gap", p["quantity"])
     # Figure 2 (urine output; drawn by metrology-atlas tools/fig_urine_heaping.py, numbers from its summary)

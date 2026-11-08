@@ -1,4 +1,4 @@
-generated: '2026-11-07'
+generated: '2026-11-08'
 atlas:
   file: built from metrology-atlas
   sha256: 0d228804c6fec236e1af395960cd66b5eecead15c41d7dffcf1624559ca61c2c
@@ -476,6 +476,23 @@ facts:
     source: parameter hr-late-label-delay
     definition: 'the example recording''s delay in Figure 1: the late group''s median
       label'
+  hr.span:
+    value: 6.6
+    display: '6.6'
+    unit: s
+    status: measured
+    source: parameter hr-window-span
+    definition: Span of ECG the Solar8000 heart rate's 8 R–R intervals cover, at each
+      recording's median R–R interval.
+  snuadc.reset.loss:
+    value: 18.7
+    display: '18'
+    unit: ms
+    status: measured
+    source: parameter snuadc-reset-loss, shown as about its whole millisecond (17.7
+      adopted for v2)
+    definition: Signal time that is never sampled at each step-mode correction, on
+      the sample count.
   solar.poll:
     value: 2.0
     display: '2'
