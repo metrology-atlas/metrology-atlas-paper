@@ -1,7 +1,7 @@
 """Every kind of VitalDB time stamp as stored: bias against standard uncertainty (decision D4), and each corrected
 source's standard uncertainty before and after correction. Read from the metrology atlas (one source of truth).
 
-    python figures/src/fig_bias_uncertainty.py ATLAS_REPO figures/fig3-bias-uncertainty.pdf figures/fig3b-corrected-uncertainty.pdf
+    python figures/src/fig_bias_uncertainty.py ATLAS_REPO figures/fig4-bias-uncertainty.pdf figures/fig6-corrected-uncertainty.pdf
 
 A. Forms as stored (the raw stamps where a signal has them, in each mode; labels, which have no stamp error, left
    out). Across: bias, the stamp minus the end of the interval its value describes, against the working
@@ -53,8 +53,8 @@ for r in sorted(rows, key=lambda r: r[2]["u_c"]):
         hit[0] = hit[0].replace(" (SNUADC)", "") + ", " + r[0]
         continue
     uniq.append([r[0], r[1], r[2], key])
-fig, ax = plt.subplots(figsize=(7.2, 5.0))
-fig.subplots_adjust(left=0.1, right=0.98, top=0.98, bottom=0.22)
+fig, ax = plt.subplots(figsize=(6.32, 4.9))  # drawn at the text width, so type prints at its stated size
+fig.subplots_adjust(left=0.12, right=0.98, top=0.98, bottom=0.27)
 for i, (label, typ, f, _) in enumerate(uniq):
     b, c = f["bias"], COL.get(typ, "#888")
     measured = f["status"] == "measured"
@@ -100,8 +100,8 @@ for typ in ("waveform", "numeric", "event"):
 ax.plot([], [], "o", color=MUTED, mfc="white", label="estimated or assumed")
 ax.legend(loc="lower right", frameon=False, fontsize=6.8)
 key = "   ".join(f"{i + 1} {u[0]}" for i, u in enumerate(uniq))
-fig.text(0.01, 0.005, "\n".join(__import__("textwrap").wrap(key, 150)), fontsize=5.8, color=INK, va="bottom")
-fig.subplots_adjust(left=0.1, right=0.98, top=0.98, bottom=0.22)
+fig.text(0.01, 0.005, "\n".join(__import__("textwrap").wrap(key, 128)), fontsize=5.8, color=INK, va="bottom")
+fig.subplots_adjust(left=0.12, right=0.98, top=0.98, bottom=0.27)
 fig.savefig(sys.argv[2])
 
 # --- B: before and after correction ------------------------------------------------------------------------------
@@ -139,7 +139,7 @@ for p in sorted(pairs, key=lambda p: p[3]):
         hit[0] = hit[0].replace(" (SNUADC)", "") + ", " + p[0]
         continue
     P.append(list(p) + [k])
-fig, ax = plt.subplots(figsize=(7.2, 0.3 * len(P) + 1.6))
+fig, ax = plt.subplots(figsize=(5.82, 0.3 * len(P) + 1.6))  # 0.92 of the text width, as placed
 for i, (label, typ, ub, ua, ul, upper, _) in enumerate(P):
     c = COL.get(typ, "#888")
     ax.plot([ua, ub], [i, i], color=c, lw=1.6, alpha=0.5)

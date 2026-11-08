@@ -37,8 +37,8 @@
 
 \title{The Metrology Atlas: describing clinical time-series data as a measurement system}
 \author{Andrew J. Goodwin$^{1}$, Hyung-Chul Lee$^{2,3,4}$, Danny Eytan$^{5,6}$\\[6pt]
-  % the affiliations in a box of the text width, so the long ones wrap instead of running off the page
-  \parbox{\textwidth}{\centering\footnotesize
+  % the affiliations in a box of the text width (less the title tabular's padding), so the long ones wrap instead of running off the page
+  \parbox{\dimexpr\textwidth-2\tabcolsep\relax}{\centering\footnotesize
   $^{1}$School of Biomedical Engineering, The University of Sydney, Sydney, Australia\\
   $^{2}$Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul, Republic of Korea\\
   $^{3}$Department of Anesthesiology and Pain Medicine, Seoul National University Hospital, Seoul National University
@@ -323,7 +323,7 @@ drawn, so the record's joint PDF is a mixture of two shapes in time and value to
 
 \begin{figure}[tp]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig2-urine-heaping.pdf}
+  \includegraphics[width=\textwidth]{figures/fig3-urine-heaping.pdf}
   \caption{What a rounded value means: intraoperative urine output in VitalDB, a total charted by hand. (A) The
     recorded volumes, per 5\,mL, pile up on round numbers: \fact{uo.on100}\% of records sit on a multiple of 100\,mL and
     \fact{uo.on50}\% on another multiple of 50\,mL. The red curve is the distribution of true volumes that the value
@@ -375,7 +375,7 @@ correction, Section~\ref{sec:sync} and Figure~\ref{fig:corrected}).
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig3-bias-uncertainty.pdf}
+  \includegraphics[width=\textwidth]{figures/fig4-bias-uncertainty.pdf}
   \caption{Every kind of time stamp in VitalDB in its stored form: bias (stamp minus the close of the interval the value describes, against the working reference; the
     bar spans the 5th to 95th percentile between recordings, a spread the uncertainty also contains) against
     combined standard uncertainty.
@@ -478,9 +478,9 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
     Clocks carried in the signal & Use a regular rhythm inside a signal, such as a pacemaker, an oximeter's frames or
       the mains hum, as a third clock & The mains hum, tying the recording PCs to the grid \\
     Does the waveform run on? & Test whether a waveform continues smoothly across a junction, reset or gap, to tell
-      lost samples from lost time & About 20\,ms of signal lost at each SNUADC reset \\
+      lost samples from lost time & About \fact{snuadc.reset.loss}\,ms of signal lost at each SNUADC reset \\
     Data continuity & Map where each signal's gaps are and how long its unbroken stretches run & Recording pauses of
-      about 18\,s \\
+      about \fact{rec.pause}\,s \\
     Delays and averaging windows & Recompute a monitor's numeric from its own waveform, or read it from how the
       numeric disagrees with another measurement of the same rate, to find the window it summarises and its delay & Heart rate's two delay groups, one poll apart \\
     Clinical and laboratory times & Find what a time in the clinical and lab tables marks, from signatures the event
@@ -568,7 +568,7 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=\textwidth]{figures/fig4-timing-network.pdf}
+  \includegraphics[width=\textwidth]{figures/fig5-timing-network.pdf}
   \caption{The VitalDB timing network. Each clock sits below the clock it is measured against, or beside it in the
     same row; solid links are
     measured, dashed estimated, dotted assumed. The recorder computer hangs from UTC by an estimated link (2): it was
@@ -643,7 +643,7 @@ uncertainty.
 
 \begin{figure}[t]
   \centering
-  \includegraphics[width=0.92\textwidth]{figures/fig3b-corrected-uncertainty.pdf}
+  \includegraphics[width=0.92\textwidth]{figures/fig6-corrected-uncertainty.pdf}
   \caption{Residual uncertainty after correction. For each signal with a per-recording correction: its standard
     uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; $\leq$
     marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after

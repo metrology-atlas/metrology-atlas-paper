@@ -508,6 +508,13 @@ facts:
       adopted for v2)
     definition: Signal time that is never sampled at each step-mode correction, on
       the sample count.
+  rec.pause:
+    value: 18.5
+    display: '18'
+    unit: s
+    status: measured
+    source: parameter recording-pause
+    definition: Length of the pauses in which every device jumps forward together.
   solar.poll:
     value: 2.0
     display: '2'
