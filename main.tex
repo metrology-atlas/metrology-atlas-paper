@@ -74,9 +74,9 @@ compact, checkable context for planning a study. The approach will be applied to
 \section{Introduction: a record is a measurement}
 
 Open clinical time-series datasets are now the training ground for clinical machine learning and time-series foundation
-models. Their users mostly treat each record as exact: a value that happened at its time stamp, the time the recording system attached to it (its stamp, for short). In a
+models. Their users mostly treat each record as exact: a value that happened at its timestamp, the time the recording system attached to it (its stamp, for short). In a
 multi-device
-recording that assumption fails in ways that matter. Device clocks drift by tens to hundreds of parts per million
+recording that assumption fails in ways that matter. Device clocks drift by tens to hundreds of parts per million (ppm)
 against the recording computer and are pulled back to it in jumps, resynchronisations, so their time error grows
 and resets: a sawtooth. Monitor numerics describe a window of signal that closed seconds before their stamp. Values are
 truncated, rounded or heaped by hand. Converters store fewer bits than documented. None of this shows in a typical
@@ -86,7 +86,7 @@ A record is best read not as a point but as a probability density function (PDF)
 true value is, given the record and what is known about how it was made (Figure~\ref{fig:concept}). A heart rate recorded as 72 beats per minute (bpm) by a
 monitor that rounds down (truncates) could be anything from 72 up to, but not including, 73,
 and it describes the last \fact{hr.window} R--R intervals of ECG, which ended a variable delay before its stamp,
-plus a wait for the recorder's next poll. A laboratory haematocrit of 35\% means 35$\pm$0.5 or 35$\pm$0.05 depending on
+plus a wait for the recorder's next poll. A laboratory haematocrit of 35\% means (35$\pm$0.5)\% or (35$\pm$0.05)\% depending on
 which analyser made it, which the record does not say, and the blood was drawn minutes before the stamp, by an
 amount that also depends on the analyser. Before correction these shapes are uniform, bimodal, mixed and skewed, and few are Gaussian; for one record, the
 atlas narrows each to what is known about that record, by measuring and undoing the steps of the record's
@@ -96,17 +96,17 @@ making that can be undone (Section~\ref{sec:correct}).
   \centering
   \includegraphics[width=\textwidth]{figures/fig1-concept-hr.pdf}
   \caption{How one heart-rate record was made, and how it can be read. (A--D) The measurement model, run forward. The
-    heart beats (A; an illustrative ECG). The monitor averages the last \fact{hr.window} R--R intervals, leaving out any
-    more than about \fact{hr.band}\% from their median, and truncates the result (B); those intervals are the value's
+    heart beats (A; an illustrative ECG). The monitor averages the last \fact{hr.window} R--R intervals, leaving out any that
+    differ from their median by more than about \fact{hr.band}\%, and truncates the result (B); those intervals are the value's
     support. The value is ready at the recorder a delay $d$ after the window closes (C), and waits for the recorder's
     next poll, 0 to \fact{solar.poll}\,s, before it is stamped (D). (E, F) The joint PDF over the true time the window
     closed and the true heart rate, given the recorded pair (white dot), on one density scale in both panels, with its
     marginal PDFs (purple): time along the top, value on the right. The value is uniform over [72, 73) in both, because
     the monitor truncates. From the stored record alone (E), the time is a mixture of two groups of VitalDB recordings,
     early (median delay \fact{hr.early.d}\,s, \fact{hr.early.share}\%) and late (\fact{hr.late.d}\,s,
-    \fact{hr.late.share}\%), each spread by the wait for the poll. With the atlas (F), the recording's own label gives
-    its delay, here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, and only the wait for
-    the poll remains. Every step and its source: \atlaspage{worked-example-heart-rate}{Worked example: one heart-rate
+    \fact{hr.late.share}\%), each spread by the wait for the poll. With the atlas (F), the delay is measured for this
+    recording (its delay label, Section~\ref{sec:system}), here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, and only the wait for
+    the poll remains. Every step and its source are in \atlaspage{worked-example-heart-rate}{Worked example: one heart-rate
     record}.}
   \label{fig:concept}
 \end{figure}
@@ -119,11 +119,10 @@ dataset's signals are synchronised, without that uncertainty and the statistic i
 objectively, nor used in a quantitative analysis.
 
 Analyses that relate signals beat by beat, or at a sub-second scale, need synchronisation that many clinical datasets
-do not document, and pooling datasets makes the gap matter more. ECG and PPG are now learned together by foundation
+do not document, and pooling datasets makes the gap matter more. ECG and photoplethysmogram (PPG) are now learned together by foundation
 models pretrained on open datasets from many sites and devices; a recent review lists 13 that record
 both~\citep[Table~S12]{han2026review}. Yet the offset between the two is a property of each recording system:
-\fact{pleth.delay}\,s in VitalDB, 1.30\,s in a paediatric intensive care unit~\citep{ruffolo2025high}. At 120 beats
-per minute, usual in a child, an R--R interval lasts 0.5\,s, so an offset of 1.30\,s puts the beats of the two
+\fact{pleth.delay}\,s in VitalDB, 1.30\,s in a paediatric intensive care unit~\citep{ruffolo2025high}. At 120\,bpm, usual in a child, an R--R interval lasts 0.5\,s, so an offset of 1.30\,s puts the beats of the two
 signals out of phase. A model trained on such datasets together is harmed in two ways. Where the offset differs
 between sites, it is a property of the site, and a model can learn the site in place of the physiology: a shortcut
 that works on the sites it was trained on and fails on a new one~\citep{geirhos2020shortcut,zech2018variable}.
@@ -136,7 +135,7 @@ described by an atlas, the question would be settled by reading it.
 
 Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved, such
 as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the ECG with the
-photoplethysmogram~\citep{ruffolo2025high}. What is missing is a complete, checkable description
+PPG~\citep{ruffolo2025high}. What is missing is a complete, checkable description
 of a dataset's measurement system that others can read, reuse and correct. Metrology already has the language: a
 measurand (the quantity intended to be measured), a measurement model, and a stated uncertainty with its evidence~\citep{jcgm-200-2012,jcgm-100-2008}.
 Earth observation has shown how to apply it to historical data whose instruments can no longer be
@@ -158,7 +157,7 @@ VitalDB~\citep{lee2022vitaldb}, to show what it finds. Its contributions are:
     labels that carry when each value could first be known (Section~\ref{sec:system}).
 \end{itemize}
 The detail lives in the atlas, at \atlasurl; this paper quotes its numbers and points to it. The numbers are
-VitalDB's, measured on its devices and recording set-up. They show the kinds of error the approach describes, not
+VitalDB's, measured on its devices and recording setup. They show the kinds of error the approach describes, not
 values to assume for another dataset.
 
 % ---------------------------------------------------------------------------
@@ -174,7 +173,7 @@ recorder (polling, buffering, stalls), the device's clock (offset, drift), the d
 resynchronisations (resets, re-anchoring, frame slips) and the stamping rule (on arrival or counted, on a grid). On
 the value side: the sensor and transducer (noise, zeroing, calibration drift), filtering, scale and units, the
 converter's codes, and rounding and heaping, by a device or by hand. Each signal's own chain is on its page of the
-atlas. The model contains only what happened to the data before it was released. An atlas then runs the model
+atlas. The model contains only what happened to the data before they were released. An atlas then runs the model
 backwards, a separate step of its own (Section~\ref{sec:correct}). Steps whose parameters can be measured, such as a
 drift or a scale factor, can be undone. Steps that are many-to-one, such as rounding or a coarse grid, map a record
 back to an interval, not a point. Inverting a record therefore gives a joint distribution over its true time and
@@ -209,7 +208,7 @@ The correction's own error and the steps it cannot undo become the components of
 (Section~\ref{sec:forms}), and the correction is recorded with its evidence like any other result. Steps that are
 many-to-one stay as they are: a truncated value remains an interval, however well its time is corrected.
 
-The plethysmogram in VitalDB shows the five steps. Its offset from the ECG drifts and jumps back one frame at a
+The plethysmogram in VitalDB (the PPG, track PLETH) shows the five steps. Its offset from the ECG drifts and jumps back one frame at a
 time; each slip is found from the pulse shapes, the teeth between slips are fitted and removed, and the correction
 is tested on sawtooths injected into real recordings and against the arterial line, a second path on the ECG's
 clock (Section~\ref{sec:sync}). The tools are open and dataset-independent where they can be: physiosync fits
@@ -284,7 +283,7 @@ those of version~1 of this paper, and why.
 \begin{table}[t]
   \centering
   \small
-  \caption{Terms changed since version~1 of this paper. Version~1 described each time stamp by its accuracy and
+  \caption{Terms changed since version~1 of this paper. Version~1 described each timestamp by its accuracy and
     resolution; version~2 uses the VIM's terms, so that the atlas's numbers combine and propagate as the GUM
     intends. The atlas keeps the version~1 values on its pages, marked as superseded.}
   \label{tab:terms}
@@ -335,7 +334,7 @@ drawn, so the record's joint PDF is a mixture of two shapes in time and value to
     The PDF of the true volume for two recorded values, stacked by the way of charting that could have produced each.
     A recorded 100\,mL lies anywhere from \fact{uo.100.lo} to \fact{uo.100.hi}\,mL (95\%), and has a \fact{uo.100.fine}\%
     chance of having been read to 10\,mL or finer; a recorded 260\,mL, which only the 5 and 10\,mL readings can produce,
-    lies from \fact{uo.260.lo} to \fact{uo.260.hi}\,mL. Every step and its source: \atlaspage{worked-example-urine-output}{Worked
+    lies from \fact{uo.260.lo} to \fact{uo.260.hi}\,mL. Every step and its source are in \atlaspage{worked-example-urine-output}{Worked
     example: a rounded urine volume}.}
   \label{fig:urine}
 \end{figure}
@@ -344,7 +343,7 @@ Values drift as clocks do. A transducer's zero and gain wander between adjustmen
 drift~\citep[4.21]{jcgm-200-2012}, and each adjustment~\citep[3.11]{jcgm-200-2012}, such as a zeroing, pulls them back: the same pattern
 of drift and resynchronisation the clocks show. An atlas can describe it the same way, as a drift rate, an adjustment
 schedule and the evidence for each. The VitalDB release records no adjustments, but the atlas detects one kind made
-in theatre, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
+in the operating room, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
 
 Values are also related to one another. Some measure the same quantity by different routes: arterial pressure from
 an invasive line and from a cuff, oxygen saturation from a pulse oximeter and from a blood gas, comparisons we have
@@ -380,7 +379,7 @@ correction, Section~\ref{sec:sync}).
 \begin{figure}[t]
   \centering
   \includegraphics[width=\textwidth]{figures/fig4-bias-uncertainty.pdf}
-  \caption{Every kind of time stamp in VitalDB in its stored form: bias (stamp minus the close of the interval the value describes, against the working reference; the
+  \caption{Every kind of timestamp in VitalDB in its stored form: bias (stamp minus the close of the interval the value describes, against the working reference; the
     bar spans the 5th to 95th percentile between recordings, a spread the uncertainty also contains) against
     combined standard uncertainty.
     Left of zero, the timestamp comes before the interval it describes has closed (look-ahead): the
@@ -394,7 +393,7 @@ correction, Section~\ref{sec:sync}).
 \subsection{Evidence}
 
 Every number carries a status (measured, derived, estimated or assumed) and points to the study that produced it.
-Studies are short reports: data in aggregate, method, results, limitations and the code that ran them. Their
+Studies are short reports: data in aggregate, method, results, limitations and the code that produced them. Their
 general findings are collected as observations, each established, likely, open or withdrawn, and their unsettled
 points as open questions of five kinds: phenomena not yet explained, weakly supported hypotheses, untestable
 assumptions, conflicts between studies, and next steps. Evidence can come from the records themselves, from
@@ -407,8 +406,8 @@ version can still be traced.
 Time reaches a record through a chain of clocks: the reference, a recording computer, each device. An atlas maps
 them as a network in which each clock is measured against another, with the rate and resynchronisation schedule of each
 link. Device rates are relative, each measured against another clock that also drifts, so the network is tested by
-its loops: where two routes join the same pair of clocks, the rates around the loop should sum to zero. Treated as
-a geodetic adjustment, the misclosures flag a bad link and test whether the stated uncertainties are right. A clock
+its loops: where two routes join the same pair of clocks, the rates around the loop should sum to zero. With the
+network treated as a geodetic adjustment, the misclosures flag a bad link and test whether the stated uncertainties are right. A clock
 outside the recording, such as the mains grid, breaks the circle of relative rates and links the network to an
 outside reference.
 
@@ -441,7 +440,7 @@ variable, the part a new atlas fills in.
       not & \fact{bis.forms} forms, from as stored to corrected per recording. This one is fitted over the whole recording: offline use only \\
     Bias & Stamp minus the close of the support, against the working reference: one value or a distribution between
       recordings (median, 5th--95th percentile, number), its scope and status & Removed by the correction; as
-      stored \fact{bis.bias.exact}\,s (\fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
+      stored \fact{bis.bias}\,s (\fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
     Uncertainty & Components, each with a name, Type A or B, distribution, standard uncertainty, scope, correlation
       shape and length, and shared key; an upper-bound flag, a 95\% interval and a likely value &
       The recording's constant \fact{bis.sync.u.recording}\,ms (scope: recording); drift left by the stamp model \fact{bis.sync.u.drift}\,ms (structured,
@@ -453,7 +452,8 @@ variable, the part a new atlas fills in.
       index comes from the same source, and the BIS smoothing label is computed from it \\
     Clock domain & The domain whose drift remains, with its rate and its spread between recordings & The working
       reference: the SNUADC sample clock, on the recorder PC's timeline. Its rate is uncertain by \fact{snuadc.drift}\,ppm between
-      recordings where the SNUADC stamps carry no resynchronisations (\fact{snuadc.uncorr.share}\%) \\
+      recordings where the SNUADC stamps carry no resynchronisations (\fact{snuadc.uncorr.share}\%). The EEG's samples are
+      spaced by the BIS's own clock and its records stamped by the PC; synchronisation moves both onto the reference \\
     Evidence & Status (measured, derived, estimated, assumed), the studies behind each number, the correction and the
       code & Measured; \fact{bis.sync.studies} studies \\
     \bottomrule
@@ -480,7 +480,7 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
     Reading the stamps & Fit a device's drift and resynchronisations from its own record stamps, against the samples each
       record holds & The SNUADC and BIS stamp model \\
     One event, two clocks & Find an event that two independently clocked signals both record, and read the offset
-      from where each puts it & Electrocautery bursts in the ECG and the EEG \\
+      from where each puts it & Electrocautery and muscle bursts in the ECG and the EEG \\
     Clocks carried in the signal & Use a regular rhythm inside a signal, such as a pacemaker, an oximeter's frames or
       the mains hum, as a third clock & The mains hum, tying the recording PCs to the grid \\
     Does the waveform run on? & Test whether a waveform continues smoothly across a junction, reset or gap, to tell
@@ -560,13 +560,13 @@ machine-readable file independently and compare it with the website.
 VitalDB holds high-resolution waveforms, numerics and clinical information from \fact{vitaldb.cases} non-cardiac surgical
 cases~\citep{lee2022vitaldb,lee2022vitaldb-physionet,pollard2026physionet}. Each operating room had one computer
 running Vital Recorder~\citep{lee2018vitalrecorder}, which stamped every record from every device on arrival. A
-500\,Hz converter (SNUADC)~\citep{snuadc} samples the patient monitor's analogue outputs; the BIS monitor, the anaesthesia machine
+500\,Hz converter (SNUADC)~\citep{snuadc} samples the patient monitor's (Solar8000) analogue outputs; the bispectral index (BIS) monitor, the anaesthesia machine (Primus)
 and several haemodynamic monitors send their own waveforms and numerics on their own clocks; clinical events and
 laboratory results come from the hospital's records.
 
 The atlas describes \fact{atlas.variables} variables, \fact{atlas.clocks} clocks, \fact{atlas.links} links and \fact{atlas.devices} devices, with \fact{atlas.studies} studies (\fact{atlas.studies.current} current, the rest
 draft, open or superseded), \fact{atlas.parameters} parameters and \fact{atlas.observations} observations behind them; \fact{atlas.forms} timing forms cover the \fact{atlas.timed} variables
-with a time stamp model, and \fact{atlas.open_questions} open questions are listed. Its working reference is the SNUADC sample clock after a model of its stamps. Figure~\ref{fig:network}
+with a timestamp model, and \fact{atlas.open_questions} open questions are listed. Its working reference is the SNUADC sample clock after a model of its stamps. Figure~\ref{fig:network}
 shows the timing network (Section~\ref{sec:network}), and Table~\ref{tab:findings} the findings that most change
 how the data should be used: how the waveforms are synchronised (Section~\ref{sec:sync}), what the numerics and
 records mark (Section~\ref{sec:records}), and where the data depart from their documentation
@@ -601,16 +601,15 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
       \fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
     Synchronisation, EEG to ECG & Standard uncertainty \fact{bis.shift.uc}\,ms with a shift known in advance; \fact{bis.sync.uc}\,ms after
       per-recording synchronisation (an upper bound; \fact{bis.sync.n} recordings); \fact{bis.own.uc}\,ms with the recording's own bursts \\
-    Synchronisation, ventilator to monitor & \fact{primus.shift.uc}\,s with a shift known in advance; \fact{primus.sync.uc}\,ms after breath matching, for a
-      stretch on its right breath (an upper bound; \fact{primus.sync.n} recordings), and still a whole breath off for
+    Synchronisation, ventilator to monitor & \fact{primus.shift.uc}\,ms with a shift known in advance; \fact{primus.sync.uc}\,ms after breath matching, for a
+      stretch matched to the correct breath (an upper bound; \fact{primus.sync.n} recordings), and still a whole breath off for
       \fact{primus.sync.breath}\% of the matched time \\
     Working reference without stamp resynchronisations (\fact{snuadc.uncorr.share}\% of recordings) & Rate error \fact{snuadc.drift}\,ppm (robust SD between
       recordings); \fact{snuadc.drift.hum}\,ppm with the SNUADC rate from the mains hum, in the \fact{snuadc.uncorr.hum} such recordings with hum (median \fact{snuadc.drift.hourly}
       to \fact{snuadc.drift.hum.hourly}\,ms per hour; checked in \fact{snuadc.drift.n}) \\
     Working reference at its resynchronisations & About \fact{snuadc.reset.loss}\,ms of signal lost at each \\
-    Recording computers against the mains grid & \fact{pc.grid.multi}\,ppm median (the computer runs slow), where the
-      SNUADC's own rate is measured (two resynchronisations in one stretch); setups \fact{pc.grid.setups.min} to
-      \fact{pc.grid.setups.max}\,ppm, preliminary \\
+    Recording computers against the mains grid & \fact{pc.grid}\,ppm median (the computer runs slow); setups
+      \fact{pc.grid.setups.min} to \fact{pc.grid.setups.max}\,ppm \\
     Monitor heart rate is truncated & In \fact{hr.trunc.share}\% of \fact{hr.trunc.n} recordings; it describes its last
       \fact{hr.window} R--R intervals (\fact{hr.span}\,s at the median rate) \\
     The CO$_2$ waveform trails the breath & \fact{co2.line}\,s median (interquartile range \fact{co2.line.q1}--\fact{co2.line.q3}\,s; \fact{co2.line.n} recordings):
@@ -630,7 +629,7 @@ One link reaches outside the recording. The SNUADC waveforms carry the mains hum
 recordings, and because the grid is regulated, the hum is a clock: it gives the converter's rate where the stamps
 cannot, in about \fact{snuadc.hum.rate.share}\% of the release, as the electrical network frequency dates recordings in audio
 forensics~\citep{grigoras2005enf}. It gives rates, not absolute times. The recording computers were synchronised to
-UTC(KRIS) by hand, at irregular times and without logs~\citep{kriss-utck}, and their offset from UTC is not observed in
+UTC(KRIS)~\citep{kriss-utck} by hand, at irregular times and without logs, and their offset from UTC is not observed in
 the release.
 
 The network is tested by its loops. Each device's rate is measured against another clock, so around any loop of links
@@ -651,9 +650,10 @@ uncertainty.
   \centering
   \includegraphics[width=0.92\textwidth]{figures/fig6-corrected-uncertainty.pdf}
   \caption{Standard uncertainty after correction. For each signal with a per-recording timing form: its standard
-    uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; $\leq$
+    uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; hollow and
+    solid here mark before and after, not status as in Figure~\ref{fig:bias}; $\leq$
     marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after
-    breath matching, the uncertainty is for stretches on their right breath; \fact{primus.sync.breath}\% of the matched time
+    breath matching, the uncertainty is for stretches matched to the correct breath; \fact{primus.sync.breath}\% of the matched time
     is still a whole breath off (Table~\ref{tab:findings}). Drawn from the atlas file.}
   \label{fig:corrected}
 \end{figure}
@@ -692,7 +692,8 @@ then waits for the recorder's poll (Figure~\ref{fig:concept}). The other polled 
 
 Records made by people or by other systems carry their own timing. A laboratory value is stamped at the specimen,
 between the draw and the result; the draw itself can be placed within the arterial-line access it came from, found in
-the arterial pressure waveform, typically \fact{lab.access.width}\,s long. Values charted by hand carry the charter's
+the arterial pressure waveform. For a blood gas the access lasts a median of \fact{lab.access.width}\,s (10th--90th
+percentile \fact{lab.access.p10}--\fact{lab.access.p90}\,s). Values charted by hand carry the charter's
 rounding (Figure~\ref{fig:urine}).
 
 \subsection{Where the data depart from their documentation}
@@ -713,10 +714,10 @@ dataset; most would be found in any multi-device recording examined this closely
     \midrule
     SNUADC converter resolution & 12-bit & \fact{snuadc.bits}-bit codes in every channel, from a 10-bit converter in the public
       firmware~\citep{snuadc} \\
-    Primus CO\textsubscript{2} gain & 0.1 & \fact{primus.co2.gain} \\
+    Primus CO\textsubscript{2} gain & 0.1\,mmHg per code & \fact{primus.co2.gain}\,mmHg per code \\
     Primus airway pressure continuity & Continuous & About \fact{primus.pause}\,s lost every \fact{primus.period}\,s, in \fact{primus.pause.n} recordings \\
-    Laboratory time stamp & Commonly taken as the result time & The specimen's time: blood gases a median \fact{lab.bg.lag}\,min
-      after the draw (10th--90th percentile \fact{lab.bg.lag.p10}--\fact{lab.bg.lag.p90}), central-lab panels about
+    Laboratory timestamp & Commonly taken as the result time & The specimen's time: blood gases a median \fact{lab.bg.lag}\,min
+      after the draw (10th--90th percentile \fact{lab.bg.lag.p10}--\fact{lab.bg.lag.p90}\,min), central-lab panels about
       \fact{lab.central.lag}\,min; the result came later, by an unrecorded turnaround \\
     Operation end & Charted & Set 10\,min before the recording end in \fact{opend.imputed} cases (\fact{opend.imputed.share}\%) \\
     \bottomrule
@@ -730,15 +731,15 @@ dataset; most would be found in any multi-device recording examined this closely
 An atlas is read on its website or loaded by analysis code. For combining signals, its planner takes any set of
 signals' timing forms. For each pair it gives the standard uncertainty of the
 difference between their times, $\sqrt{u_a^2 + u_b^2 - 2\,\mathrm{cov}}$, where the covariance is the sum of the
-products of the components with the same shared key; shared errors cancel. From the largest pair it gives the finest useful shared time grid and, from the clock domains'
+products of the components with the same shared key; shared errors cancel. From the pair with the largest uncertainty it gives the finest useful shared time grid and, from the clock domains'
 drift rates and their spread between recordings, how long a window can be before drift adds another standard
 deviation. A switch restricts the forms to those usable in real time. The planner never shifts a signal silently:
 it says which shift each form needs and in which direction.
 
 An atlas is also compact enough to give an AI assistant as context. Given the VitalDB atlas file alone, an
 assistant answered a researcher's question about synchronising the ECG, the BIS EEG and the end-tidal CO$_2$, naming
-the atlas item behind each claim and saying where the atlas is silent; checked claim by claim, every number traced
-to the atlas, and the exchange found four problems in the atlas itself, since fixed. The question, the answer and
+the atlas item behind each claim and saying where the atlas is silent. The answer was checked claim by claim, and every number traced
+to the atlas; the exchange found four problems in the atlas itself, since fixed. The question, the answer and
 the check are in the supplementary material.
 
 % ---------------------------------------------------------------------------
@@ -750,7 +751,7 @@ public firmware of one device and the recording software's rules for stamping th
 are known in detail, the model can rest more on the chain itself. The chain to UTC rests on the computers'
 synchronisation to UTC(KRIS), made by hand with no logs kept, and on rates through the mains hum; no offset from UTC is observed, so absolute times
 are not traceable. Population results describe the release, not any one
-recording; a per-setup or per-recording estimate is given where the data support one. The value side is described by
+recording; a per-setup or per-recording estimate is given where the data allow one. The value side is described by
 resolution and rounding, not by calibration. The devices' calibration and maintenance records are not part of the
 release; with them, an atlas could carry each device's drift in value and its calibration schedule as it carries
 the clocks' drift and resynchronisations, and future work may add them. Several results are

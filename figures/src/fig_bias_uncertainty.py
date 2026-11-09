@@ -44,18 +44,32 @@ for vid, v in V.items():
             continue
         if f["kind"] == "as_stored" and (not raw or f["name"].startswith("raw stamps")):   # the stored stamps, where stated
             name = f["name"].removeprefix("raw stamps").lstrip(", ")
-            rows.append((v["name"] + ("" if name in ("as stamped", "as recorded", "") else f" ({name})"), v["type"], f))
+            # the form's name only where it adds to the variable's (not "Blood gas lab timestamp (lab timestamp)")
+            if name in ("as stamped", "as recorded", "") or name.lower() in v["name"].lower():
+                name = ""
+            rows.append((v["name"], name, v["type"], f))
+
+
+def label(bases, suffix):
+    """Joined names share one bracket: "Arterial pressure, ECG lead II (SNUADC, frequent-correction mode)"."""
+    tag = "SNUADC" if any(b.endswith(" (SNUADC)") for b in bases) else ""
+    names = ", ".join(b.removesuffix(" (SNUADC)") for b in bases)
+    inside = ", ".join(x for x in (tag, suffix) if x)
+    return names + (f" ({inside})" if inside else "")
+
+
 uniq = []
-for r in sorted(rows, key=lambda r: r[2]["u_c"]):
-    key = (r[2]["id"], round(r[2]["bias"]["mid"], 4), round(r[2]["u_c"], 4))
-    hit = next((u for u in uniq if u[3] == key), None)
+for base, suffix, typ, f in sorted(rows, key=lambda r: r[3]["u_c"]):
+    key = (f["id"], round(f["bias"]["mid"], 4), round(f["u_c"], 4))
+    hit = next((u for u in uniq if u[3] == key and u[5] == suffix), None)
     if hit:
-        hit[0] = hit[0].replace(" (SNUADC)", "") + ", " + r[0]
+        hit[4].append(base)
+        hit[0] = label(hit[4], suffix)
         continue
-    uniq.append([r[0], r[1], r[2], key])
+    uniq.append([label([base], suffix), typ, f, key, [base], suffix])
 fig, ax = plt.subplots(figsize=(6.32, 4.9))  # drawn at the text width, so type prints at its stated size
 fig.subplots_adjust(left=0.12, right=0.98, top=0.98, bottom=0.27)
-for i, (label, typ, f, _) in enumerate(uniq):
+for i, (lab_, typ, f, *_) in enumerate(uniq):
     b, c = f["bias"], COL.get(typ, "#888")
     measured = f["status"] == "measured"
     ax.plot([b["lo"], b["hi"]], [f["u_c"]] * 2, color=c, lw=1.4, alpha=0.6, solid_capstyle="butt")
@@ -87,13 +101,13 @@ yt = [1e-3, 1e-2, 1e-1, 1, 10, 60, 600, 3600, 86400]
 ax.set_yticks(yt); ax.set_yticklabels(["1 ms", "10 ms", "100 ms", "1 s", "10 s", "1 min", "10 min", "1 h", "1 d"])
 ax.axvline(0, color=INK, lw=1.3, zorder=1)
 ax.axvspan(-3, 0, color="#f3e7e1", alpha=0.5, lw=0)
-ax.text(-2.6, 1.5e4, "stamp before the\nvalue could exist\n(look-ahead)", fontsize=6.5, color=MUTED, va="top")
+ax.text(-2.6, 1.5e4, "timestamp before\nthe value could exist\n(look-ahead)", fontsize=6.5, color=MUTED, va="top")
 ax.xaxis.set_minor_locator(matplotlib.ticker.SymmetricalLogLocator(linthresh=1e-3, base=10, subs=range(2, 10)))
 ax.yaxis.set_minor_locator(matplotlib.ticker.LogLocator(base=10, subs=range(2, 10)))
 ax.tick_params(which="minor", length=2, color=GRID)
 ax.grid(which="major", color=GRID, lw=0.7); ax.grid(which="minor", color=GRID, lw=0.35, alpha=0.7); ax.set_axisbelow(True)
 for s_ in ("top", "right"): ax.spines[s_].set_visible(False)
-ax.set_xlabel("Bias: stamp minus the end of the interval the value describes (p5–p95 between recordings)")
+ax.set_xlabel("Bias: timestamp minus the close of the interval the value describes (p5–p95 between recordings)")
 ax.set_ylabel("Standard uncertainty (1 SD)")
 for typ in ("waveform", "numeric", "event"):
     ax.plot([], [], "o", color=COL[typ], label=NAME[typ])

@@ -1,8 +1,8 @@
-generated: '2026-11-08'
+generated: '2026-11-09'
 atlas:
   file: built from metrology-atlas
-  sha256: abdb719722b7038464fca812738949feaa99f81825c006d67d7512d2589dbcbe
-  commit: 61d7540
+  sha256: e6fdd03b7fa0162359aab6655893c4c8cf6798b8ca1a303069a20db3822c5b09
+  commit: fc6abf8
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -267,11 +267,11 @@ facts:
     source: device bis tracks EEG1_WAV step
     definition: value grid of the BIS EEG
   primus.shift.uc:
-    value: 0.7634160071677827
-    display: '0.76'
-    unit: s
+    value: 763.4160071677827
+    display: '760'
+    unit: ms
     status: measured
-    source: primus-awp/primus-shift components (combined)
+    source: primus-awp/primus-shift components (combined), in ms
     definition: combined standard uncertainty with a shift known in advance
   primus.sync.uc:
     value: 77.6860991426394
@@ -602,6 +602,20 @@ facts:
     source: parameter lab-access-length
     definition: median length of the arterial-line access matched to a blood gas
     n: 4742
+  lab.access.p10:
+    value: 28
+    display: '28'
+    unit: s
+    status: measured
+    source: parameter lab-access-length spread.p10
+    definition: p10 of the length of the arterial-line access matched to a blood gas
+  lab.access.p90:
+    value: 115
+    display: '115'
+    unit: s
+    status: measured
+    source: parameter lab-access-length spread.p90
+    definition: p90 of the length of the arterial-line access matched to a blood gas
   pleth.delay:
     value: 0.385
     display: '0.385'
@@ -685,25 +699,26 @@ facts:
     status: measured
     source: parameter co2-sampling-line-lag spread.n
     definition: n
-  pc.grid.multi:
-    value: -14.0
-    display: $-$14
+  pc.grid:
+    value: -12.6
+    display: $-$13
     unit: ppm
     status: measured
-    source: parameter pc-grid-rate-multi
-    definition: Rate of the recorder PC against the mains grid in recordings whose
-      SNUADC rate comes from at least one whole tooth (two stamp corrections in one
-      stretch).
+    source: parameter pc-grid-rate
+    definition: How fast the recorder PC runs against the grid (f_PC − f_grid), per
+      recording, through the SNUADC hum, where the SNUADC's own rate is known (from
+      the recording's whole teeth or its setup's).
+    n: 898
   pc.grid.setups.min:
-    value: -24.8
-    display: $-$25
+    value: -57.2
+    display: $-$57
     unit: ppm
     status: measured
     source: parameter pc-grid-rate-setups spread.min
     definition: lowest setup median
   pc.grid.setups.max:
-    value: -3.3
-    display: $-$3
+    value: 7.4
+    display: $+$7
     unit: ppm
     status: measured
     source: parameter pc-grid-rate-setups spread.max

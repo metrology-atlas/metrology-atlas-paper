@@ -167,7 +167,7 @@ def main():
 
     # ---- Primus
     u = uc("primus-awp", "primus-shift")
-    fact("primus.shift.uc", u, num(u, 2), "s", "primus-awp/primus-shift components (combined)",
+    fact("primus.shift.uc", u * 1000, num(round(u * 1000, -1)), "ms", "primus-awp/primus-shift components (combined), in ms",
          "combined standard uncertainty with a shift known in advance")
     u = uc_core("primus-awp", "primus-sync") * 1000
     fact("primus.sync.uc", u, num(u), "ms", "primus-awp/primus-sync components without the mixture (combined)",
@@ -266,6 +266,9 @@ def main():
     p = P["lab-access-length"]
     fact("lab.access.width", p["value"], num(p["value"]), "s", "parameter lab-access-length",
          "median length of the arterial-line access matched to a blood gas", n=p["spread"]["n"])
+    for q in ("p10", "p90"):
+        fact(f"lab.access.{q}", p["spread"][q], num(p["spread"][q]), "s", f"parameter lab-access-length spread.{q}",
+             f"{q} of the length of the arterial-line access matched to a blood gas")
     # ---- ECG and plethysmogram: the system's offset
     p = P["pleth-chain-delay"]
     fact("pleth.delay", p["value"] / 1000, num(p["value"] / 1000, 3), "s", "parameter pleth-chain-delay",
@@ -298,8 +301,8 @@ def main():
              f"parameter co2-sampling-line-lag spread.{k}", k)
 
     # ---- mains hum and the working reference
-    fact("pc.grid.multi", P["pc-grid-rate-multi"]["value"], num(P["pc-grid-rate-multi"]["value"], sign=True), "ppm",
-         "parameter pc-grid-rate-multi", P["pc-grid-rate-multi"]["quantity"])
+    fact("pc.grid", P["pc-grid-rate"]["value"], num(P["pc-grid-rate"]["value"], sign=True), "ppm",
+         "parameter pc-grid-rate", P["pc-grid-rate"]["quantity"], n=P["pc-grid-rate"]["spread"]["n"])
     # pc-grid-rate-single was withdrawn on 9 Nov 2026 (a line fit through one step, not a rate): no fact
     s = P["pc-grid-rate-setups"]["spread"]
     fact("pc.grid.setups.min", s["min"], num(s["min"], sign=True), "ppm", "parameter pc-grid-rate-setups spread.min",
