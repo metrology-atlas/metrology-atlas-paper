@@ -1,8 +1,8 @@
 generated: '2026-11-09'
 atlas:
   file: built from metrology-atlas
-  sha256: 45e7617639ea1b9068bf91f903effb234a6540e9cc4cfbe720c75eba5d4eb066
-  commit: 7762f91
+  sha256: bf51880716c4acce901d2980fffe3d1794ebfa7c07bc4dcc9b59f3242ffbb5ca
+  commit: a4ee927
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 129
-    display: '129'
+    value: 131
+    display: '131'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -168,6 +168,22 @@ facts:
     status: measured
     source: bis-eeg/bis-sync removes_bias_s.n
     definition: recordings
+  bis.recorder.sub:
+    value: 1.0
+    display: '1'
+    unit: s
+    status: documented
+    source: parameter bis-recorder-subtraction (minus)
+    definition: the time Vital Recorder subtracts from a BIS packet's arrival to stamp
+      it
+  bis.arrival:
+    value: 0.2
+    display: '0.2'
+    unit: s
+    status: estimated
+    source: parameter bis-packet-arrival-delay
+    definition: Time from a BIS EEG packet's first sample to its arrival at the recorder,
+      on the working reference.
   bis.sync.uc:
     value: 58.6694128145152
     display: '59'

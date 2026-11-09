@@ -138,6 +138,12 @@ def main():
     fact("bis.bias.p5", b["p5"], num(b["p5"], 2), "s", "bis-eeg/bis-sync removes_bias_s.p5", "5th percentile")
     fact("bis.bias.p95", b["p95"], num(b["p95"], 2), "s", "bis-eeg/bis-sync removes_bias_s.p95", "95th percentile")
     fact("bis.bias.n", b["n"], num(b["n"]), "recordings", "bis-eeg/bis-sync removes_bias_s.n", "recordings")
+    p = P["bis-recorder-subtraction"]
+    fact("bis.recorder.sub", -p["value"], num(-p["value"]), "s", "parameter bis-recorder-subtraction (minus)",
+         "the time Vital Recorder subtracts from a BIS packet's arrival to stamp it", status=p["status"])
+    p = P["bis-packet-arrival-delay"]
+    fact("bis.arrival", p["value"], num(p["value"], 1), "s", "parameter bis-packet-arrival-delay", p["quantity"],
+         status=p["status"])
     for fid, key in (("bis-sync", "sync"), ("bis-own", "own"), ("bis-shift", "shift")):
         u = uc("bis-eeg", fid) * 1000
         fact(f"bis.{key}.uc", u, num(u), "ms", f"bis-eeg/{fid} components (combined)",

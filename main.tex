@@ -384,8 +384,9 @@ correction, Section~\ref{sec:sync}).
     bar spans the 5th to 95th percentile between recordings, a spread the uncertainty also contains) against
     combined standard uncertainty.
     Left of zero, the timestamp comes before the interval it describes has closed (look-ahead): the
-    ventilator's airway pressure because the recorder anchors each stretch of samples too early; the EEG for a reason
-    not yet known, either early EEG timestamps or a late reference. Waveform samples sit at milliseconds; numerics
+    ventilator's airway pressure because the recorder anchors each stretch of samples too early; the EEG because the
+    recorder stamps each packet of EEG at its arrival minus a fixed \fact{bis.recorder.sub}\,s, though a packet arrives
+    only about \fact{bis.arrival}\,s after its first sample. Waveform samples sit at milliseconds; numerics
     describe windows of seconds that closed seconds earlier; records and hand-entered times span minutes to days.
     Solid markers measured, hollow estimated or assumed. Drawn from the atlas file.}
   \label{fig:bias}
@@ -666,8 +667,10 @@ and jumps back one frame at a time: a sawtooth hidden inside a signal that looks
 spread of finger minus arterial pulse arrival time from \fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms, tested
 against the arterial line, a second path on the ECG's clock that carries no sawtooth.
 
-\emph{The EEG.} The BIS monitor stamps its EEG \fact{bis.bias.early}\,s before the ECG shows the same event, so its
-stamps look ahead. Electrocautery and muscle bursts, which both signals record, synchronise them to
+\emph{The EEG.} The BIS EEG's timestamps come \fact{bis.bias.early}\,s before the ECG shows the same event, so
+they look ahead. The cause is a rule in the recorder, not in the monitor: it stamps each packet of EEG at its arrival
+minus a fixed \fact{bis.recorder.sub}\,s, and a packet arrives only about \fact{bis.arrival}\,s after its first
+sample, so the timestamps are set early by about the difference. Electrocautery and muscle bursts, which both signals record, synchronise them to
 \fact{bis.sync.uc}\,ms (an upper bound), or \fact{bis.own.uc}\,ms with each recording's own bursts.
 
 \emph{The ventilator.} The anaesthesia machine sends its airway pressure in stretches, each anchored too early, so its
