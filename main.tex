@@ -679,12 +679,17 @@ pressure, synchronises them to \fact{primus.sync.uc}\,ms, but a periodic signal 
 \fact{primus.sync.breath}\% of the matched time is still a whole breath out. The atlas states that as a share, not
 folded into a standard deviation.
 
-\emph{The reference itself.} Even the working reference is not a perfect clock. The recorder resynchronises the SNUADC in
-one of two modes. In step mode it lets the timestamps drift and pulls them back by about \fact{snuadc.step.size}\,s every
-\fact{snuadc.step.period}\,h, and about \fact{snuadc.reset.loss}\,ms of signal is lost at each resynchronisation; in
-frequent-correction mode it keeps them close with small forward steps. In the \fact{snuadc.uncorr.share}\% of
-recordings where it does neither, the converter runs at its own rate, known only to \fact{snuadc.drift}\,ppm between
-recordings.
+\emph{The reference itself.} Even the working reference is not a perfect clock. The recorder counts the SNUADC's
+samples from an anchor taken at their arrival, and at every read compares the count with its own clock. One rule then
+gives two behaviours, depending on the converter. A converter that runs fast gains on the recorder until it is
+\fact{snuadc.ahead}\,s ahead; the recorder then discards the samples just read, about \fact{snuadc.reset.loss}\,ms of
+signal, and starts the count again, so the timestamps drift and are pulled back by about \fact{snuadc.step.size}\,s
+every \fact{snuadc.step.period}\,h (step mode). A converter that runs slow falls behind and is filled with blank
+samples at each read, so its timestamps keep close with small forward steps (frequent-correction mode). In the
+\fact{snuadc.uncorr.share}\% of recordings with neither, a fast converter never gained \fact{snuadc.ahead}\,s; its
+rate is known only to \fact{snuadc.drift}\,ppm between recordings, though that \fact{snuadc.ahead}\,s bounds it.
+Because the count is kept up to the latest arrivals, the reference itself is probably late on true time by close to
+the largest delay from the converter to the recorder, which moves every absolute delay against it and no relative one.
 
 \subsection{Numerics and records}
 \label{sec:records}

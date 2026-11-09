@@ -141,6 +141,9 @@ def main():
     p = P["bis-recorder-subtraction"]
     fact("bis.recorder.sub", -p["value"], num(-p["value"]), "s", "parameter bis-recorder-subtraction (minus)",
          "the time Vital Recorder subtracts from a BIS packet's arrival to stamp it", status=p["status"])
+    p = P["snuadc-ahead-threshold"]
+    fact("snuadc.ahead", p["value"], num(p["value"], 1), "s", "parameter snuadc-ahead-threshold", p["quantity"],
+         status=p["status"])
     p = P["bis-packet-arrival-delay"]
     fact("bis.arrival", p["value"], num(p["value"], 1), "s", "parameter bis-packet-arrival-delay", p["quantity"],
          status=p["status"])

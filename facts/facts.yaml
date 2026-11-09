@@ -1,8 +1,8 @@
 generated: '2026-11-09'
 atlas:
   file: built from metrology-atlas
-  sha256: bf51880716c4acce901d2980fffe3d1794ebfa7c07bc4dcc9b59f3242ffbb5ca
-  commit: a4ee927
+  sha256: e06f771f9da7013a83ff495989b09a8232f0152eba5337cf7a812707fea946a0
+  commit: 13a3b10
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 131
-    display: '131'
+    value: 132
+    display: '132'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -176,6 +176,15 @@ facts:
     source: parameter bis-recorder-subtraction (minus)
     definition: the time Vital Recorder subtracts from a BIS packet's arrival to stamp
       it
+  snuadc.ahead:
+    value: 0.5
+    display: '0.5'
+    unit: s
+    status: documented
+    source: parameter snuadc-ahead-threshold
+    definition: How far the SNUADC sample count may run ahead of the recorder's clock
+      before Vital Recorder discards the block just read and re-anchors the count
+      at arrival.
   bis.arrival:
     value: 0.2
     display: '0.2'
