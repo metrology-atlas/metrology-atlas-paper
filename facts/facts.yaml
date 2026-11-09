@@ -1,8 +1,8 @@
 generated: '2026-11-09'
 atlas:
   file: built from metrology-atlas
-  sha256: a5ee4c906950748aa13266691367ec286eeab086c4c5524632c8ccfafb92131f
-  commit: a0151ba
+  sha256: 45e7617639ea1b9068bf91f903effb234a6540e9cc4cfbe720c75eba5d4eb066
+  commit: 7762f91
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -169,15 +169,15 @@ facts:
     source: bis-eeg/bis-sync removes_bias_s.n
     definition: recordings
   bis.sync.uc:
-    value: 59.36008760101353
+    value: 58.6694128145152
     display: '59'
     unit: ms
     status: measured
     source: bis-eeg/bis-sync components (combined)
     definition: combined standard uncertainty, form bis-sync
   bis.own.uc:
-    value: 26.79888057363591
-    display: '27'
+    value: 25.503921267130668
+    display: '26'
     unit: ms
     status: measured
     source: bis-eeg/bis-own components (combined)
@@ -190,15 +190,15 @@ facts:
     source: bis-eeg/bis-shift components (combined)
     definition: combined standard uncertainty, form bis-shift
   bis.sync.u.recording:
-    value: 54.800000000000004
-    display: '55'
+    value: 54.5
+    display: '54'
     unit: ms
     status: measured
     source: bis-eeg/bis-sync uncertainty.components[0]
     definition: the recording's constant against its SNUADC mode's
   bis.sync.u.drift:
-    value: 22.700000000000003
-    display: '23'
+    value: 21.6
+    display: '22'
     unit: ms
     status: measured
     source: bis-eeg/bis-sync uncertainty.components[1]
@@ -211,22 +211,22 @@ facts:
     source: bis-eeg/bis-sync uncertainty.components[2]
     definition: sample or stamp grid
   bis.sync.length:
-    value: 7.25
+    value: 7.1
     display: '7'
     unit: min
     status: measured
     source: bis-eeg/bis-sync uncertainty.components[1].length_s
     definition: correlation length of the drift left by the stamp model
   bis.sync.i95.lo:
-    value: -0.227
-    display: $-$227
+    value: -0.195
+    display: $-$195
     unit: ms
     status: measured
     source: bis-eeg/bis-sync interval95_s
     definition: 95% interval, lower
   bis.sync.i95.hi:
-    value: 0.165
-    display: $+$165
+    value: 0.163
+    display: $+$163
     unit: ms
     status: measured
     source: bis-eeg/bis-sync interval95_s
@@ -253,8 +253,8 @@ facts:
     source: bis-eeg/bis-sync studies
     definition: studies behind the form
   bis.sync.n:
-    value: 2716
-    display: 2,716
+    value: 2717
+    display: 2,717
     unit: recordings
     status: measured
     source: parameter stamp-model-error spread.n
