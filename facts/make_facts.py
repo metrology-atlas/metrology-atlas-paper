@@ -312,6 +312,13 @@ def main():
     # ---- mains hum and the working reference
     fact("pc.grid", P["pc-grid-rate"]["value"], num(P["pc-grid-rate"]["value"], sign=True), "ppm",
          "parameter pc-grid-rate", P["pc-grid-rate"]["quantity"], n=P["pc-grid-rate"]["spread"]["n"])
+    o = P["pc-utc-offset"]
+    fact("pc.utc.offset", o["value"], num(o["value"], 2), "s", "parameter pc-utc-offset", o["quantity"],
+         status=o["status"])
+    h = o["value"] / abs(P["pc-grid-rate"]["value"] * 1e-6) / 3600
+    fact("pc.utc.offset.h", h, num(h), "h", "parameter pc-utc-offset / |parameter pc-grid-rate|",
+         "hours of running at the median PC rate in which the recorder drifts pc.utc.offset from the server time",
+         status="derived")
     # pc-grid-rate-single was withdrawn on 9 Nov 2026 (a line fit through one step, not a rate): no fact
     s = P["pc-grid-rate-setups"]["spread"]
     fact("pc.grid.setups.min", s["min"], num(s["min"], sign=True), "ppm", "parameter pc-grid-rate-setups spread.min",

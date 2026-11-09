@@ -1,8 +1,8 @@
 generated: '2026-11-09'
 atlas:
   file: built from metrology-atlas
-  sha256: e06f771f9da7013a83ff495989b09a8232f0152eba5337cf7a812707fea946a0
-  commit: 13a3b10
+  sha256: d27d93f8d77a6d45aa32931c022027f8b438fceba4703270f510a76d0c537342
+  commit: a7014f6
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -734,6 +734,21 @@ facts:
       recording, through the SNUADC hum, where the SNUADC's own rate is known (from
       the recording's whole teeth or its setup's).
     n: 898
+  pc.utc.offset:
+    value: 0.23
+    display: '0.23'
+    unit: s
+    status: estimated
+    source: parameter pc-utc-offset
+    definition: How far the recorder's time may sit from UTC at any moment.
+  pc.utc.offset.h:
+    value: 5.070546737213404
+    display: '5'
+    unit: h
+    status: derived
+    source: parameter pc-utc-offset / |parameter pc-grid-rate|
+    definition: hours of running at the median PC rate in which the recorder drifts
+      pc.utc.offset from the server time
   pc.grid.setups.min:
     value: -57.2
     display: $-$57
