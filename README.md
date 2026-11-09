@@ -4,6 +4,10 @@ LaTeX source of the paper "The Metrology Atlas: describing clinical time-series 
 
 Build: `latexmk -pdf main.tex` (pdflatex + BibTeX).
 
+Review copy (a red note under the date; the normal build has none):
+`latexmk -pdf -jobname=review -pdflatex="pdflatex %O '\def\draftnote{Draft for co-authors, DATE. Not for circulation.}\input{%S}'" main.tex`
+writes `review.pdf`; keep shared copies in `review/` (git-ignored).
+
 Numbers: every number in the paper that describes the dataset is a `\fact{id}`, defined in `facts/facts.tex`.
 `python facts/make_facts.py --resolution ../vitaldb/vitaldb-resolution` regenerates `facts/facts.tex` and
 `facts/facts.yaml` from the atlas file (built from `../metrology-atlas`, or pass the file's path); the YAML records
