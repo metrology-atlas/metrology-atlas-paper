@@ -1,8 +1,8 @@
-generated: '2026-11-09'
+generated: '2026-11-10'
 atlas:
   file: built from metrology-atlas
-  sha256: d27d93f8d77a6d45aa32931c022027f8b438fceba4703270f510a76d0c537342
-  commit: a7014f6
+  sha256: ad6437d662d5407d12ca711bb2ac44e9d495af452f65e622dd0e0e9d9dca92de
+  commit: ce34a1b
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -358,6 +358,13 @@ facts:
     status: measured
     source: device primus tracks CO2 corrected_gain
     definition: corrected gain of the CO2 waveform
+  primus.co2.gain.kpa:
+    value: 0.009999173401665463
+    display: '0.01'
+    unit: kPa/code
+    status: derived
+    source: device primus tracks CO2 corrected_gain / 7.50062
+    definition: corrected gain of the CO2 waveform in kPa per code
   hr.trunc.share:
     value: 98.6
     display: '98.6'

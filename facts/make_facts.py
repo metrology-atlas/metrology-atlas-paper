@@ -199,6 +199,9 @@ def main():
     gain = next(t for t in J["devices"]["primus"]["tracks"] if t["track"] == "CO2" and t.get("corrected_gain"))
     fact("primus.co2.gain", gain["corrected_gain"], f"{gain['corrected_gain']:g}", "mmHg/code",
          "device primus tracks CO2 corrected_gain", "corrected gain of the CO2 waveform")
+    kpa = gain["corrected_gain"] / 7.50062            # mmHg per kPa
+    fact("primus.co2.gain.kpa", kpa, f"{kpa:.2f}", "kPa/code", "device primus tracks CO2 corrected_gain / 7.50062",
+         "corrected gain of the CO2 waveform in kPa per code", status="derived")
 
     # ---- heart rate and ECG
     p = P["hr-truncation-share"]
