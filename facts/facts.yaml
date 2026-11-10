@@ -1,8 +1,8 @@
 generated: '2026-11-10'
 atlas:
   file: built from metrology-atlas
-  sha256: ad6437d662d5407d12ca711bb2ac44e9d495af452f65e622dd0e0e9d9dca92de
-  commit: ce34a1b
+  sha256: 4942971e75d32e300e7d7ad0d8f254e43eb50a4c7cb1cce2b9552091e56b77dd
+  commit: 73d3a0c
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -292,7 +292,7 @@ facts:
     source: device bis tracks EEG1_WAV step
     definition: value grid of the BIS EEG
   primus.shift.uc:
-    value: 763.4160071677827
+    value: 756.066134673416
     display: '760'
     unit: ms
     status: measured
@@ -307,8 +307,8 @@ facts:
     definition: combined standard uncertainty after breath matching, for a stretch
       on its right breath
   primus.sync.breath:
-    value: 12.4
-    display: '12.4'
+    value: 12.2
+    display: '12.2'
     unit: '%'
     status: estimated
     source: parameter primus-breath-error-share
@@ -366,8 +366,8 @@ facts:
     source: device primus tracks CO2 corrected_gain / 7.50062
     definition: corrected gain of the CO2 waveform in kPa per code
   hr.trunc.share:
-    value: 98.6
-    display: '98.6'
+    value: 98.8
+    display: '98.8'
     unit: '%'
     status: measured
     source: parameter hr-truncation-share
@@ -390,28 +390,28 @@ facts:
     source: solar8000-hr/hr-lab support_s
     definition: support of the HR
   hr.lab.n:
-    value: 6233
-    display: 6,233
+    value: 6232
+    display: 6,232
     unit: recordings
     status: measured
     source: solar8000-hr/hr-lab removes_bias_s.n
     definition: recordings with a label
   hr.groups.n:
-    value: 5999
-    display: 5,999
+    value: 6011
+    display: 6,011
     unit: recordings
     status: measured
     source: parameters hr-delay-early + hr-delay-late spread.n
     definition: recordings assigned to a delay group
   hr.groups.none:
-    value: 234
-    display: '234'
+    value: 221
+    display: '221'
     unit: recordings
     status: derived
     source: hr.lab.n minus hr.groups.n
     definition: labelled recordings not assigned to a group
   hr.label.u:
-    value: 0.219
+    value: 0.218
     display: '0.22'
     unit: s
     status: measured
@@ -468,16 +468,16 @@ facts:
       of it, at which an interval still enters the Solar8000 heart rate's mean (best
       fit).
   hr.early.d:
-    value: 1.88
-    display: '1.88'
+    value: 1.89
+    display: '1.89'
     unit: s
     status: measured
     source: parameter hr-delay-early
     definition: Delay from the end of the HR window to its stamp, in the early group
       of cases.
-    n: 2228
+    n: 2253
   hr.early.share:
-    value: 37.139523253875645
+    value: 37.481284312094495
     display: '37'
     unit: '%'
     status: derived
@@ -492,16 +492,16 @@ facts:
     source: parameter hr-delay-late
     definition: Delay from the end of the HR window to its stamp, in the late group
       of cases.
-    n: 3771
+    n: 3758
   hr.late.share:
-    value: 62.860476746124355
+    value: 62.518715687905505
     display: '63'
     unit: '%'
     status: derived
     source: parameters hr-delay-early, hr-delay-late spread.n
     definition: share of the recordings assigned to a group that are in the late group
   hr.groups.gap:
-    value: 2.29
+    value: 2.2800000000000002
     display: '2.3'
     unit: s
     status: derived
