@@ -7,6 +7,7 @@
 *.fls
 *.synctex.gz
 *.toc
+*.tmp
 main.pdf
 arxiv/
 figures/*_preview.png
