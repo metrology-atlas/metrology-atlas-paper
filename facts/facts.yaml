@@ -1,8 +1,8 @@
-generated: '2026-11-10'
+generated: '2026-11-11'
 atlas:
   file: built from metrology-atlas
-  sha256: 4942971e75d32e300e7d7ad0d8f254e43eb50a4c7cb1cce2b9552091e56b77dd
-  commit: 73d3a0c
+  sha256: 3370e313374697cd58018c7451e964201de2d918a154cec6bbd238420a1afc47
+  commit: a3b23da
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -76,8 +76,8 @@ facts:
     source: 'atlas file: variables[].timing'
     definition: variables with timing forms
   atlas.open_questions:
-    value: 136
-    display: '136'
+    value: 137
+    display: '137'
     unit: questions
     status: measured
     source: 'atlas file: studies, examples open_questions'
@@ -871,8 +871,8 @@ facts:
     definition: Share of BIS-SNUADC-PC loops whose misclosure is more than three stated
       standard errors.
   loop.solar.bis:
-    value: 4.11
-    display: $+$4.1
+    value: 10.35
+    display: $+$10.3
     unit: ppm
     status: measured
     source: parameter loop-solar-bis-misclosure
@@ -887,29 +887,29 @@ facts:
     source: parameter loop-solar-bis-misclosure spread.n
     definition: loops
   loop.vf.min:
-    value: 1.97
+    value: 1.95
     display: '2'
     unit: ''
     status: measured
     source: parameter loop-variance-factor spread.min
     definition: smallest variance factor
   loop.vf.max:
-    value: 6.84
-    display: '6.8'
+    value: 7.77
+    display: '7.8'
     unit: ''
     status: measured
     source: parameter loop-variance-factor spread.max
     definition: largest variance factor
   loop.se.min:
-    value: 1.40356688476182
+    value: 1.396424004376894
     display: '1.4'
     unit: ''
     status: derived
     source: sqrt of loop-variance-factor spread.min
     definition: factor by which standard errors are too small
   loop.se.max:
-    value: 2.615339366124404
-    display: '2.6'
+    value: 2.787471972953271
+    display: '2.8'
     unit: ''
     status: derived
     source: sqrt of loop-variance-factor spread.max
