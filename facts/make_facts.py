@@ -209,7 +209,7 @@ def main():
     fact("hr.trunc.n", p["spread"]["n"], num(p["spread"]["n"]), "recordings", "parameter hr-truncation-share spread.n",
          "recordings")
     lo, hi = form("solar8000-hr", "hr-lab")["support_s"]
-    fact("hr.support", [lo, hi], f"{lo:g}--{hi:g}", "s", "solar8000-hr/hr-lab support_s", "support of the HR")
+    fact("hr.support", [lo, hi], f"{lo:.1f}--{hi:.1f}", "s", "solar8000-hr/hr-lab support_s", "support of the HR")
     nlab = form("solar8000-hr", "hr-lab")["removes_bias_s"]["n"]
     fact("hr.lab.n", nlab, num(nlab), "recordings", "solar8000-hr/hr-lab removes_bias_s.n", "recordings with a label")
     ng = P["hr-delay-early"]["spread"]["n"] + P["hr-delay-late"]["spread"]["n"]
