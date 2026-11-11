@@ -607,8 +607,9 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
       stretch matched to the correct breath (an upper bound; \fact{primus.sync.n} recordings), and still a whole breath off for
       \fact{primus.sync.breath}\% of the matched time \\
     Working reference without stamp resynchronisations (\fact{snuadc.uncorr.share}\% of recordings) & Rate error \fact{snuadc.drift}\,ppm (robust SD between
-      recordings); \fact{snuadc.drift.hum}\,ppm with the SNUADC rate from the mains hum, in the \fact{snuadc.uncorr.hum} such recordings with hum (median \fact{snuadc.drift.hourly}
-      to \fact{snuadc.drift.hum.hourly}\,ms per hour; checked in \fact{snuadc.drift.n}) \\
+      recordings; median \fact{snuadc.drift.hourly}\,ms per hour; checked in \fact{snuadc.drift.n}); the mains hum, in the
+      \fact{snuadc.uncorr.hum} such recordings with hum, does not narrow it further (\fact{snuadc.drift.hum}\,ppm), though it
+      trims the tail \\
     Working reference at its resynchronisations & About \fact{snuadc.reset.loss}\,ms of signal lost at each \\
     Recording computers against the mains grid & \fact{pc.grid}\,ppm median (the computer runs slow); setups
       \fact{pc.grid.setups.min} to \fact{pc.grid.setups.max}\,ppm \\
@@ -628,8 +629,9 @@ minus the other's for the same event, and that alone caught an error: in version
 lost, and the planner shifted the EEG the wrong way.
 
 One link reaches outside the recording. The SNUADC waveforms carry the mains hum in \fact{snuadc.hum.share}\% of
-recordings, and because the grid is regulated, the hum is a clock: it gives the converter's rate where the stamps
-cannot, in about \fact{snuadc.hum.rate.share}\% of the release, as the electrical network frequency dates recordings in audio
+recordings, and because the grid is regulated, the hum is a clock: it measures the converter's rate independently
+where the stamps carry no correction, in about \fact{snuadc.hum.rate.share}\% of the release (no more closely than the
+stamp model, \fact{snuadc.drift.hum} against \fact{snuadc.drift}\,ppm), as the electrical network frequency dates recordings in audio
 forensics~\citep{grigoras2005enf}. It gives rates, not absolute times. The recorder takes its time from the VitalDB server each time it starts and then counts on
 the computer's hardware timer, which runs \fact{pc.grid}\,ppm against the grid, so between starts it drifts from the
 server's time by about \fact{pc.utc.offset}\,s every \fact{pc.utc.offset.h}\,h. Its offset from UTC is not observed in

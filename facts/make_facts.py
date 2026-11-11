@@ -342,7 +342,7 @@ def main():
                      ("snuadc.drift.hourly", "snuadc-uncorrected-drift-hourly"),
                      ("snuadc.drift.hum.hourly", "snuadc-uncorrected-drift-hum-hourly")):
         p = P[pid]
-        fact(fid, p["value"], num(p["value"]), p["unit"], f"parameter {pid}", p["quantity"], p["spread"]["n"])
+        fact(fid, p["value"], num(p["value"], 1 if abs(p["value"]) < 10 else 0), p["unit"], f"parameter {pid}", p["quantity"], p["spread"]["n"])
     n = P["snuadc-uncorrected-drift"]["spread"]["n"]
     fact("snuadc.drift.n", n, num(n), "recordings", "parameter snuadc-uncorrected-drift spread.n",
          "recordings in the BIS check")

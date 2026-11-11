@@ -1,8 +1,8 @@
 generated: '2026-11-11'
 atlas:
   file: built from metrology-atlas
-  sha256: 3370e313374697cd58018c7451e964201de2d918a154cec6bbd238420a1afc47
-  commit: a3b23da
+  sha256: d52729aafb054147f2fc59737164c7b1801412681e9ab886f49d107054f8e332
+  commit: 093b206
   schema: metrology-atlas/0.4
 facts:
   atlas.variables:
@@ -803,46 +803,47 @@ facts:
     definition: share of the release whose SNUADC rate comes from the mains hum (Section
       4.1)
   snuadc.drift:
-    value: 31.3
-    display: '31'
+    value: 9.5
+    display: '9.5'
     unit: ppm
     status: measured
     source: parameter snuadc-uncorrected-drift
-    definition: Error of the SNUADC rate the stamp model uses in recordings without
-      stamp corrections, against the BIS-checked drift (zero-centred robust SD over
-      recordings).
-    n: 224
+    definition: 'Error of the SNUADC rate the stamp model uses in recordings without
+      stamp corrections (model5: the setup''s or port''s rate, capped so the count
+      gains under 0.5 s per stretch), against the BIS-checked drift (zero-centred
+      robust SD over recordings).'
+    n: 223
   snuadc.drift.hum:
-    value: 12.8
-    display: '13'
+    value: 12.0
+    display: '12'
     unit: ppm
     status: measured
     source: parameter snuadc-uncorrected-drift-hum
     definition: Error of the SNUADC rate from the mains hum in recordings without
       stamp corrections, against the BIS-checked drift (zero-centred robust SD over
       recordings).
-    n: 224
+    n: 223
   snuadc.drift.hourly:
-    value: 76
-    display: '76'
+    value: 23
+    display: '23'
     unit: ms/h
     status: measured
     source: parameter snuadc-uncorrected-drift-hourly
-    definition: Median absolute drift per hour of the working reference on the port's
-      assumed SNUADC rate, in recordings without stamp corrections.
-    n: 224
+    definition: Median absolute drift per hour of the working reference on the stamp
+      model's SNUADC rate (model5), in recordings without stamp corrections.
+    n: 223
   snuadc.drift.hum.hourly:
-    value: 31
-    display: '31'
+    value: 29
+    display: '29'
     unit: ms/h
     status: measured
     source: parameter snuadc-uncorrected-drift-hum-hourly
     definition: Median absolute drift per hour of the working reference on the hum
       rate, in recordings without stamp corrections.
-    n: 224
+    n: 223
   snuadc.drift.n:
-    value: 224
-    display: '224'
+    value: 223
+    display: '223'
     unit: recordings
     status: measured
     source: parameter snuadc-uncorrected-drift spread.n
