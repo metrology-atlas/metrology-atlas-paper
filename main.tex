@@ -721,23 +721,30 @@ how far its correction reduces the uncertainty.
 \subsection{Numerics and records}
 \label{sec:records}
 
-Monitor numerics describe windows of signal, not instants. The Solar8000's heart rate is computed from the mean of its last
-\fact{hr.window} R--R intervals, leaving out outliers, and truncated; its support is therefore its last \fact{hr.window} beats,
-whose length in seconds changes with the rate. It is ready a delay after the window closes, a delay that falls in one of two groups of recordings, and
-then waits for the recorder's poll (Figure~\ref{fig:concept}). The other polled numerics wait in the same way.
+Monitor numerics describe windows of signal rather than instants. For example, the heart rate reported by the
+Solar8000 monitor is computed from the mean of its last \fact{hr.window} R--R intervals, after outliers have been
+excluded, and the result is truncated, that is, rounded down to a whole number of beats per minute. The support of
+each value is therefore the \fact{hr.window} R--R intervals that ended when the monitor computed it, and the length of
+this support in seconds changes with the heart rate. The value then reaches the recorder after a delay, which falls
+into one of two groups of recordings, and waits for the recorder's next poll before it is stamped
+(Figure~\ref{fig:concept}). The support therefore ends a delay and a poll wait before the stamp, and it is this
+interval that the atlas measures. The other numerics polled by the recorder wait in the same way.
 
-Records made by people or by other systems carry their own timing. A laboratory value is stamped at the specimen,
-between the draw and the result; the draw itself can be placed within the arterial-line access it came from, found in
-the arterial pressure waveform. For a blood gas the access lasts a median of \fact{lab.access.width}\,s (10th--90th
-percentile \fact{lab.access.p10}--\fact{lab.access.p90}\,s). Values charted by hand carry the charter's
-rounding (Figure~\ref{fig:urine}).
+Records made by people, or by other hospital systems, carry their own timing. A laboratory value is stamped when its
+specimen was logged: when the specimen was registered at the central laboratory, or entered from the blood-gas
+analyser in theatre. This time falls after the blood was drawn, and before the result was available. The draw itself
+can be located more precisely, within the access of the arterial line that the blood was taken from, which can be
+found in the arterial pressure waveform. For a blood gas, this access lasts a median of \fact{lab.access.width}\,s
+(10th--90th percentile \fact{lab.access.p10}--\fact{lab.access.p90}\,s). Values that are charted by hand carry the
+rounding applied by the person who charted them (Figure~\ref{fig:urine}).
 
 \subsection{Where the data depart from their documentation}
 \label{sec:departures}
 
-The atlas also documents issues that differ from VitalDB's documentation or from common assumptions
-(Table~\ref{tab:quality}). None is a criticism of VitalDB, which remains the most detailed open intraoperative
-dataset; most would be found in any multi-device recording examined this closely.
+The atlas also documents issues where the data differ from VitalDB's documentation, or from common assumptions about
+the data (Table~\ref{tab:quality}). None of these issues is a criticism of VitalDB, which remains one of the most
+detailed open intraoperative datasets available. Most of them would be found in any multi-device recording that was
+examined this closely.
 
 \begin{table}[tp]
   \centering
