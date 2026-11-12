@@ -330,42 +330,55 @@ the headline, labelled an upper bound, and beside it, where a second independent
 \subsection{Correcting what can be measured}
 \label{sec:correct}
 
-A correction undoes a step of the record's making whose size is known. That knowledge comes from one of two places.
-It can come from outside the record: the vendor's documentation, a device's firmware, a published bench test, or the
-recording software's rules for stamping. Or it can be measured from the record itself, when the dataset's own signals
-show the step. Either way the correction is an estimate with an uncertainty of its own, so an atlas treats it as a
-measurement. Measuring a correction from the record takes five steps. First, find the step: a pattern in the data that the documented model
-does not explain, such as an offset between two signals that grows slowly and collapses at intervals (a drift and
-its resynchronisations), or values that fall on fewer levels than the converter should give. Second, measure it
-from the dataset's own records, with a model of the step: here, the rate of the drift and the time of each
-resynchronisation, fitted for each recording against the working reference. Third, undo it, applying the inverse
-of the step to the stamps or the values. Fourth, test it: on data the fit did not use, on known errors injected
-into real recordings, and against a second, independent reference where one exists. Fifth, state what remains.
-The correction's own error and the steps it cannot undo become the components of the corrected form's uncertainty
-(Section~\ref{sec:forms}), and the correction is recorded with its evidence like any other result. Steps that are
-many-to-one stay as they are: a truncated value remains an interval, however well its time is corrected.
+A correction undoes a step in the making of a record whose size is known. This knowledge can come from one of two
+places. It may come from outside the record, for example from the vendor's documentation, a device's firmware, a
+published bench test, or the rules the recording software uses to stamp its data. Alternatively, it may be measured
+from the record itself, when the dataset's own signals reveal the step. In either case the correction is an estimate
+with an uncertainty of its own, so an atlas treats it as a measurement.
 
-We developed the tools and kept them dataset-independent where we could: physiosync fits
-drifts, resynchronisations and frame slips from times and samples a caller supplies; vitaldb-reader reads the
-release at native resolution with each correction as a separate, versioned step; and vitaldb-bench holds the
-studies that measured and tested each correction (\url{https://github.com/metrology-atlas}). Each study names
-the code and version it used, so a correction can be rerun, or replaced by a better one. Section~\ref{sec:sync}
-works through one correction, of the plethysmogram, step by step.
+Measuring a correction from the record involves five steps. The first step is to find the problem, by identifying a
+pattern in the data that the documented model does not explain. Examples include an offset between two signals that
+grows slowly and collapses at intervals, which indicates a drift and its resynchronisations, or values that fall on
+fewer levels than the converter should produce. The second step is to measure the problem from the dataset's own
+records, using a model of the step. In the case of a drift, this means fitting the rate of the drift and the time of
+each resynchronisation for each recording, against the working reference. The third step is to undo it, by applying
+the inverse of the step to the stamps or the values. The fourth step is to test the correction, using data the fit
+did not use, known errors injected into real recordings, and a second, independent reference where one exists. The
+fifth and final step is to state what remains. The correction's own error, and any steps it cannot undo, become
+components of the uncertainty of the corrected form (Section~\ref{sec:forms}), and the correction is recorded with its
+evidence like any other result. Note that steps that are many-to-one cannot be undone, and remain as intervals that are
+carried into the uncertainty. For example, no correction can recover where within a clock tick an event fell, or
+whether a heart rate recorded as 72\,bpm by a monitor that truncates was 72.1 or 72.9\,bpm.
+
+We developed the tools used in this work, and kept them independent of any particular dataset where we could. The
+physiosync package fits drifts, resynchronisations and frame slips from times and samples supplied by the user. The
+vitaldb-reader package reads the VitalDB release at its native resolution, and applies each correction as a separate,
+versioned step. The vitaldb-bench repository holds the studies that measured and tested each correction
+(\url{https://github.com/metrology-atlas}). Each study records the code and version it used, so that a correction can
+be rerun, or replaced by a better one. Section~\ref{sec:sync} works through one of these corrections, for the
+plethysmogram, step by step.
 
 \subsection{The value side}
 
-The same structure describes values. A value has a native resolution~\citep{jcgm-200-2012} and a rule that
-mapped the true value onto it: rounding to the nearest step, truncation, or heaping by hand to round numbers.
-Truncation is a bias as well as a spread: a monitor that truncates records half a step low on average. Where a
-value's resolution is a mixture, as with hand-charted volumes or a test that two analysers report differently, the
-distribution of the true value is a mixture too~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}.
-Figure~\ref{fig:urine} shows such a mixture. Intraoperative urine output is a total charted by
-hand: a recorded volume may have been read to 5 or 10\,mL or rounded to 50 or 100\,mL, and which of these happened is
-not recorded. The atlas's value model separates the rounding from the volumes, so each recorded value maps back to a
-PDF of its own: wide for a round number, narrow for one that can only have been read finely. Time and value can also
-depend on each other. A laboratory haematocrit of 35\% means 34.5--35.5\% if a blood-gas analyser measured it and
-34.95--35.05\% if the central laboratory did, and the analyser also sets how long before the stamp the blood was
-drawn, so the record's joint PDF is a mixture of two shapes in time and value together
+The same approach can be applied to the recorded values. Every value has a native resolution~\citep{jcgm-200-2012},
+and some rule was used to map the true value onto it. For example, the value may have been rounded to the nearest
+step, truncated, or rounded by hand to a convenient number, a practice known as heaping. Truncation introduces a bias
+as well as a spread, because a monitor that truncates its output will, on average, record values half a step below
+the true value. In some cases the resolution of a variable differs from one value to the next, and the record does not say which
+resolution applies. For example, volumes charted by hand may be read to the nearest few millilitres or rounded to a
+convenient number, and the same laboratory test may be reported to different resolutions by two analysers. We
+describe such data as having \emph{mixed resolution}. For mixed-resolution data, the distribution of the true value
+is a mixture of distributions, one for each resolution that could have produced the recorded
+value~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}. An example of such a mixture
+is shown in Figure~\ref{fig:urine}. Intraoperative urine output is a total that is charted by hand. A recorded volume
+may have been read to the nearest 5 or 10\,mL, or rounded to 50 or 100\,mL, and the record does not say which. The
+value model in the atlas separates the rounding from the volumes, so that each recorded value maps back to its own
+PDF. This PDF is wide for a round number, and narrow for a value that can only have been read finely.
+
+The time and the value of a record can also depend on each other. For example, a laboratory haematocrit of 35\% means
+34.5--35.5\% if it was measured by a blood-gas analyser, but 34.95--35.05\% if it was measured by the central
+laboratory. The analyser also determines how long before the stamp the blood was drawn. As a result, the joint PDF of
+the record is a mixture of two shapes, in time and value together
 (\atlaspage{worked-example-record-pdf}{Worked example: a record as a PDF}).
 
 \begin{figure}[tp]
@@ -383,38 +396,44 @@ drawn, so the record's joint PDF is a mixture of two shapes in time and value to
   \label{fig:urine}
 \end{figure}
 
-Values drift as clocks do. A transducer's zero and gain wander between adjustments, the instrument's drift, and each adjustment, such as a zeroing, pulls them back~\citep{jcgm-200-2012}: the same pattern
-of drift and resynchronisation the clocks show. An atlas describes it the same way, as a drift rate, an adjustment
-schedule and the evidence for each.
+Values can drift in the same way that clocks do. The zero and gain of a transducer wander between adjustments, which
+is known as instrumental drift, and each adjustment, such as zeroing the transducer, pulls them
+back~\citep{jcgm-200-2012}. This is the same pattern of drift and resynchronisation that is seen in clocks, and an
+atlas describes it in the same way, using a drift rate, an adjustment schedule, and the evidence for each.
 
-Values are also related to one another. Some measure the same quantity by different routes: arterial pressure from
-an invasive line and from a cuff, oxygen saturation from a pulse oximeter and from a blood gas, comparisons we have
-quantified before~\citep{goodwin2021blood,eytan2019revisiting}. Others are derived from other values, in one of two
-ways: computed from data the dataset stores, as a length of stay is from two dates, or computed inside a device from
-a signal the dataset also records, as a monitor computes its heart rate from the ECG it exports. A model can also
-\emph{estimate} a quantity it never measures, as when arterial pressure is estimated from the ECG and the
-plethysmogram; its uncertainty then includes the model's own error, which only validation against a reference
-measurement gives. An atlas records these relations explicitly: what each variable measures or estimates, which
-variables it was derived from and how, and the algorithm, code and version behind it. Along each derivation it
-carries what the inputs imply. A derived value describes at least the intervals its inputs describe. Its uncertainty follows by the law of
-propagation~\citep{jcgm-100-2008}, with the covariance of errors its inputs share, or, for a value defined
-by code, from the study that measured it. Features derived for machine learning are values like any other, so the
-atlas describes the variables never measured directly from the patient as fully as those that were, and a feature
-store can take them from it as this paper takes its numbers (Section~\ref{sec:system}). In the VitalDB atlas,
-\fact{atlas.measured} variables measure \fact{atlas.measurands} measurands of value (the time of each record is the other), and \fact{atlas.derived} are derived
-from others.
+Values are also related to one another. Some variables measure the same quantity by different routes. For example,
+arterial pressure can be measured with an invasive line or with a cuff, and oxygen saturation with a pulse oximeter
+or a blood-gas analyser. We have quantified comparisons of this kind
+previously~\citep{goodwin2021blood,eytan2019revisiting}. Other variables are derived from other values, in one of two
+ways. They may be computed from data stored in the dataset, as a length of stay is computed from two dates, or
+computed inside a device from a signal that the dataset also records, as a monitor computes its heart rate from the
+ECG it exports. A model can also \emph{estimate} a quantity that it never measures, for example when arterial pressure
+is estimated from the ECG and the plethysmogram. The uncertainty of such an estimate includes the model's own error,
+which can only be determined by validation against a reference measurement.
+
+An atlas records these relationships explicitly, including what each variable measures or estimates, which variables
+it was derived from and how, and the algorithm, code and version behind it. Along each derivation, the atlas carries
+forward what the inputs imply. A derived value describes at least the intervals its inputs describe. Its uncertainty
+follows from the law of propagation of uncertainty~\citep{jcgm-100-2008}, including the covariance of any errors its
+inputs share, or, for a value defined by code, from the study that measured it. Features derived for machine learning
+are treated in the same way as any other value. The atlas therefore describes variables that were never measured
+directly from the patient as fully as those that were, and a feature store can draw them from the atlas in the same
+way that this paper draws its numbers (Section~\ref{sec:system}). In the VitalDB atlas, \fact{atlas.measured}
+variables measure \fact{atlas.measurands} measurands of value (the time of each record is the other measurand), and
+\fact{atlas.derived} variables are derived from others.
 
 \subsection{Forms of the times}
 \label{sec:forms}
 
-A signal's times can be used in more than one form, and an atlas states each of them. There are three kinds, and a signal may have more than one form of a kind. The first
-is the stamps as stored. The second shifts the stored timestamps by an amount known in advance, such as the median delay
-across the release. Because that shift is fixed before the recording's own data arrive, this form can be used in real time. The
-third applies a correction fitted to each recording separately. That correction is estimated from the whole
-recording, including data recorded after the values it corrects, so it cannot be used in real time: a corrected time
-is available only once the recording has ended. Each form has its own bias and uncertainty, so a user can choose the
-form that suits the analysis and see what that choice costs (Figure~\ref{fig:bias}; for the uncertainty left after
-correction, Section~\ref{sec:sync}).
+The times of a signal can be used in more than one form, and an atlas states each of them. There are three kinds of
+form, and a signal may have more than one form of each kind. The first kind is the stamps as stored. The second kind
+shifts the stored timestamps by an amount known in advance, such as the median delay across the release. Because this
+shift is fixed before the recording's own data arrive, this form can be used in real time. The third kind applies a
+correction fitted to each recording separately. This correction is estimated from the whole recording, including data
+recorded after the values it corrects, so it cannot be used in real time; a corrected time is only available once the
+recording has ended. Each form has its own bias and uncertainty, so a user can choose the form that suits their
+analysis and see what that choice costs (Figure~\ref{fig:bias}; the uncertainty left after correction is described in
+Section~\ref{sec:sync}).
 
 \begin{figure}[t]
   \centering
