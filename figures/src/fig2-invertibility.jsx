@@ -32,7 +32,7 @@ export default () => {
     <g>{step(s4, rowT, true)}{two(s4 + SW / 2, rowT, 'Stamp', 'grid')}</g>
     <g>{step(s1, rowV, true)}{two(s1 + SW / 2, rowV, 'Sensor', 'error')}</g>
     <g>{step(s2, rowV, false)}{two(s2 + SW / 2, rowV, 'Scale', 'factor')}</g>
-    <g>{step(s3, rowV, true)}{two(s3 + SW / 2, rowV, 'Converter', 'codes')}</g>
+    <g>{step(s3, rowV, true)}{two(s3 + SW / 2, rowV, 'Quantisation', '(A/D steps)')}</g>
     <g>{step(s4, rowV, true)}{two(s4 + SW / 2, rowV, 'Rounding,', 'heaping')}</g>
     <g>{end(e5, rowT, false)}{two(e5 + EW / 2, rowT, 'Recorded', 'time stamp', true)}</g>
     <g>{end(e5, rowV, false)}{two(e5 + EW / 2, rowV, 'Recorded', 'value', true)}</g>
@@ -40,7 +40,7 @@ export default () => {
     <text x='24' y='240' fontSize='11.5' fill={quiet}>What the atlas does: the correction, from the recorded pair back towards the truth</text>
     <g>{end(e5, rowC, false)}{two(e5 + EW / 2, rowC, 'Recorded', 'pair', true)}</g>
     {fixbox(384, 208, 'Undo the measured steps', 'delay, drift,', 'resynchronisations, scale')}
-    {fixbox(160, 208, 'Carry the rest', 'as an interval or a spread:', 'grid, codes, rounding')}
+    {fixbox(160, 208, 'Carry the rest', 'as an interval or a spread:', 'grid, quantisation, rounding')}
     <g>{end(e0, rowC, true)}{two(e0 + EW / 2, rowC, 'Corrected', 'pair', true)}</g>
     <g fill='none' stroke={fix} strokeWidth='1.5'>
       <path d={`M${e5 - 1} ${rowC}H${593}`} markerEnd='url(#inv-fix)'/>

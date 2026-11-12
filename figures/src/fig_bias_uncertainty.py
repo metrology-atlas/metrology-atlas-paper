@@ -101,7 +101,7 @@ yt = [1e-3, 1e-2, 1e-1, 1, 10, 60, 600, 3600, 86400]
 ax.set_yticks(yt); ax.set_yticklabels(["1 ms", "10 ms", "100 ms", "1 s", "10 s", "1 min", "10 min", "1 h", "1 d"])
 ax.axvline(0, color=INK, lw=1.3, zorder=1)
 ax.axvspan(-3, 0, color="#f3e7e1", alpha=0.5, lw=0)
-ax.text(-2.6, 1.5e4, "timestamp before\nthe value could exist\n(look-ahead)", fontsize=6.5, color=MUTED, va="top")
+ax.text(-2.6, 1.5e4, "timestamp before\nthe interval it\ndescribes has closed", fontsize=6.5, color=MUTED, va="top")
 ax.xaxis.set_minor_locator(matplotlib.ticker.SymmetricalLogLocator(linthresh=1e-3, base=10, subs=range(2, 10)))
 ax.yaxis.set_minor_locator(matplotlib.ticker.LogLocator(base=10, subs=range(2, 10)))
 ax.tick_params(which="minor", length=2, color=GRID)

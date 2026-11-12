@@ -60,14 +60,13 @@ Vocabulary of Metrology and the Guide to the Expression of Uncertainty in Measur
 states its measurement model; the interval of time each value describes; the bias of its time and value, and the
 distribution of the error that remains, summarised by its standard uncertainty; which errors are shared with other
 signals; and the evidence behind each number, marked as measured, derived, estimated or assumed. It also records how variables relate, what each measures and which it was
-derived from, so that derived features carry their inputs' uncertainty and availability. A schema and an engine, independent of any dataset, check an atlas and
+derived from, so that derived features carry their inputs' uncertainty. A schema and an engine, independent of any dataset, check an atlas and
 publish it as a website and a single machine-readable file, and the atlas is revised as evidence comes in. Our
 first application, to VitalDB (\fact{vitaldb.cases} surgical cases), reconstructs the timing of a multi-device recording
 system largely from its own records: \fact{atlas.variables} variables from \fact{atlas.devices} devices on \fact{atlas.clocks} clocks, joined into one timing network by
-\fact{atlas.studies.current} current studies. With open tools, it corrects the synchronisation between devices to a stated uncertainty, ties the recording's
+\fact{atlas.studies.current} analyses of its own records, each saved with the code that ran it. With open-source tools we developed, it corrects the synchronisation between devices to a stated uncertainty, ties the recording's
 clock rates to an outside reference through the mains hum, and documents where the data depart from their documentation.
-An atlas can be read, loaded by analysis code, or given to an AI assistant as
-compact, checkable context for planning a study. The approach will be applied to further datasets.
+An atlas can be read on its website or loaded by analysis code as a single file.
 \end{abstract}
 
 % ---------------------------------------------------------------------------
@@ -88,9 +87,10 @@ monitor that rounds down (truncates) could be anything from 72 up to, but not in
 and it describes the last \fact{hr.window} R--R intervals of ECG, which ended a variable delay before its stamp,
 plus a wait for the recorder's next poll. A laboratory haematocrit of 35\% means (35$\pm$0.5)\% or (35$\pm$0.05)\% depending on
 which analyser made it, which the record does not say, and the blood was drawn minutes before the stamp, by an
-amount that also depends on the analyser. Before correction these shapes are uniform, bimodal, mixed and skewed, and few are Gaussian; for one record, the
-atlas narrows each to what is known about that record, by measuring and undoing the steps of the record's
-making that can be undone (Section~\ref{sec:correct}).
+amount that also depends on the analyser. What is known about the true time and value behind each of these records has a shape of its own:
+uniform for a truncated heart rate, a mixture of two for the haematocrit, skewed for a delay. Few of these shapes are
+Gaussian. Some of the steps that made a record can be measured and undone, which narrows its shape; the rest remain
+as an interval or a spread (Section~\ref{sec:correct}).
 
 \begin{figure}[tp]
   \centering
@@ -147,14 +147,14 @@ VitalDB~\citep{lee2022vitaldb}, to show what it finds. Its contributions are:
   \item a way to describe each variable of a recorded dataset by its measurement model, the interval each value
     describes, its bias and uncertainty with their correlation structure, and its evidence
     (Section~\ref{sec:approach});
-  \item a method, with open tools, for correcting what can be measured: finding each step of the record's making
+  \item a method, with open-source tools we developed, for correcting what can be measured: finding each step of the record's making
     that can be undone, such as a clock's drift and resynchronisations, measuring it from the dataset's own records,
     undoing it, testing the result and stating the uncertainty that remains (Section~\ref{sec:correct});
   \item a dataset-independent schema and engine that check an atlas and publish it as a website and one
     machine-readable file, revised as evidence comes in (Section~\ref{sec:system});
-  \item a first atlas, of VitalDB, with \fact{atlas.studies.current} current studies behind it (Section~\ref{sec:vitaldb});
-  \item two ways to use an atlas beyond reading it: a planner for combining signals (Section~\ref{sec:use}), and
-    labels that carry when each value could first be known (Section~\ref{sec:system}).
+  \item a first atlas, of VitalDB, with \fact{atlas.studies.current} analyses behind it (Section~\ref{sec:vitaldb});
+  \item a planner that, for any set of signals, gives the uncertainty of their relative timing and the finest
+    time grid on which they can be combined (Section~\ref{sec:use}).
 \end{itemize}
 The detail lives in the atlas, at \atlasurl; this paper quotes its numbers and points to it. The numbers are
 VitalDB's, measured on its devices and recording setup. They show the kinds of error the approach describes, not
@@ -172,7 +172,7 @@ record was made. It runs forward, from the true time and value to the recorded p
 recorder (polling, buffering, stalls), the device's clock (offset, drift), the device's or recorder's
 resynchronisations (resets, re-anchoring, frame slips) and the stamping rule (on arrival or counted, on a grid). On
 the value side: the sensor and transducer (noise, zeroing, calibration drift), filtering, scale and units, the
-converter's codes, and rounding and heaping, by a device or by hand. Each signal's own chain is on its page of the
+quantisation by the analogue-to-digital converter (the finite set of levels it can output), and rounding and heaping, by a device or by hand. Each signal's own chain is on its page of the
 atlas. The model contains only what happened to the data before they were released. An atlas then runs the model
 backwards, a separate step of its own (Section~\ref{sec:correct}). Steps whose parameters can be measured, such as a
 drift or a scale factor, can be undone. Steps that are many-to-one, such as rounding or a coarse grid, map a record
@@ -186,7 +186,7 @@ value, which can be propagated through any later calculation~\citep{jcgm-101-200
     from the true time and value to the recorded pair. The boxes are examples of the kinds of step listed in
     Section~\ref{sec:approach}; each signal's own chain is on its page of the atlas. Steps whose parameters can be
     measured (delay, drift, resynchronisations, scale factors) can be undone; steps that are many-to-one or random
-    (the stamp grid, converter codes, rounding and heaping, sensor noise) cannot be undone for a single value. Bottom
+    (the stamp grid, quantisation, rounding and heaping, sensor noise) cannot be undone for a single value. Bottom
     row: the atlas's correction (Section~\ref{sec:correct}), which undoes the measured steps and carries the rest as
     an interval or a spread, so a corrected pair is a joint PDF with its own, smaller, error model. The window a
     value describes is part of the measurand, not an error.}
@@ -196,10 +196,13 @@ value, which can be propagated through any later calculation~\citep{jcgm-101-200
 \subsection{Correcting what can be measured}
 \label{sec:correct}
 
-A correction is not read from the record. It is an estimate made from the record, so an atlas treats it as a
-measurement in its own right, in five steps. First, find the step: a pattern in the data that the documented model
+A correction undoes a step of the record's making whose size is known. That knowledge comes from one of two places.
+It can come from outside the record: the vendor's documentation, a device's firmware, a published bench test, or the
+recording software's rules for stamping. Or it can be measured from the record itself, when the dataset's own signals
+show the step. Either way the correction is an estimate with an uncertainty of its own, so an atlas treats it as a
+measurement. Measuring a correction from the record takes five steps. First, find the step: a pattern in the data that the documented model
 does not explain, such as an offset between two signals that grows slowly and collapses at intervals (a drift and
-its resynchronisations), or values that fall on fewer codes than the converter should give. Second, measure it
+its resynchronisations), or values that fall on fewer levels than the converter should give. Second, measure it
 from the dataset's own records, with a model of the step: here, the rate of the drift and the time of each
 resynchronisation, fitted for each recording against the working reference. Third, undo it, applying the inverse
 of the step to the stamps or the values. Fourth, test it: on data the fit did not use, on known errors injected
@@ -208,14 +211,12 @@ The correction's own error and the steps it cannot undo become the components of
 (Section~\ref{sec:forms}), and the correction is recorded with its evidence like any other result. Steps that are
 many-to-one stay as they are: a truncated value remains an interval, however well its time is corrected.
 
-The plethysmogram in VitalDB (the PPG, track PLETH) shows the five steps. Its offset from the ECG drifts and jumps back one frame at a
-time; each slip is found from the pulse shapes, the teeth between slips are fitted and removed, and the correction
-is tested on sawtooths injected into real recordings and against the arterial line, a second path on the ECG's
-clock (Section~\ref{sec:sync}). The tools are open and dataset-independent where they can be: physiosync fits
+We developed the tools and kept them dataset-independent where we could: physiosync fits
 drifts, resynchronisations and frame slips from times and samples a caller supplies; vitaldb-reader reads the
 release at native resolution with each correction as a separate, versioned step; and vitaldb-bench holds the
 studies that measured and tested each correction (\url{https://github.com/metrology-atlas}). Each study names
-the code and version it used, so a correction can be rerun, or replaced by a better one.
+the code and version it used, so a correction can be rerun, or replaced by a better one. Section~\ref{sec:sync}
+works through one correction, of the plethysmogram, step by step.
 
 \subsection{The interval each value describes}
 
@@ -231,23 +232,12 @@ that millisecond, as a recorded 72\,bpm places the heart rate only within 72 to 
 as a component of the time's uncertainty, with a uniform probability density over the tick, not as part of the
 support: no timestamp locates the support more finely than one tick of its clock.
 
-Two times then matter. A value \emph{describes} its support, and by convention its time is the support's close
-(close-stamping). It becomes \emph{available} at or after that close: its \emph{availability time} is the earliest
-moment at which it could have been produced in real time, once every input it depends on has arrived. The
-difference is an \emph{honest lag}, the processing, buffering or analysis between the close of the support and the
-moment the value exists: seconds for a monitor's numeric, an unrecorded turnaround for a laboratory result. An atlas
-states both. The \emph{bias} of a stamp is the stamp minus the close of the support. A
-negative bias means the stamp comes before the interval it describes has closed. That is look-ahead: real if the
-value was computed from later data, apparent if the reference the bias is measured against is itself late. Between two signals we write
-\emph{offset}: the relative bias of their timestamps, one signal's bias minus the other's, negative when the first
-signal's timestamps are early. It contains no physiology: a pulse reaching the finger after the R peak is part of what the two
-signals measure, not of the offset between them. A
-non-negative bias does not make a value safe to use at its timestamp: a timestamp after the support's close can
-still come before the availability time, and only the availability time says when the value can be used. The
-\emph{availability rule} is that no value may be used before its availability time. It is judged at the
-\emph{reference time}, the instant at which a model is taken to act. Both times are read on one clock, which in an
-atlas is the working reference. Breaking the rule leaks information from the future into a model built on the
-data~\citep{kaufman2012leakage}.
+A value \emph{describes} its support, and by convention its time is the support's close (close-stamping). The
+\emph{bias} of a stamp is the stamp minus the close of the support. A negative bias means the stamp comes before the
+interval it describes has closed: the value was computed from later data, or the reference the bias is measured
+against is itself late. Between two signals we write \emph{offset}: the relative bias of their timestamps, one
+signal's bias minus the other's, negative when the first signal's timestamps are early. It contains no physiology: a
+pulse reaching the finger after the R peak is part of what the two signals measure, not of the offset between them.
 
 \subsection{Bias and uncertainty}
 
@@ -354,9 +344,7 @@ a signal the dataset also records, as a monitor computes its heart rate from the
 plethysmogram; its uncertainty then includes the model's own error, which only validation against a reference
 measurement gives. An atlas records these relations explicitly: what each variable measures or estimates, which
 variables it was derived from and how, and the algorithm, code and version behind it. Along each derivation it
-carries what the inputs imply. A derived value describes at least the intervals its inputs describe and cannot be
-available before its latest input, and if any input can be known only after the fact, as a correction fitted on the
-whole recording can, so can the derived value. Its uncertainty follows by the law of
+carries what the inputs imply. A derived value describes at least the intervals its inputs describe. Its uncertainty follows by the law of
 propagation~\citep[5.1--5.2]{jcgm-100-2008}, with the covariance of errors its inputs share, or, for a value defined
 by code, from the study that measured it. Features derived for machine learning are values like any other, so the
 atlas describes the variables never measured directly from the patient as fully as those that were, and a feature
@@ -382,7 +370,7 @@ correction, Section~\ref{sec:sync}).
   \caption{Every kind of timestamp in VitalDB in its stored form: bias (stamp minus the close of the interval the value describes, against the working reference; the
     bar spans the 5th to 95th percentile between recordings, a spread the uncertainty also contains) against
     combined standard uncertainty.
-    Left of zero, the timestamp comes before the interval it describes has closed (look-ahead): the
+    Left of zero, the timestamp comes before the interval it describes has closed: the
     ventilator's airway pressure probably because samples lost in transmission go uncounted, so every later sample
     in a stretch is stamped early; the EEG because the
     recorder stamps each packet of EEG at its arrival minus a fixed \fact{bis.recorder.sub}\,s, though a packet arrives
@@ -509,11 +497,6 @@ timing form whose bias and uncertainty do not follow the conventions of Section~
 \emph{accuracy} next to a number~\citep[2.13]{jcgm-200-2012}, and patterns the dataset forbids, such as a case
 identifier outside a deliberate link, so that no per-recording table leaves by accident. Each variable's page states its timing forms with their
 budgets, its value model, and the chain of clocks behind its stamp; each study links to the code that produced it.
-Derived results are published as time-aware labels: per-recording values, each with its span, its parameters and
-its availability time (\texttt{available\_at}). The labels are themselves variables in the atlas, derived from the
-signals they were made from, whether by an algorithm, as all of VitalDB's are, or by a person annotating them. Each
-has a timing form stamped at its availability time, and one as stored, which the engine flags as look-ahead where
-it starts before the values it depends on.
 
 Adding a study to an atlas is the system working, not a new edition. Contributions are pull requests against the folder, checked by
 the same engine. What carries over to a new dataset is the schema, the engine and its checks, the website and the
@@ -665,10 +648,35 @@ uncertainty.
 
 \emph{The plethysmogram.} The ECG and the plethysmogram are both sampled by the SNUADC, yet the plethysmogram's
 offset from the ECG is \fact{pleth.delay}\,s: a fixed delay inside the monitor, which must be removed before a pulse
-arrival time means anything. On top of it, the oximeter computes its waveform in frames on its own clock, so the offset creeps
-and jumps back one frame at a time: a sawtooth hidden inside a signal that looks continuous. Correcting it narrows the
-spread of finger minus arterial pulse arrival time from \fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms, tested
-against the arterial line, a second path on the ECG's clock that carries no sawtooth.
+arrival time means anything. On top of it sits a sawtooth, and its correction follows the five steps of
+Section~\ref{sec:correct} (Figure~\ref{fig:pleth}). The step was found in the delay from each R~peak to the pulse
+that follows it: within a recording the delay creeps slowly, then jumps by one frame of the oximeter's waveform
+(Figure~\ref{fig:pleth}a). The oximeter computes its waveform in frames on its own clock, so its clock and the
+converter's drift apart until the waveform is pulled back by a whole frame: a sawtooth hidden inside a signal that looks continuous. The step
+was measured in each recording, by finding each slip from the shapes of the pulses and fitting the creep between
+slips (Figure~\ref{fig:pleth}b), and undone by removing the fitted sawtooth (Figure~\ref{fig:pleth}c). It was
+tested in two ways. At the slips, the step of about one frame falls to close to zero (Figure~\ref{fig:pleth}d).
+Against the arterial line, a second path to the ECG's clock that carries no sawtooth, the spread of finger minus
+arterial pulse arrival time falls from \fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms (median over \fact{ppg.art.n} recordings with a sawtooth; Figure~\ref{fig:pleth}e shows one). What remains, the correction's own error
+and the frame grid it cannot undo, is the corrected form's uncertainty (Figure~\ref{fig:corrected}).
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=\textwidth]{figures/fig7-ppg-correction-steps.pdf}
+  \caption{Correcting the plethysmogram's sawtooth, step by step. (a--c) One recording (case 5328, 90 minutes):
+    the delay from each R~peak to the pulse at the finger (medians of 15 beats) as measured (blue); the same
+    delay less its slow trend (a running median of the corrected delay), with the slips found (dotted) and the fitted
+    sawtooth (black: straight teeth at the creep rate, each falling one frame before the slip that pulls it back);
+    and the corrected
+    delay (orange, at the same median), in which the slow variation that remains is physiology. (d) The step in the
+    delay across each slip, measured and corrected, in 265 recordings checked. (e) The same recording against its
+    arterial line, which carries no sawtooth: the delay from each R~peak to the arterial pulse (green), to the finger pulse as recorded (blue; it still holds the monitor's fixed delay), and to the finger
+    pulse corrected (orange: the sawtooth removed, and the monitor's fixed delay of \fact{pleth.delay}\,s, which rests
+    on an adopted arrival time at the finger, so that the orange's position is partly assumed and its width is what
+    the arterial line tests), as medians of 15 beats. Drawn from the saved outputs of the correction's checks (vitaldb-bench
+    \texttt{tools/ppg\_correction\_steps\_figure.py}).}
+  \label{fig:pleth}
+\end{figure}
 
 \emph{The EEG.} The BIS EEG's timestamps come \fact{bis.bias.early}\,s before the ECG shows the same event, so
 they look ahead. The cause is a rule in the recorder, not in the monitor: it stamps each packet of EEG at its arrival
@@ -750,12 +758,6 @@ drift rates and their spread between recordings, how long a window can be before
 deviation. A switch restricts the forms to those usable in real time. The planner never shifts a signal silently:
 it says which shift each form needs and in which direction.
 
-An atlas is also compact enough to give an AI assistant as context. Given the VitalDB atlas file alone, an
-assistant answered a researcher's question about synchronising the ECG, the BIS EEG and the end-tidal CO$_2$, naming
-the atlas item behind each claim and saying where the atlas is silent. The answer was checked claim by claim, and every number traced
-to the atlas; the exchange found four problems in the atlas itself, since fixed. The question, the answer and
-the check are in the supplementary material.
-
 % ---------------------------------------------------------------------------
 \section{Limitations and related work}
 \label{sec:limits}
@@ -788,8 +790,7 @@ GUM~\citep{jcgm-200-2012,jcgm-100-2008,jcgm-101-2008,jcgm-102-2011}, on their ap
 observations~\citep{mittaz2019metrology}, on statistical work on coarse and heaped
 data~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping} and on change of
 support~\citep{gotway2002combining}, on network time synchronisation~\citep{rfc5905}, geodetic network
-adjustment~\citep{ghilani2017adjustment} and electrical network frequency analysis~\citep{grigoras2005enf}, and on
-work on leakage in machine learning~\citep{kaufman2012leakage}. It extends earlier work on timing errors in clinical
+adjustment~\citep{ghilani2017adjustment}, and on electrical network frequency analysis~\citep{grigoras2005enf}. It extends earlier work on timing errors in clinical
 databases~\citep{goodwin2022timing}, EEG synchronisation in intensive care~\citep{goodwin2023}, data-quality
 modelling of high-frequency physiological data~\citep{goodwin2023high}, and pulse arrival time with bedside
 equipment~\citep{ruffolo2025high}. Delays in
