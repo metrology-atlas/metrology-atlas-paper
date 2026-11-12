@@ -1,8 +1,8 @@
 generated: '2026-11-12'
 atlas:
   file: built from metrology-atlas
-  sha256: c4aed5cb981e1889213d5a54a691693eb18f8233f5014f8d7e7a8ab02d60dbbe
-  commit: cac0559
+  sha256: 268413b3ea15b167b783d57a193c4bd75905caddc869a7eea44c3d38fd19eec8
+  commit: 2d74021
   schema: metrology-atlas/0.5
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 132
-    display: '132'
+    value: 133
+    display: '133'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -652,10 +652,42 @@ facts:
     value: 0.385
     display: '0.385'
     unit: s
-    status: measured
+    status: derived
     source: parameter pleth-chain-delay
-    definition: 'offset of the SNUADC plethysmogram from the ECG: the monitor''s fixed
-      delay behind the pulse at the finger (one value for the release)'
+    definition: 'the monitor''s fixed delay behind the pulse at the finger (one value
+      for the release): the stored delay less the adopted pulse arrival time'
+  pleth.delay.ms:
+    value: 385
+    display: '385'
+    unit: ms
+    status: derived
+    source: parameter pleth-chain-delay
+    definition: the monitor's fixed delay, in ms
+  pleth.stored:
+    value: 655.0
+    display: '655'
+    unit: ms
+    status: measured
+    source: parameter pleth-stored-delay
+    definition: The delay from each ECG R peak to the foot of the following PLETH
+      pulse, as stored (SNUADC stamps), median per recording, then median over recordings.
+      It holds the physiological pulse arrival time and the PPG hardware delay together.
+    n: 5536
+  pat.adopted:
+    value: 270
+    display: '270'
+    unit: ms
+    status: assumed
+    source: parameter adopted-pat
+    definition: R peak to finger PPG foot in anaesthetised adults, used to remove
+      the PPG hardware delay.
+  pleth.slip:
+    value: 32.4
+    display: '32.4'
+    unit: ms
+    status: measured
+    source: parameter pleth-slip-step
+    definition: Step of the ECG→PPG delay at a frame slip.
   ecg.sawtooth:
     value: 500.0
     display: '500'

@@ -284,7 +284,17 @@ def main():
     # ---- ECG and plethysmogram: the system's offset
     p = P["pleth-chain-delay"]
     fact("pleth.delay", p["value"] / 1000, num(p["value"] / 1000, 3), "s", "parameter pleth-chain-delay",
-         "offset of the SNUADC plethysmogram from the ECG: the monitor's fixed delay behind the pulse at the finger (one value for the release)")
+         "the monitor's fixed delay behind the pulse at the finger (one value for the release): the stored delay less the adopted pulse arrival time",
+         status=p["status"])
+    fact("pleth.delay.ms", p["value"], num(p["value"]), "ms", "parameter pleth-chain-delay",
+         "the monitor's fixed delay, in ms", status=p["status"])
+    q = P["pleth-stored-delay"]
+    fact("pleth.stored", q["value"], num(q["value"]), "ms", "parameter pleth-stored-delay", q["quantity"],
+         n=q["spread"]["n"], status=q["status"])
+    q = P["adopted-pat"]
+    fact("pat.adopted", q["value"], num(q["value"]), "ms", "parameter adopted-pat", q["quantity"], status=q["status"])
+    q = P["pleth-slip-step"]
+    fact("pleth.slip", q["value"], num(q["value"], 1), "ms", "parameter pleth-slip-step", q["quantity"], status=q["status"])
     saw = comp("snuadc-ecg-ii", "snu-raw-step", 0)["u_s"] * math.sqrt(12) * 1000
     fact("ecg.sawtooth", saw, num(saw), "ms", "snuadc-ecg-ii/snu-raw-step components[0].u_s x sqrt(12)",
          "span of the stamp sawtooth (uniform)", status="derived")

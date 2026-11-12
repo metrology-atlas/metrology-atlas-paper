@@ -625,15 +625,9 @@ Figure~\ref{fig:network}. Every link is stated with its sign, as one clock's tim
 because an offset without a sign is easily applied in the wrong direction.
 
 One link reaches outside the recording. The SNUADC waveforms contain the mains hum in \fact{snuadc.hum.share}\% of
-recordings, and because the frequency of the electricity grid is regulated, the hum can act as a clock. In about
-\fact{snuadc.hum.rate.share}\% of the release, where the stamps carry no correction, the hum provides an independent
-measurement of the converter's rate, in the same way that electrical network frequency is used to date recordings in
-audio forensics~\citep{grigoras2005enf}. However, it does not measure the rate more precisely than the stamp model does
-(\fact{snuadc.drift.hum}\,ppm, compared with \fact{snuadc.drift}\,ppm). Note also that the hum provides rates only, and
-not absolute times. The recorder takes its time from the VitalDB server each time it starts, and then counts using the
-computer's hardware timer, which runs \fact{pc.grid}\,ppm against the grid. Between starts, the recorder therefore
-drifts from the server's time by about \fact{pc.utc.offset}\,s every \fact{pc.utc.offset.h}\,h. Its offset from UTC is
-not observed in the release.
+recordings, and because the frequency of the electricity grid is regulated, the hum can act as a clock that ties the
+recording's clock rates to an outside reference (Appendix~\ref{app:timing}). It provides rates only, and not absolute
+times, so the offset of the recordings from UTC is not observed in the release.
 
 Because each device's rate is measured against another clock, the rates around any loop of links should sum to zero,
 in the same way that the height differences around a levelling loop do in surveying. In VitalDB the loops close to
@@ -646,22 +640,29 @@ alongside them.
 \subsection{Synchronising the waveforms}
 \label{sec:sync}
 
-The waveforms come from four clocks, and each pair raises a different problem. Together they show the main ways a
-recording system mistimes its signals, and how a correction can be checked against a second path.
+The waveforms in VitalDB come from four clocks, and each pair of clocks raises a different problem. Together, these
+problems illustrate the main ways in which a recording system can mistime its signals, and show how a correction can be
+checked against a second path.
 
-\emph{The plethysmogram.} The ECG and the plethysmogram are both sampled by the SNUADC, yet the plethysmogram's
-offset from the ECG is \fact{pleth.delay}\,s: a fixed delay inside the monitor, which must be removed before a pulse
-arrival time means anything. On top of it sits a sawtooth, and its correction follows the five steps of
-Section~\ref{sec:correct} (Figure~\ref{fig:pleth}). The step was found in the delay from each R~peak to the pulse
-that follows it: within a recording the delay creeps slowly, then jumps by one frame of the oximeter's waveform
-(Figure~\ref{fig:pleth}a). The oximeter computes its waveform in frames on its own clock, so its clock and the
-converter's drift apart until the waveform is pulled back by a whole frame: a sawtooth hidden inside a signal that looks continuous. The step
-was measured in each recording, by finding each slip from the shapes of the pulses and fitting the creep between
-slips (Figure~\ref{fig:pleth}b), and undone by removing the fitted sawtooth (Figure~\ref{fig:pleth}c). It was
-tested in two ways. At the slips, the step of about one frame falls to close to zero (Figure~\ref{fig:pleth}d).
-Against the arterial line, a second path to the ECG's clock that carries no sawtooth, the spread of finger minus
-arterial pulse arrival time falls from \fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms (median over \fact{ppg.art.n} recordings with a sawtooth; Figure~\ref{fig:pleth}e shows one). What remains, the correction's own error
-and the frame grid it cannot undo, is the corrected form's uncertainty (Figure~\ref{fig:corrected}).
+\emph{The plethysmogram.} The ECG and the plethysmogram are both sampled by the SNUADC, yet the plethysmogram trails the
+ECG by a median of \fact{pleth.stored}\,ms as stored. Most of this is a fixed delay inside the monitor: subtracting an
+assumed physiological pulse arrival time of \fact{pat.adopted}\,ms leaves about \fact{pleth.delay.ms}\,ms. A sawtooth
+is superimposed on this fixed delay, and its correction follows the five steps described in Section~\ref{sec:correct}
+(Figure~\ref{fig:pleth}). The problem was found in the delay from each R~peak to the pulse that follows it. Within a
+recording, this delay creeps slowly and then jumps by about \fact{pleth.slip}\,ms (Figure~\ref{fig:pleth}a). This
+happens because the oximeter computes its waveform in frames, short blocks of samples produced on its own clock. The
+oximeter's clock and the converter's clock drift apart until the waveform is pulled back by a whole frame, which
+produces a sawtooth hidden inside a signal that appears continuous. The sawtooth was measured in each recording, by
+locating each slip from the shapes of the pulses and fitting the creep between slips (Figure~\ref{fig:pleth}b), and
+was then undone by removing the fitted sawtooth (Figure~\ref{fig:pleth}c). The correction was tested in three ways.
+First, the slips found by the algorithm were compared with blinded manual labels
+(\atlaspage{studies/ppg-sawtooth-slips}{Finding and placing each PPG frame slip}), and individual corrections were
+reviewed by eye. Second, at the slips themselves, the step of about one frame falls to close to zero after correction
+(Figure~\ref{fig:pleth}d). Third, the correction was tested against the arterial line, which provides a second path to
+the ECG's clock that carries no sawtooth. The spread of finger minus arterial pulse arrival time falls from
+\fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms (median over \fact{ppg.art.n} recordings with a sawtooth;
+Figure~\ref{fig:pleth}e shows one example). What remains, including the correction's own error and the frame grid it
+cannot undo, forms the uncertainty of the corrected form (Figure~\ref{fig:corrected}).
 
 \begin{figure}[tp]
   \centering
@@ -681,33 +682,29 @@ and the frame grid it cannot undo, is the corrected form's uncertainty (Figure~\
   \label{fig:pleth}
 \end{figure}
 
-\emph{The EEG.} The BIS EEG's timestamps come \fact{bis.bias.early}\,s before the ECG shows the same event, so
-they look ahead. The cause is a rule in the recorder, not in the monitor: it stamps each packet of EEG at its arrival
-minus a fixed \fact{bis.recorder.sub}\,s, and a packet arrives only about \fact{bis.arrival}\,s after its first
-sample, so the timestamps are set early by about the difference. Electrocautery and muscle bursts, which both signals record, synchronise them to
-\fact{bis.sync.uc}\,ms (an upper bound), or \fact{bis.own.uc}\,ms with each recording's own bursts.
+\emph{The EEG.} The timestamps of the BIS EEG come \fact{bis.bias.early}\,s before the ECG shows the same event,
+because of the rule the recorder uses to stamp them (Appendix~\ref{app:timing}). Bursts of electrocautery and muscle
+activity, which both signals record, were used to synchronise the EEG with the ECG to within \fact{bis.sync.uc}\,ms (an
+upper bound), or to within \fact{bis.own.uc}\,ms when each recording's own bursts are used.
 
-\emph{The ventilator.} The recorder stamps the anaesthesia machine's airway pressure by counting its samples and
-re-anchors the count only when it is seconds out, so samples lost in transmission go unnoticed and every later
-sample in the stretch is stamped early by the amount lost: its stamps also run ahead of the breaths they record. The breath cycle, seen in airway pressure and in central venous
-pressure, synchronises them to \fact{primus.sync.uc}\,ms, but a periodic signal can be matched one cycle off:
-\fact{primus.sync.breath}\% of the matched time is still a whole breath out. The atlas states that as a share, not
-folded into a standard deviation.
+\emph{The ventilator.} The recorder does not notice samples of the ventilator's airway pressure that are lost in
+transmission, so the stamps of this waveform run ahead of the breaths they record (Appendix~\ref{app:timing}). The
+breath cycle, which can be seen in both the airway pressure and the central venous pressure, was used to synchronise
+the two signals to within \fact{primus.sync.uc}\,ms. However, because ventilation is so regular, a match one breath
+early or late fits almost as well, and only pauses in ventilation show which breath is right. An estimated
+\fact{primus.sync.breath}\% of the matched time is a whole breath out. Since the affected stretches cannot be
+identified, the atlas carries this as a separate component of the uncertainty, rather than including it in a standard
+deviation.
 
-\emph{The reference itself.} Even the working reference is not a perfect clock. The recorder counts the SNUADC's
-samples from an anchor taken at their arrival, and at every read compares the count with its own clock. One rule then
-gives two behaviours, depending on the converter. A converter that runs fast gains on the recorder until it is
-\fact{snuadc.ahead}\,s ahead; the recorder then discards the samples just read, about \fact{snuadc.reset.loss}\,ms of
-signal, and starts the count again, so the timestamps drift and are pulled back by about \fact{snuadc.step.size}\,s
-every \fact{snuadc.step.period}\,h (step mode). A converter that runs slow falls behind and is filled with blank
-samples at each read, so its timestamps keep close with small forward steps (frequent-correction mode). In the
-\fact{snuadc.uncorr.share}\% of recordings with neither, a fast converter never gained \fact{snuadc.ahead}\,s; its
-rate is known only to \fact{snuadc.drift}\,ppm between recordings, though that \fact{snuadc.ahead}\,s bounds it.
-Because the count is kept up to the latest arrivals, the reference itself is probably late on true time by close to
-the largest delay from the converter to the recorder, which moves every absolute delay against it and no relative one.
+\emph{The reference itself.} Even the working reference is not a perfect clock. Depending on whether the converter runs
+fast or slow, the recorder either restarts its count of the converter's samples about every
+\fact{snuadc.step.period}\,h, which pulls the timestamps back by about \fact{snuadc.step.size}\,s and loses about
+\fact{snuadc.reset.loss}\,ms of signal each time, or makes frequent small corrections (Appendix~\ref{app:timing}). In
+the \fact{snuadc.uncorr.share}\% of recordings that show neither behaviour, the converter's rate is known only to within
+\fact{snuadc.drift}\,ppm between recordings.
 
-Figure~\ref{fig:corrected} gathers the four: for every signal with a per-recording timing form, how far its
-correction narrows the uncertainty.
+Figure~\ref{fig:corrected} brings the four signals together, showing for every signal with a per-recording timing form
+how far its correction reduces the uncertainty.
 
 \begin{figure}[t]
   \centering
@@ -879,6 +876,47 @@ We thank the other members of the VitalDB team for making the dataset openly ava
 releasing this work. Analysis code, figures and drafts of the text were developed with the assistance of an AI
 system (Claude, Anthropic); A.J.G. designed the work and checked the analyses, H.-C.L. provided information on how
 the data were recorded, and all authors are responsible for all content.
+
+% ---------------------------------------------------------------------------
+\appendix
+\section{Timing of the VitalDB signals}
+\label{app:timing}
+
+This appendix gives the mechanisms behind the timing results summarised in Sections~\ref{sec:network}
+and~\ref{sec:sync}. Each is described in more detail, with its evidence, on the corresponding pages of the atlas.
+
+\emph{The mains hum and the recorder's clock.} In about \fact{snuadc.hum.rate.share}\% of the release, where the SNUADC
+stamps carry no correction, the mains hum provides an independent measurement of the converter's rate, in the same way
+that electrical network frequency is used to date recordings in audio forensics~\citep{grigoras2005enf}. However, it
+does not measure the rate more precisely than the stamp model does (\fact{snuadc.drift.hum}\,ppm, compared with
+\fact{snuadc.drift}\,ppm). The recorder takes its time from the VitalDB server each time it starts, and then counts
+using the computer's hardware timer, which runs \fact{pc.grid}\,ppm against the grid. Between starts, the recorder
+therefore drifts from the server's time by about \fact{pc.utc.offset}\,s every \fact{pc.utc.offset.h}\,h.
+
+\emph{The BIS EEG.} The cause of the EEG's early timestamps is a rule in the recorder, rather than in the monitor. The
+recorder stamps each packet of EEG at its arrival time minus a fixed \fact{bis.recorder.sub}\,s, but a packet arrives
+only about \fact{bis.arrival}\,s after its first sample. As a result, the timestamps are set early by approximately
+the difference between these two times.
+
+\emph{The ventilator.} The recorder stamps the airway pressure waveform from the anaesthesia machine by counting its
+samples, and only re-anchors the count when it is several seconds out. Samples lost in transmission therefore go
+unnoticed, and every later sample in that stretch is stamped early by the amount of time lost. Breath matching uses the
+size of each breath's effect on the central venous pressure, which varies enough from breath to breath to identify the
+right breath in some stretches; elsewhere, pauses in ventilation fix which breath is which.
+
+\emph{The working reference.} The recorder counts the samples from the SNUADC, starting from an anchor taken when they
+arrive, and at every read compares this count with its own clock. A single rule then produces two different
+behaviours, depending on whether the converter runs fast or slow. A converter that runs fast gains on the recorder
+until it is \fact{snuadc.ahead}\,s ahead. The recorder then discards the samples it has just read, which amounts to
+about \fact{snuadc.reset.loss}\,ms of signal, and starts the count again. As a result, the timestamps drift and are
+pulled back by about \fact{snuadc.step.size}\,s every \fact{snuadc.step.period}\,h (step mode). A converter that runs
+slow falls behind, and is filled with blank samples at each read, so its timestamps stay close to the recorder's clock,
+with small forward steps (frequent-correction mode). In the recordings that show neither behaviour, the converter
+never gained \fact{snuadc.ahead}\,s on the recorder, so its rate is bounded by that threshold, but is otherwise known
+only to within \fact{snuadc.drift}\,ppm between recordings. Because the count is kept up to date with the latest
+arrivals, the reference itself is probably late relative to true time, by close to the largest delay between the
+converter and the recorder. This shifts every absolute delay measured against the reference, but does not affect any
+relative delay.
 
 \bibliographystyle{unsrtnat}
 \bibliography{references}
