@@ -75,6 +75,7 @@ documentation. An atlas can be read on its website, or loaded by analysis code a
 
 % ---------------------------------------------------------------------------
 \section{Introduction: a record is a measurement}
+\label{sec:intro}
 
 Open clinical time-series datasets are now widely used to train machine learning models and time-series
 foundation models. Users of these datasets mostly treat each record as exact, that is, as a value that occurred at
@@ -319,6 +320,8 @@ the headline, labelled an upper bound, and beside it, where a second independent
     shared between signals, or common to the release & after \citet{mittaz2019metrology} \\
   Propagation & Combining components into the uncertainty of a result: by the law of propagation, or by Monte
     Carlo where the shape matters & GUM 5.1--5.2; JCGM 101 \\
+  Target measurement uncertainty & The uncertainty an analysis can tolerate, set in advance from its intended use &
+    VIM 2.34 \\
   Instrumental drift & A slow change in an instrument's indication, such as a clock's rate or a transducer's zero
     & VIM 4.21 \\
   Adjustment & An operation that brings an instrument back, such as a resynchronisation or a zeroing & VIM 3.11 \\
@@ -772,53 +775,66 @@ examined this closely.
 \section{Using an atlas}
 \label{sec:use}
 
-An atlas is read on its website or loaded by analysis code. For combining signals, its planner takes any set of
-signals' timing forms. For each pair it gives the standard uncertainty of the
-difference between their times, $\sqrt{u_a^2 + u_b^2 - 2\,\mathrm{cov}}$, where the covariance is the sum of the
-products of the components with the same shared key; shared errors cancel. From the pair with the largest uncertainty it gives the finest useful shared time grid and, from the clock domains'
-drift rates and their spread between recordings, how long a window can be before drift adds another standard
-deviation. A switch restricts the forms to those usable in real time. The planner never shifts a signal silently:
-it says which shift each form needs and in which direction.
+An atlas can be read on its website, or loaded by analysis code. To help users combine signals, the atlas includes a
+planner, which takes any set of signals and their timing forms. For each pair of signals, the planner gives the
+standard uncertainty of the difference between their times, $\sqrt{u_a^2 + u_b^2 - 2\,\mathrm{cov}}$, where the
+covariance is the sum of the products of the components that share the same key. In this way, errors that the two
+signals share cancel out. From the pair with the largest uncertainty, the planner gives the finest time grid on which
+the signals can usefully be combined. It also uses the drift rates of the clock domains, and how much they vary
+between recordings, to estimate how long a window can be before drift adds another standard deviation to the
+uncertainty. A switch restricts the forms to those that can be used in real time. The planner never shifts a signal
+without telling the user; instead, it states which shift each form needs, and in which direction.
 
 % ---------------------------------------------------------------------------
 \section{Discussion}
 \label{sec:limits}
 
-\subsection{Main findings}
+\subsection{Main findings and implications}
 
-VitalDB's signals are stored as if they shared one clock, but they do not: each device adds its own delay, and
-several devices' clocks drift and are pulled back. The BIS EEG's timestamps sit \fact{bis.bias}\,s early against the
-ECG. The plethysmogram trails the ECG by a fixed \fact{pleth.delay}\,s inside the monitor, with a frame sawtooth on
-top. The ventilator's waveforms are stamped by counting their samples, so samples lost in transmission leave every
-later sample early. The CO$_2$ waveform trails the breath by \fact{co2.line}\,s, the transit through the gas sampling
-line. Most of these could be measured from the dataset's own records and corrected to a stated uncertainty: the EEG
-to within \fact{bis.sync.uc}\,ms of the ECG (an upper bound), the plethysmogram to a spread of finger minus arterial
-pulse arrival time of \fact{ppg.art.rebuilt}\,ms, and the ventilator to \fact{primus.sync.uc}\,ms where breath
-matching finds the right breath; our matching still lands a whole breath off for \fact{primus.sync.breath}\% of the
-matched time. The values hold their own surprises: the monitor's heart rate is truncated, not rounded, in
-\fact{hr.trunc.share}\% of recordings, and hand-charted volumes are heaped. None of this is in the release's
-documentation, and none of it shows in a typical loader's output. The checks also turned on the atlas itself: the
-loops of the clock network close, but their misclosures show that some stated uncertainties are still too small, by a
-factor of \fact{loop.se.min} to \fact{loop.se.max}.
+Describing VitalDB as a measurement system showed that a recording which appears to share a single timeline is in
+fact made up of many clocks and delays, each with its own behaviour (Section~\ref{sec:vitaldb},
+Table~\ref{tab:findings}). Most of these could be measured from the dataset's own records and corrected to a stated
+uncertainty, and the remainder could at least be bounded and carried forward as uncertainty. The values showed similar
+effects, including truncation and heaping, which are not described in the dataset's documentation and are not
+visible in the output of a typical data loader.
 
-\subsection{Implications}
+Timing differences between signals are rarely simple offsets. Device clocks drift at their own characteristic rates,
+and are pulled back into line by resynchronisations that follow their own schedules, so the offset between two
+signals changes continually within a recording, often as a sawtooth. A single shift for the whole dataset, or even
+for each recording, cannot remove such errors. Instead, corrections must be expressed as functions of time within
+each recording, and their uncertainty must be stated in the same way.
 
-Synchronisation is usually reported as a property a dataset has or lacks: its signals are said to be synchronised,
-or not. It is better treated as a measurement. The relative timing of two signals has a bias and an uncertainty,
-which depend on the signals, the timing form used and the recording, and which can be measured, stated and checked
-like any other quantity. A statement that signals are synchronised, without that uncertainty and the evidence behind
-it, cannot be verified. An atlas puts this practice into effect: for each pair of signals it gives the measured
-offset, its uncertainty, and the studies behind them.
+Datasets also often carry enough information to reconstruct their own timing. Artefacts that are usually regarded as
+noise, such as electrocautery bursts, the mains hum, the frames of an oximeter and pauses in ventilation, act as
+clocks that can be used to measure the relationships between devices. In the same way, the functions that devices use
+to produce derived variables can often be recovered from the data. For example, the rule the monitor uses to compute
+heart rate, including the number of R--R intervals it averages and the way it truncates the result, could be
+recovered from the ECG it exports. Knowing these parameters can help when harmonising data collected by different
+recording chains, or at different clinical sites, since a derived variable from one device can then be recomputed to
+match another.
 
-For users of VitalDB, synchronisation becomes a measured quantity with a stated uncertainty, not an assumption. An
-analysis that relates signals beat by beat can choose a timing form, apply its correction, and carry the stated
-uncertainty into its result. For datasets pooled across sites, the offset between two signals becomes a property that
-can be read and compared, so a model need not learn the site in place of the physiology. Stated uncertainties with
-their correlation structure also open the data to methods that account for measurement error explicitly, such as
-errors-in-variables regression, which undoes the dilution that random error in a predictor
-causes~\citep{hutcheon2010random,carroll2006measurement}, and Monte Carlo propagation through derived
-features~\citep{jcgm-101-2008}. For the custodians of a dataset, an atlas is a way to document a release that others
-can check and extend.
+Much current clinical research implicitly assumes that all signals in a dataset are perfectly synchronised. This
+assumption becomes harder to defend as analyses make more use of high-frequency signals, and combine signals across
+modalities. We suggest that synchronisation is better treated as a measurement, with a bias and an uncertainty that
+depend on the signals, the timing form used and the recording. The relevant question is then whether the uncertainty
+of the synchronisation is small enough for the intended analysis, that is, whether it lies within the \emph{target
+measurement uncertainty} for that analysis~\citep{jcgm-200-2012}. A statement that signals are synchronised cannot be
+checked against such a target unless the uncertainty and the evidence behind it are given. An atlas puts this
+practice into effect, by stating the measured offset between signals, its uncertainty and the studies behind them,
+and the planner described in Section~\ref{sec:use} applies it to a chosen set of signals.
+
+It follows that systematic biases should be corrected before any analysis, and this is particularly important when
+data from different sites, with different recording chains, are pooled. Where timing and quantisation effects can be
+modelled explicitly, as demonstrated here, we believe it is better to do so than to rely on a model to absorb them
+implicitly. An explicit correction can be inspected, tested and carried to another site, whereas a model that learns
+these effects implicitly may instead learn the site in place of the physiology (Section~\ref{sec:intro}). Stated uncertainties,
+together with their correlation structure, also open the data to methods that account for measurement error
+explicitly, such as errors-in-variables regression, which corrects the dilution that random error in a predictor
+causes~\citep{hutcheon2010random,carroll2006measurement}, and Monte Carlo propagation of uncertainty through derived
+features~\citep{jcgm-101-2008}. We expect that other datasets recorded with several devices are affected in similar
+ways, since most share the same architecture of polled numerics, independent device clocks and separate converters,
+and timing errors of these kinds have been documented across clinical systems~\citep{goodwin2022timing}. For the
+custodians of such datasets, an atlas provides a way to document a release that others can check and extend.
 
 \subsection{Limitations}
 
@@ -845,12 +861,20 @@ The cause has not been found.
 
 \subsection{Future work}
 
-Three directions follow. The first is other datasets, including ones whose recording chain can be reverse-engineered
-in more detail than VitalDB's, and comparison of atlases built on the same schema. The second is external ground
-truth: bench recordings of the devices, or recordings with a known injected offset, would test the timing results
-against a reference outside the data, and calibration and maintenance records would let an atlas carry each
-device's drift in value as it carries the clocks'. The third is use: testing whether analyses, and AI assistants
-used to plan them, give better answers with an atlas than without.
+The approach described here should be applied to other datasets, including ones whose recording chain can be
+reverse-engineered in more detail than VitalDB's, so that atlases built on the same schema can be compared.
+Preliminary, unpublished comparisons of the offset between ECG and PPG in around a dozen open datasets, using the
+techniques described by \citet{ruffolo2025high}, suggest that this offset varies widely from one dataset to another.
+An atlas of each dataset would make these differences explicit. We speculate that multimodal foundation models, and
+efforts to harmonise data collected at different sites, could benefit from the techniques described in this paper.
+Such models could then be trained on signals whose timing and resolution have been corrected, and whose remaining
+uncertainty is known, rather than being left to learn these effects implicitly.
+
+The timing results presented here should also be tested against an external reference. Bench recordings of the
+devices, or recordings with a known injected offset, would provide such a reference. Calibration and maintenance
+records would also allow an atlas to describe each device's drift in value, in the same way that it describes the
+drift of its clocks. Finally, it would be useful to test whether analyses, and the AI assistants used to plan them,
+give better answers when an atlas is available than when it is not.
 
 % ---------------------------------------------------------------------------
 \section{Access, licences and contributing}
