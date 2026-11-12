@@ -137,7 +137,8 @@ Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}
 as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the ECG with the
 PPG~\citep{ruffolo2025high}. What is missing is a complete, checkable description
 of a dataset's measurement system that others can read, reuse and correct. Metrology already has the language: a
-measurand (the quantity intended to be measured), a measurement model, and a stated uncertainty with its evidence~\citep{jcgm-200-2012,jcgm-100-2008}.
+measurand (the quantity intended to be measured), a measurement model, and a stated uncertainty with its evidence, set out in the International Vocabulary of Metrology
+(VIM)~\citep{jcgm-200-2012} and the Guide to the Expression of Uncertainty in Measurement (GUM)~\citep{jcgm-100-2008}.
 Earth observation has shown how to apply it to historical data whose instruments can no longer be
 examined~\citep{mittaz2019metrology}. The Metrology Atlas applies it to clinical time-series data.
 
@@ -193,6 +194,110 @@ value, which can be propagated through any later calculation~\citep{jcgm-101-200
   \label{fig:model}
 \end{figure}
 
+\subsection{The interval each value describes}
+
+Every value describes an interval of time, not an instant: a heart rate is computed from one or more R--R
+intervals, an end-tidal CO$_2$ from the last breath, and a laboratory result describes the blood at the moment of the
+draw. Even a single waveform sample is taken over a short acquisition window, shaped by the analogue filtering
+before the converter. An atlas states this interval as part of what the value is: its \emph{support}, a term borrowed from geostatistics, where a value's
+support is the region it averages over~\citep{gotway2002combining}. The support is not an error, and counting it as
+uncertainty, as many descriptions do, overstates how badly a value is timed. An atlas also states where in the
+interval the stamp sits. Separately, every recorded time is itself an interval, the \emph{resolution interval} of
+the clock that stamped it: a timestamp from a clock that ticks every millisecond places the support only to within
+that millisecond, as a recorded 72\,bpm places the heart rate only within 72 to 73. An atlas carries this interval
+as a component of the time's uncertainty, with a uniform probability density over the tick, not as part of the
+support: no timestamp locates the support more finely than one tick of its clock.
+
+A value \emph{describes} its support, and by convention its time is the support's close (close-stamping). The
+\emph{bias} of a stamp is the stamp minus the close of the support. A negative bias means the stamp comes before the
+interval it describes has closed: the value was computed from later data, or the reference the bias is measured
+against is itself late. Between two signals we write \emph{offset}: the relative bias of their timestamps, one
+signal's bias minus the other's, negative when the first signal's timestamps are early. It contains no physiology: a
+pulse reaching the finger after the R peak is part of what the two signals measure, not of the offset between them.
+
+\subsection{Bias and uncertainty}
+\label{sec:bias}
+
+Metrology separates two kinds of error. A \emph{bias} is a systematic shift, the same or nearly the same for every
+value it affects, such as a delay inside a monitor that puts every timestamp late by the same
+amount~\citep{jcgm-200-2012}. A bias that is known can be corrected by removing it~\citep{jcgm-100-2008};
+Section~\ref{sec:correct} describes how. What a correction cannot remove is \emph{uncertainty}: the spread of values
+the true time or value could take, given the record and what is known about how it was made. It includes the random
+scatter of each value, the error of the correction itself, and anything the record cannot resolve, such as where
+within a clock tick an event fell. The \emph{standard uncertainty} summarises that spread as a standard
+deviation~\citep{jcgm-100-2008}. Table~\ref{tab:terms} gathers these and the other terms this paper uses, with their
+sources.
+
+An atlas builds each uncertainty from named parts, which we call \emph{components}, as the GUM does and as in the
+effects tables of \citet{mittaz2019metrology}. For a waveform stamped by a device clock, for example, one component
+is the clock's tick, another the clock's drift between resynchronisations, and another the error of the correction
+that removes that drift. Each component has its own size and distribution, and states how it was evaluated:
+\emph{Type~A} if estimated statistically from this dataset's own data, \emph{Type~B} if taken from documentation, a
+specification or judgement~\citep{jcgm-100-2008}. A clock tick is Type~B with a rectangular (uniform) distribution;
+a spread measured between recordings is Type~A with an empirical one.
+
+Components combine by the law of propagation of uncertainty~\citep{jcgm-100-2008}: their standard deviations add in
+quadrature, with a further term for any two that are correlated. A standard deviation is enough when the combined
+distribution is close to normal. Where it is not, as for a truncated value or a delay that differs between groups of
+recordings, the atlas also gives the shape in full, so that it can be propagated by Monte Carlo~\citep{jcgm-101-2008}.
+
+How components combine also depends on which values they affect together, which an atlas states as each
+component's \emph{scope}. Some errors are independent from one value to the next, such as where each event fell
+within a clock tick. Some are correlated over time: a clock's drift between resynchronisations moves neighbouring
+timestamps together, so for these the atlas also states how long the correlation lasts and its shape (exponential,
+rectangular, triangular or bell). Others are fixed within a recording, shared between signals that use the same
+clock or correction, or common to the whole release. Scope decides what comparison and averaging can do: errors
+shared by two signals cancel when the signals are compared, and errors fixed within a recording do not shrink by
+averaging within it. Each shared error carries a key naming what it comes from, such as one clock or one
+correction, so that a user combining two signals can see which errors cancel.
+
+All biases and uncertainties are stated against the atlas's \emph{working reference}, one clock chosen because the
+others can be tied to it. The reference's own bias against the true event, such as a monitor's output delay, is a
+component common to the whole release where it is known, and is named as unknown where it is not. One caution
+concerns evaluation. When an uncertainty is measured by comparing a signal with a second, checking signal, the
+comparison includes the checking signal's own noise and so overstates the uncertainty. An atlas then gives that
+result as the headline, labelled an upper bound, and beside it, where a second independent reference allows, a
+likely value.
+
+\begin{table}[tp]
+  \centering
+  \small
+  \caption{Terms used in this paper, with their sources. VIM: International Vocabulary of
+    Metrology~\citep{jcgm-200-2012}; GUM: Guide to the Expression of Uncertainty in
+    Measurement~\citep{jcgm-100-2008} and its first supplement~\citep{jcgm-101-2008}. Terms without a source are the
+    atlas's own.}
+  \label{tab:terms}
+  \begin{tabularx}{\textwidth}{@{}P{0.2\textwidth}LP{0.2\textwidth}@{}}
+  \toprule
+  Term & Meaning here & Source \\
+  \midrule
+  Measurand & The quantity intended to be measured: here, when something happened and what its value was & VIM 2.3 \\
+  Support & The interval of time a value describes, such as the R--R intervals behind a heart rate; part of the
+    measurand, not an error & \citet{gotway2002combining} \\
+  Resolution & The smallest step a recorded value or timestamp can show & VIM 4.14 \\
+  Bias & A systematic shift; for a timestamp, the stamp minus the close of its support, on the working reference,
+    negative when early & VIM 2.18 \\
+  Offset & Between two signals, the difference of their biases & \\
+  Correction & What is applied to remove a known bias & VIM 2.53; GUM 3.2.3--3.2.4 \\
+  Uncertainty & The spread of values the true time or value could take, given the record and what is known about
+    how it was made & VIM 2.26 \\
+  Standard uncertainty & That spread as a standard deviation & VIM 2.30; GUM 2.3.1 \\
+  Component & One named part of an uncertainty, with its own size, distribution, evaluation and scope & GUM 5.1;
+    \citet{mittaz2019metrology} \\
+  Type A, Type B & A component estimated statistically from the dataset's own data (A), or from documentation,
+    a specification or judgement (B) & VIM 2.28--2.29; GUM 4.2--4.3 \\
+  Scope & Which values a component affects together: independent, correlated over time, fixed within a recording,
+    shared between signals, or common to the release & after \citet{mittaz2019metrology} \\
+  Propagation & Combining components into the uncertainty of a result: by the law of propagation, or by Monte
+    Carlo where the shape matters & GUM 5.1--5.2; JCGM 101 \\
+  Instrumental drift & A slow change in an instrument's indication, such as a clock's rate or a transducer's zero
+    & VIM 4.21 \\
+  Adjustment & An operation that brings an instrument back, such as a resynchronisation or a zeroing & VIM 3.11 \\
+  Working reference & The one clock against which an atlas states every bias and uncertainty & \\
+  \bottomrule
+\end{tabularx}
+\end{table}
+
 \subsection{Correcting what can be measured}
 \label{sec:correct}
 
@@ -218,89 +323,9 @@ studies that measured and tested each correction (\url{https://github.com/metrol
 the code and version it used, so a correction can be rerun, or replaced by a better one. Section~\ref{sec:sync}
 works through one correction, of the plethysmogram, step by step.
 
-\subsection{The interval each value describes}
-
-Every value describes an interval of time, not an instant: a heart rate is computed from one or more R--R
-intervals, an end-tidal CO$_2$ from the last breath, and a laboratory result describes the blood at the moment of the
-draw. Even a single waveform sample is taken over a short acquisition window, shaped by the analogue filtering
-before the converter. An atlas states this interval as part of what the value is: its \emph{support}, a term borrowed from geostatistics, where a value's
-support is the region it averages over~\citep{gotway2002combining}. The support is not an error, and counting it as
-uncertainty, as many descriptions do, overstates how badly a value is timed. An atlas also states where in the
-interval the stamp sits. Separately, every recorded time is itself an interval, the \emph{resolution interval} of
-the clock that stamped it: a timestamp from a clock that ticks every millisecond places the support only to within
-that millisecond, as a recorded 72\,bpm places the heart rate only within 72 to 73. An atlas carries this interval
-as a component of the time's uncertainty, with a uniform probability density over the tick, not as part of the
-support: no timestamp locates the support more finely than one tick of its clock.
-
-A value \emph{describes} its support, and by convention its time is the support's close (close-stamping). The
-\emph{bias} of a stamp is the stamp minus the close of the support. A negative bias means the stamp comes before the
-interval it describes has closed: the value was computed from later data, or the reference the bias is measured
-against is itself late. Between two signals we write \emph{offset}: the relative bias of their timestamps, one
-signal's bias minus the other's, negative when the first signal's timestamps are early. It contains no physiology: a
-pulse reaching the finger after the R peak is part of what the two signals measure, not of the offset between them.
-
-\subsection{Bias and uncertainty}
-
-Following the VIM, an atlas separates a systematic shift, the \emph{bias}~\citep[2.18]{jcgm-200-2012}, from the
-\emph{standard uncertainty} that remains~\citep[2.26, 2.30]{jcgm-200-2012}. A known bias is corrected where
-possible~\citep[3.2.3--3.2.4]{jcgm-100-2008}, and what the correction leaves is uncertainty. What remains is a
-distribution, and the standard uncertainty is its standard deviation~\citep[2.3.1]{jcgm-100-2008}: a summary, not
-the whole. Each component below carries its own distribution, and the standard deviation is what combines across
-components by the law of propagation~\citep[5.1]{jcgm-100-2008}. Where the result is far from normal, as for a
-truncated value or a delay that differs between groups of recordings, the atlas gives the shape in full as well,
-so that it can be propagated by Monte Carlo~\citep{jcgm-101-2008}. Biases and
-uncertainties are stated against the atlas's \emph{working reference}, one clock chosen because the others can be
-tied to it. The reference's own bias against the true event, such as a monitor's output delay, is stated as a
-component common to the whole release where it is known, and named as unknown where it is not. Each uncertainty is a
-budget of named components, as in the effects tables of \citet{mittaz2019metrology}. Each component states:
-\begin{itemize}[itemsep=2pt]
-  \item its evaluation, Type A from this dataset's data or Type B from documentation or
-    judgement~\citep[4.2--4.3]{jcgm-100-2008}, and its distribution (rectangular, that is uniform, for a grid; empirical for a
-    measured spread);
-  \item its \emph{scope}: independent from value to value, structured over a time scale, fixed within one
-    recording, shared with other signals, common to the whole release, or unknown;
-  \item for a structured error, the shape and length of its correlation over time (exponential, rectangular,
-    triangular or bell);
-  \item for a shared error, a key naming what shares it, such as one clock or one correction.
-\end{itemize}
-Scope and keys decide how errors combine. Errors shared by two signals cancel when the signals are compared; errors
-fixed within a recording do not shrink by averaging within it. Where the errors used to evaluate an uncertainty
-include the checking signal's own noise, their standard deviation overstates the standard uncertainty. An atlas
-gives it as the headline, labelled an upper bound, and beside it, where a second independent reference allows, a
-likely value from the part of the errors the two references share. Table~\ref{tab:terms} lists the terms that replace
-those of version~1 of this paper, and why.
-
-\begin{table}[tp]
-  \centering
-  \small
-  \caption{Terms changed since version~1 of this paper. Version~1 described each timestamp by its accuracy and
-    resolution; version~2 uses the VIM's terms, so that the atlas's numbers combine and propagate as the GUM
-    intends. The atlas keeps the version~1 values on its pages, marked as superseded.}
-  \label{tab:terms}
-  \begin{tabularx}{\textwidth}{@{}P{0.17\textwidth}P{0.22\textwidth}LP{0.17\textwidth}@{}}
-  \toprule
-  Version 1 & Version 2 & Why & Source \\
-  \midrule
-  Accuracy, as a number & Bias and standard uncertainty, stated separately &
-    Accuracy is a qualitative concept and is not given a number; a known systematic effect is a bias, corrected
-    where possible, and what remains is uncertainty & VIM 2.13, 2.18, 2.26; GUM 3.2.3--3.2.4 \\
-  Offset, unsigned & Bias: stamp minus the close of the support, on the working reference; offset, signed, between two signals; negative is early & Sign and reference made explicit; an offset without a sign was
-    applied the wrong way in version~1's planner for the BIS & VIM 2.18 \\
-  Residual & Standard uncertainty after correction, an upper bound with a likely value & Separates what a
-    correction removes from what it leaves & GUM 3.2.4; VIM 2.53 (correction) \\
-  Window, counted as timing error & Support: the interval a value describes, stamped at its close &
-    The window is part of the measurand, not an error about its time & VIM 2.3; \citet{gotway2002combining} \\
-  Error sources, unlabelled & Components: Type A or B, distribution, scope, correlation & So that shared errors
-    cancel between signals & GUM 4.2--4.3; \citet{mittaz2019metrology} \\
-  Resolution & Kept, with rounding and truncation & Truncation shifts a value as well as widening it &
-    VIM 4.14 \\
-  \bottomrule
-\end{tabularx}
-\end{table}
-
 \subsection{The value side}
 
-The same structure describes values. A value has a native resolution~\citep[4.14]{jcgm-200-2012} and a rule that
+The same structure describes values. A value has a native resolution~\citep{jcgm-200-2012} and a rule that
 mapped the true value onto it: rounding to the nearest step, truncation, or heaping by hand to round numbers.
 Truncation is a bias as well as a spread: a monitor that truncates records half a step low on average. Where a
 value's resolution is a mixture, as with hand-charted volumes or a test that two analysers report differently, the
@@ -329,8 +354,7 @@ drawn, so the record's joint PDF is a mixture of two shapes in time and value to
   \label{fig:urine}
 \end{figure}
 
-Values drift as clocks do. A transducer's zero and gain wander between adjustments, the instrument's
-drift~\citep[4.21]{jcgm-200-2012}, and each adjustment~\citep[3.11]{jcgm-200-2012}, such as a zeroing, pulls them back: the same pattern
+Values drift as clocks do. A transducer's zero and gain wander between adjustments, the instrument's drift, and each adjustment, such as a zeroing, pulls them back~\citep{jcgm-200-2012}: the same pattern
 of drift and resynchronisation the clocks show. An atlas can describe it the same way, as a drift rate, an adjustment
 schedule and the evidence for each. The VitalDB release records no adjustments, but the atlas detects one kind made
 in the operating room, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
@@ -345,7 +369,7 @@ plethysmogram; its uncertainty then includes the model's own error, which only v
 measurement gives. An atlas records these relations explicitly: what each variable measures or estimates, which
 variables it was derived from and how, and the algorithm, code and version behind it. Along each derivation it
 carries what the inputs imply. A derived value describes at least the intervals its inputs describe. Its uncertainty follows by the law of
-propagation~\citep[5.1--5.2]{jcgm-100-2008}, with the covariance of errors its inputs share, or, for a value defined
+propagation~\citep{jcgm-100-2008}, with the covariance of errors its inputs share, or, for a value defined
 by code, from the study that measured it. Features derived for machine learning are values like any other, so the
 atlas describes the variables never measured directly from the patient as fully as those that were, and a feature
 store can take them from it as a paper takes its numbers (Section~\ref{sec:instep}). In the VitalDB atlas,
@@ -494,7 +518,7 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
 
 The engine checks every field and cross-reference before it builds. It refuses unknown and retired fields, a
 timing form whose bias and uncertainty do not follow the conventions of Section~\ref{sec:approach}, the word
-\emph{accuracy} next to a number~\citep[2.13]{jcgm-200-2012}, and patterns the dataset forbids, such as a case
+\emph{accuracy} next to a number~\citep{jcgm-200-2012}, and patterns the dataset forbids, such as a case
 identifier outside a deliberate link, so that no per-recording table leaves by accident. Each variable's page states its timing forms with their
 budgets, its value model, and the chain of clocks behind its stamp; each study links to the code that produced it.
 
