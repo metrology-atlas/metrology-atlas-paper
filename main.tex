@@ -838,26 +838,30 @@ custodians of such datasets, an atlas provides a way to document a release that 
 
 \subsection{Limitations}
 
-An atlas is a reconstruction. In the first application most of the model is inferred from the records, the
-public firmware of one device and the recording software's rules for stamping that device's records, without access to the devices or the recording computers; where a dataset's devices and recording chain
-are known in detail, the model can rest more on the chain itself. The chain to UTC rests on the VitalDB server's
-time, read by the recorder each time it starts, whose own offset from UTC is not known, and on rates through the mains hum; no offset from UTC is observed, so absolute times
-are not traceable. Population results describe the release, not any one
-recording; a per-setup or per-recording estimate is given where the data allow one. The value side is described by
-resolution and rounding, not by calibration. The devices' calibration and maintenance records are not part of the
-release; with them, an atlas could carry each device's drift in value and its calibration schedule as it carries
-the clocks' drift and resynchronisations. Several results are
-preliminary and are marked as such.
+An atlas is a reconstruction of a measurement system, and what it can describe depends on what the records reveal.
+Steps that leave a trace in the data, such as a drifting clock or a resynchronisation, can be measured and corrected,
+but steps that leave no trace cannot. For example, two signals that share no artefact, event or rhythm cannot be
+synchronised from the data alone, and steps that are many-to-one, such as rounding, can only be carried forward as
+uncertainty. Where a dataset's devices and recording chain are documented in detail, or the devices themselves can be
+examined, the model can rely more on that knowledge and less on inference. The VitalDB atlas was built largely by
+inference, from the records, the public firmware of one device and the recording software's stamping rules, without
+access to the devices or the recording computers. Absolute times are a particular case, because a dataset's own records
+rarely link its clocks to UTC, and in VitalDB this link is not observed. An atlas can therefore usually state relative
+timing with much greater confidence than absolute timing. Similarly, the value side of a variable can be described by
+its resolution and rounding, but its accuracy against a reference requires calibration and maintenance records, which
+are rarely released with clinical datasets.
 
-No timing result here is checked against an external ground truth. Every check is internal: a shared artefact, a
-second path, or a closed loop. The loops show that some stated uncertainties are still too small, and only the
-plethysmogram's correction has been tested end to end, on sawtooths injected into real recordings and against the
-arterial line (Section~\ref{sec:sync}); the arterial line also helps place the slips, so that check is not wholly
-independent of the correction.  One check is still open. Recomputed from the waveforms, the monitor's heart rate and
-pulse rate change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their timing forms predict,
-although the same test recovers known delays on synthetic data; the polled numerics' delays may be about
-1\,s longer than stated (\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}).
-The cause has not been found.
+Most of the checks available to an atlas are internal, relying on a shared artefact, a second path to the same clock,
+or a closed loop of links. Such checks can show that results are consistent with one another, and can reveal when
+stated uncertainties are too small, but they cannot replace a comparison with an external reference. In the VitalDB
+atlas, the loops of the clock network show that some stated uncertainties are still too small, and only the
+plethysmogram's correction has been tested end to end, against an arterial line that also helps to place the slips. A
+check of the polled numerics also remains unresolved. When the monitor's heart rate and pulse rate are recomputed from
+the waveforms, they change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their timing forms
+predict, which suggests that these delays may be up to about 1\,s longer than stated
+(\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}), although the cause has not
+yet been found. Where the evidence only supports a bound, an atlas reports an upper bound rather than a value. Finally,
+building an atlas requires considerable effort and expertise, both in the recording systems and in the analysis.
 
 \subsection{Future work}
 
