@@ -456,7 +456,7 @@ Section~\ref{sec:sync}).
 \label{sec:system}
 
 An atlas is a folder of text files, one per item, from which an engine builds a website and a single
-machine-readable file. The engine knows nothing about any one dataset, so another dataset is another folder. Before
+machine-readable file. The engine is independent of any particular dataset, so a new dataset only needs a new folder. Before
 it builds, the engine checks every field and cross-reference, and refuses a timing form whose bias and uncertainty do
 not follow the conventions of Section~\ref{sec:approach}. Every number carries a status (measured, derived, estimated
 or assumed) and points to the study that produced it: a short report with its method, its results in aggregate, its
@@ -506,19 +506,21 @@ documented with the code (\url{https://github.com/metrology-atlas/metrology-atla
 \section{VitalDB: the first application}
 \label{sec:vitaldb}
 
-VitalDB holds high-resolution waveforms, numerics and clinical information from \fact{vitaldb.cases} non-cardiac surgical
-cases~\citep{lee2022vitaldb,lee2022vitaldb-physionet,pollard2026physionet}. Each operating room had one computer
-running Vital Recorder~\citep{lee2018vitalrecorder}, which stamped numerics on arrival (the BIS's at arrival minus
-\fact{bis.recorder.sub}\,s) and waveform samples by counting from an anchor taken at arrival. A
-500\,Hz converter (SNUADC)~\citep{snuadc} samples the patient monitor's (Solar8000) analogue outputs; the bispectral index (BIS) monitor, the anaesthesia machine (Primus)
-and several haemodynamic monitors send their own waveforms and numerics on their own clocks; clinical events and
-laboratory results come from the hospital's records.
+VitalDB contains high-resolution waveforms, numerics and clinical information from \fact{vitaldb.cases} non-cardiac
+surgical cases~\citep{lee2022vitaldb,lee2022vitaldb-physionet,pollard2026physionet}. Each operating room had a single
+computer running Vital Recorder~\citep{lee2018vitalrecorder}. This software stamped numerics when they arrived (for the
+BIS, at their arrival time minus \fact{bis.recorder.sub}\,s), and stamped waveform samples by counting them from an
+anchor time taken at their arrival. A 500\,Hz converter (SNUADC)~\citep{snuadc} sampled the analogue outputs of the
+patient monitor (Solar8000). The bispectral index (BIS) monitor, the anaesthesia machine (Primus) and several
+haemodynamic monitors sent their own waveforms and numerics, each on its own clock. Clinical events and laboratory
+results came from the hospital's records.
 
-The studies behind the VitalDB atlas use \fact{atlas.methods} general methods, which another dataset can reuse
-(Table~\ref{tab:methods}). One, method comparison, is the classic design for two measurements of one
-quantity~\citep{bland1986statistical,bland2007agreement}; what an atlas adds is the pairing, taken at the moment each
-value describes, which its timing supplies. Each method's page in the atlas describes its techniques, such as
-sawtooth fits, null controls and predictions tested against the data, and the studies that use them.
+The studies behind the VitalDB atlas use \fact{atlas.methods} general methods, which can be reused for other datasets
+(Table~\ref{tab:methods}). One of these, method comparison, is the classic design for comparing two measurements of the
+same quantity~\citep{bland1986statistical,bland2007agreement}. What an atlas adds to this design is the pairing of
+values at the moment each one describes, which is made possible by its timing information. The page for each method in
+the atlas describes its techniques, such as sawtooth fits, null controls and predictions tested against the data, and
+lists the studies that use them.
 
 \begin{table}[tp]
   \centering
@@ -555,13 +557,16 @@ sawtooth fits, null controls and predictions tested against the data, and the st
   \end{tabularx}
 \end{table}
 
-The atlas describes \fact{atlas.variables} variables, \fact{atlas.clocks} clocks, \fact{atlas.links} links and \fact{atlas.devices} devices, with \fact{atlas.studies} studies (\fact{atlas.studies.current} current, the rest
-draft, open or superseded), \fact{atlas.parameters} parameters and \fact{atlas.observations} observations behind them; \fact{atlas.forms} timing forms cover the \fact{atlas.timed} variables
-with a timestamp model, and \fact{atlas.open_questions} open questions are listed. Its working reference is the SNUADC sample clock after a model of its stamps. Figure~\ref{fig:network}
-shows the timing network (Section~\ref{sec:network}), and Table~\ref{tab:findings} the findings that most change
-how the data should be used: how the waveforms are synchronised (Section~\ref{sec:sync}), what the numerics and
-records mark (Section~\ref{sec:records}), and where the data depart from their documentation
-(Section~\ref{sec:departures}).
+In total, the atlas describes \fact{atlas.variables} variables, \fact{atlas.clocks} clocks, \fact{atlas.links} links
+and \fact{atlas.devices} devices. These are supported by \fact{atlas.studies} studies (\fact{atlas.studies.current}
+current, with the remainder in draft, open or superseded), \fact{atlas.parameters} parameters and
+\fact{atlas.observations} observations. The \fact{atlas.timed} variables with a timestamp model are covered by
+\fact{atlas.forms} timing forms, and \fact{atlas.open_questions} open questions are listed. The working reference for
+the atlas (Section~\ref{sec:bias}) is the SNUADC sample clock, after its stamps have been modelled. The timing network is shown in
+Figure~\ref{fig:network} (Section~\ref{sec:network}). The findings that most change how the data should be used are
+summarised in Table~\ref{tab:findings}, and are described in the following sections: how the waveforms are
+synchronised (Section~\ref{sec:sync}), what the numerics and records mark (Section~\ref{sec:records}), and where the
+data depart from their documentation (Section~\ref{sec:departures}).
 
 \begin{figure}[t]
   \centering
@@ -612,26 +617,31 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
 \subsection{The timing network}
 \label{sec:network}
 
-Time reaches a record through a chain of clocks: the reference, a recording computer, each device. An atlas maps
-them as a network, each clock measured against another with the rate and resynchronisation schedule of the link, and
-tests the network by its loops, as a geodetic network is adjusted~\citep{ghilani2017adjustment}.
-Figure~\ref{fig:network} shows VitalDB's. Every link is stated with its sign, as one clock's time
-minus the other's for the same event, since an offset without a sign is easily applied the wrong way.
+Time reaches a record through a chain of clocks, including the reference clock, a recording computer, and each
+device. An atlas maps these clocks as a network, in which each clock is measured against another, and each link has a
+rate and a resynchronisation schedule. The network is then tested using its loops, in the same way that a geodetic
+network is adjusted~\citep{ghilani2017adjustment}. The timing network for VitalDB is shown in
+Figure~\ref{fig:network}. Every link is stated with its sign, as one clock's time minus the other's for the same event,
+because an offset without a sign is easily applied in the wrong direction.
 
-One link reaches outside the recording. The SNUADC waveforms carry the mains hum in \fact{snuadc.hum.share}\% of
-recordings, and because the grid is regulated, the hum is a clock: it measures the converter's rate independently
-where the stamps carry no correction, in about \fact{snuadc.hum.rate.share}\% of the release (no more closely than the
-stamp model, \fact{snuadc.drift.hum} against \fact{snuadc.drift}\,ppm), as the electrical network frequency dates recordings in audio
-forensics~\citep{grigoras2005enf}. It gives rates, not absolute times. The recorder takes its time from the VitalDB server each time it starts and then counts on
-the computer's hardware timer, which runs \fact{pc.grid}\,ppm against the grid, so between starts it drifts from the
-server's time by about \fact{pc.utc.offset}\,s every \fact{pc.utc.offset.h}\,h. Its offset from UTC is not observed in
-the release.
+One link reaches outside the recording. The SNUADC waveforms contain the mains hum in \fact{snuadc.hum.share}\% of
+recordings, and because the frequency of the electricity grid is regulated, the hum can act as a clock. In about
+\fact{snuadc.hum.rate.share}\% of the release, where the stamps carry no correction, the hum provides an independent
+measurement of the converter's rate, in the same way that electrical network frequency is used to date recordings in
+audio forensics~\citep{grigoras2005enf}. However, it does not measure the rate more precisely than the stamp model does
+(\fact{snuadc.drift.hum}\,ppm, compared with \fact{snuadc.drift}\,ppm). Note also that the hum provides rates only, and
+not absolute times. The recorder takes its time from the VitalDB server each time it starts, and then counts using the
+computer's hardware timer, which runs \fact{pc.grid}\,ppm against the grid. Between starts, the recorder therefore
+drifts from the server's time by about \fact{pc.utc.offset}\,s every \fact{pc.utc.offset.h}\,h. Its offset from UTC is
+not observed in the release.
 
-The network is tested by its loops. Each device's rate is measured against another clock, so around any loop of links
-the rates should sum to zero, as the height differences around a levelling loop do. In VitalDB they close to about
-\fact{loop.bis}\,ppm (median, over \fact{loop.bis.n} BIS--SNUADC--computer loops, each measured within a recording), so the links agree with one another. The
-misclosures also scatter more widely than the links' stated uncertainties allow, by a factor of \fact{loop.se.min} to
-\fact{loop.se.max}, so those uncertainties are too small, and the atlas says so beside them.
+Because each device's rate is measured against another clock, the rates around any loop of links should sum to zero,
+in the same way that the height differences around a levelling loop do in surveying. In VitalDB the loops close to
+within about \fact{loop.bis}\,ppm (median, over \fact{loop.bis.n} loops between the BIS, the SNUADC and the recording
+computer, each measured within a recording), which shows that the links agree with one another. However, the
+misclosures also vary more widely than the stated uncertainties of the links allow, by a factor of
+\fact{loop.se.min} to \fact{loop.se.max}. This means that those uncertainties are too small, and the atlas reports this
+alongside them.
 
 \subsection{Synchronising the waveforms}
 \label{sec:sync}
