@@ -133,14 +133,21 @@ confined to ECG and PPG: the same holds for any pairing across modalities, from 
 response to a drug. The descriptions of the pooled datasets rarely say whether their timing differs. If each were
 described by an atlas, the question would be settled by reading it.
 
-Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved, such
-as aligning the EEG with bedside waveforms~\citep{goodwin2023} and the ECG with the
-PPG~\citep{ruffolo2025high}. What is missing is a complete, checkable description
-of a dataset's measurement system that others can read, reuse and correct. Metrology already has the language: a
-measurand (the quantity intended to be measured), a measurement model, and a stated uncertainty with its evidence, set out in the International Vocabulary of Metrology
-(VIM)~\citep{jcgm-200-2012} and the Guide to the Expression of Uncertainty in Measurement (GUM)~\citep{jcgm-100-2008}.
-Earth observation has shown how to apply it to historical data whose instruments can no longer be
-examined~\citep{mittaz2019metrology}. The Metrology Atlas applies it to clinical time-series data.
+Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved:
+aligning the EEG with bedside waveforms in intensive care~\citep{goodwin2023}, the ECG with the PPG for pulse arrival
+time~\citep{ruffolo2025high}, and the delays of processed EEG indices~\citep{pilge2006timedelay}; the quality of
+high-frequency physiological data has also been modelled~\citep{goodwin2023high}. What is missing is a complete,
+checkable description of a dataset's measurement system that others can read, reuse and correct; to our knowledge,
+no clinical dataset has been described this way. Metrology already has the language: a measurand (the quantity
+intended to be measured), a measurement model, and a stated uncertainty with its evidence, set out in the
+International Vocabulary of Metrology (VIM)~\citep{jcgm-200-2012} and the Guide to the Expression of Uncertainty in
+Measurement (GUM)~\citep{jcgm-100-2008}, whose supplements cover propagation by Monte Carlo and models with several
+outputs~\citep{jcgm-101-2008,jcgm-102-2011}. Earth observation has shown how to apply it to historical data whose
+instruments can no longer be examined~\citep{mittaz2019metrology}. Other fields supply the remaining tools: the
+statistics of coarse and heaped data~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}, change of support
+from geostatistics~\citep{gotway2002combining}, network time synchronisation~\citep{rfc5905}, geodetic network
+adjustment~\citep{ghilani2017adjustment} and electrical network frequency analysis~\citep{grigoras2005enf}. The
+Metrology Atlas brings them together for clinical time-series data.
 
 This paper describes the approach and the system that implements it, and uses the first atlas, of
 VitalDB~\citep{lee2022vitaldb}, to show what it finds. Its contributions are:
@@ -568,8 +575,7 @@ Time reaches a record through a chain of clocks: the reference, a recording comp
 them as a network, each clock measured against another with the rate and resynchronisation schedule of the link, and
 tests the network by its loops, as a geodetic network is adjusted~\citep{ghilani2017adjustment}.
 Figure~\ref{fig:network} shows VitalDB's. Every link is stated with its sign, as one clock's time
-minus the other's for the same event, and that alone caught an error: in version~1 the sign of the BIS offset was
-lost, and the planner shifted the EEG the wrong way.
+minus the other's for the same event, since an offset without a sign is easily applied the wrong way.
 
 One link reaches outside the recording. The SNUADC waveforms carry the mains hum in \fact{snuadc.hum.share}\% of
 recordings, and because the grid is regulated, the hum is a clock: it measures the converter's rate independently
@@ -719,8 +725,46 @@ deviation. A switch restricts the forms to those usable in real time. The planne
 it says which shift each form needs and in which direction.
 
 % ---------------------------------------------------------------------------
-\section{Limitations and related work}
+\section{Discussion}
 \label{sec:limits}
+
+\subsection{Main findings}
+
+VitalDB's signals are stored as if they shared one clock, but they do not: each device adds its own delay, and
+several devices' clocks drift and are pulled back. The BIS EEG's timestamps sit \fact{bis.bias}\,s early against the
+ECG. The plethysmogram trails the ECG by a fixed \fact{pleth.delay}\,s inside the monitor, with a frame sawtooth on
+top. The ventilator's waveforms are stamped by counting their samples, so samples lost in transmission leave every
+later sample early. The CO$_2$ waveform trails the breath by \fact{co2.line}\,s, the transit through the gas sampling
+line. Most of these could be measured from the dataset's own records and corrected to a stated uncertainty: the EEG
+to within \fact{bis.sync.uc}\,ms of the ECG (an upper bound), the plethysmogram to a spread of finger minus arterial
+pulse arrival time of \fact{ppg.art.rebuilt}\,ms, and the ventilator to \fact{primus.sync.uc}\,ms where breath
+matching finds the right breath; our matching still lands a whole breath off for \fact{primus.sync.breath}\% of the
+matched time. The values hold their own surprises: the monitor's heart rate is truncated, not rounded, in
+\fact{hr.trunc.share}\% of recordings, and hand-charted volumes are heaped. None of this is in the release's
+documentation, and none of it shows in a typical loader's output. The checks also turned on the atlas itself: the
+loops of the clock network close, but their misclosures show that some stated uncertainties are still too small, by a
+factor of \fact{loop.se.min} to \fact{loop.se.max}.
+
+\subsection{Implications}
+
+Synchronisation is usually reported as a property a dataset has or lacks: its signals are said to be synchronised,
+or not. It is better treated as a measurement. The relative timing of two signals has a bias and an uncertainty,
+which depend on the signals, the timing form used and the recording, and which can be measured, stated and checked
+like any other quantity. A statement that signals are synchronised, without that uncertainty and the evidence behind
+it, cannot be verified. An atlas puts this practice into effect: for each pair of signals it gives the measured
+offset, its uncertainty, and the studies behind them.
+
+For users of VitalDB, synchronisation becomes a measured quantity with a stated uncertainty, not an assumption. An
+analysis that relates signals beat by beat can choose a timing form, apply its correction, and carry the stated
+uncertainty into its result. For datasets pooled across sites, the offset between two signals becomes a property that
+can be read and compared, so a model need not learn the site in place of the physiology. Stated uncertainties with
+their correlation structure also open the data to methods that account for measurement error explicitly, such as
+errors-in-variables regression, which undoes the dilution that random error in a predictor
+causes~\citep{hutcheon2010random,carroll2006measurement}, and Monte Carlo propagation through derived
+features~\citep{jcgm-101-2008}. For the custodians of a dataset, an atlas is a way to document a release that others
+can check and extend.
+
+\subsection{Limitations}
 
 An atlas is a reconstruction. In the first application most of the model is inferred from the records, the
 public firmware of one device and the recording software's rules for stamping that device's records, without access to the devices or the recording computers; where a dataset's devices and recording chain
@@ -730,32 +774,27 @@ are not traceable. Population results describe the release, not any one
 recording; a per-setup or per-recording estimate is given where the data allow one. The value side is described by
 resolution and rounding, not by calibration. The devices' calibration and maintenance records are not part of the
 release; with them, an atlas could carry each device's drift in value and its calibration schedule as it carries
-the clocks' drift and resynchronisations, and future work may add them. Several results are
+the clocks' drift and resynchronisations. Several results are
 preliminary and are marked as such.
 
 No timing result here is checked against an external ground truth. Every check is internal: a shared artefact, a
 second path, or a closed loop. The loops show that some stated uncertainties are still too small, and only the
 plethysmogram's correction has been tested end to end, on sawtooths injected into real recordings and against the
 arterial line (Section~\ref{sec:sync}); the arterial line also helps place the slips, so that check is not wholly
-independent of the correction. Bench recordings of the devices, or recordings with a known injected offset, would
-close this gap. One check is still open. Recomputed from the waveforms, the monitor's heart rate and
+independent of the correction.  One check is still open. Recomputed from the waveforms, the monitor's heart rate and
 pulse rate change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their timing forms predict,
 although the same test recovers known delays on synthetic data; the polled numerics' delays may be about
 1\,s longer than stated (\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}).
 The cause has not been found.
 
+\subsection{Future work}
 
-The work builds on the vocabulary and uncertainty framework of the VIM and the
-GUM~\citep{jcgm-200-2012,jcgm-100-2008,jcgm-101-2008,jcgm-102-2011}, on their application to historical Earth
-observations~\citep{mittaz2019metrology}, on statistical work on coarse and heaped
-data~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping} and on change of
-support~\citep{gotway2002combining}, on network time synchronisation~\citep{rfc5905}, geodetic network
-adjustment~\citep{ghilani2017adjustment}, and on electrical network frequency analysis~\citep{grigoras2005enf}. It extends earlier work on timing errors in clinical
-databases~\citep{goodwin2022timing}, EEG synchronisation in intensive care~\citep{goodwin2023}, data-quality
-modelling of high-frequency physiological data~\citep{goodwin2023high}, and pulse arrival time with bedside
-equipment~\citep{ruffolo2025high}. Delays in
-processed EEG indices were measured by \citet{pilge2006timedelay}. To our knowledge, no open dataset has previously
-been described as a complete measurement system in this way.
+Three directions follow. The first is other datasets, including ones whose recording chain can be reverse-engineered
+in more detail than VitalDB's, and comparison of atlases built on the same schema. The second is external ground
+truth: bench recordings of the devices, or recordings with a known injected offset, would test the timing results
+against a reference outside the data, and calibration and maintenance records would let an atlas carry each
+device's drift in value as it carries the clocks'. The third is use: testing whether analyses, and AI assistants
+used to plan them, give better answers with an atlas than without.
 
 % ---------------------------------------------------------------------------
 \section{Access, licences and contributing}
