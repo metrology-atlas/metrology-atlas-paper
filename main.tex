@@ -105,7 +105,7 @@ as an interval or a spread (Section~\ref{sec:correct}).
     the monitor truncates. From the stored record alone (E), the time is a mixture of two groups of VitalDB recordings,
     early (median delay \fact{hr.early.d}\,s, \fact{hr.early.share}\%) and late (\fact{hr.late.d}\,s,
     \fact{hr.late.share}\%), each spread by the wait for the poll. With the atlas (F), the delay is measured for this
-    recording (its delay label, Section~\ref{sec:system}), here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, and only the wait for
+    recording, here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, and only the wait for
     the poll remains. Every step and its source are in \atlaspage{worked-example-heart-rate}{Worked example: one heart-rate
     record}.}
   \label{fig:concept}
@@ -355,9 +355,8 @@ drawn, so the record's joint PDF is a mixture of two shapes in time and value to
 \end{figure}
 
 Values drift as clocks do. A transducer's zero and gain wander between adjustments, the instrument's drift, and each adjustment, such as a zeroing, pulls them back~\citep{jcgm-200-2012}: the same pattern
-of drift and resynchronisation the clocks show. An atlas can describe it the same way, as a drift rate, an adjustment
-schedule and the evidence for each. The VitalDB release records no adjustments, but the atlas detects one kind made
-in the operating room, the zeroing of the arterial pressure transducer, from the signature it leaves in the waveform.
+of drift and resynchronisation the clocks show. An atlas describes it the same way, as a drift rate, an adjustment
+schedule and the evidence for each.
 
 Values are also related to one another. Some measure the same quantity by different routes: arterial pressure from
 an invasive line and from a cuff, oxygen saturation from a pulse oximeter and from a blood gas, comparisons we have
@@ -372,7 +371,7 @@ carries what the inputs imply. A derived value describes at least the intervals 
 propagation~\citep{jcgm-100-2008}, with the covariance of errors its inputs share, or, for a value defined
 by code, from the study that measured it. Features derived for machine learning are values like any other, so the
 atlas describes the variables never measured directly from the patient as fully as those that were, and a feature
-store can take them from it as a paper takes its numbers (Section~\ref{sec:instep}). In the VitalDB atlas,
+store can take them from it as this paper takes its numbers (Section~\ref{sec:system}). In the VitalDB atlas,
 \fact{atlas.measured} variables measure \fact{atlas.measurands} measurands of value (the time of each record is the other), and \fact{atlas.derived} are derived
 from others.
 
@@ -404,39 +403,20 @@ correction, Section~\ref{sec:sync}).
   \label{fig:bias}
 \end{figure}
 
-\subsection{Evidence}
-
-Every number carries a status (measured, derived, estimated or assumed) and points to the study that produced it.
-Studies are short reports: data in aggregate, method, results, limitations and the code that produced them. Their
-general findings are collected as observations, each established, likely, open or withdrawn, and their unsettled
-points as open questions of five kinds: phenomena not yet explained, weakly supported hypotheses, untestable
-assumptions, conflicts between studies, and next steps. Evidence can come from the records themselves, from
-device documentation, or from reverse-engineering the recording chain: converter and filter models, bench tests.
-When a result changes, the old one is marked superseded, not overwritten, so any number quoted from an earlier
-version can still be traced.
-
-\subsection{Clocks and links}
-
-Time reaches a record through a chain of clocks: the reference, a recording computer, each device. An atlas maps
-them as a network in which each clock is measured against another, with the rate and resynchronisation schedule of each
-link. Device rates are relative, each measured against another clock that also drifts, so the network is tested by
-its loops: where two routes join the same pair of clocks, the rates around the loop should sum to zero. With the
-network treated as a geodetic adjustment, the misclosures flag a bad link and test whether the stated uncertainties are right. A clock
-outside the recording, such as the mains grid, breaks the circle of relative rates and links the network to an
-outside reference.
-
-
-
 % ---------------------------------------------------------------------------
-\section{The atlas as a system}
+\section{Implementation}
 \label{sec:system}
 
-An atlas is a folder of YAML files, one per item, from which an engine builds a website and a single
-machine-readable file. The engine knows nothing about any one dataset; another dataset is another folder. Items are
-of \fact{atlas.kinds} kinds: variables, the measurands they measure, clocks, links between clocks, devices, parameters, studies, observations, the methods
-and techniques the studies use, worked examples, software and references. Each fact lives in one place, and every
-relation is written once and linked both ways. Table~\ref{tab:schema} shows what an atlas records for each
-variable, the part a new atlas fills in.
+An atlas is a folder of text files, one per item, from which an engine builds a website and a single
+machine-readable file. The engine knows nothing about any one dataset, so another dataset is another folder. Before
+it builds, the engine checks every field and cross-reference, and refuses a timing form whose bias and uncertainty do
+not follow the conventions of Section~\ref{sec:approach}. Every number carries a status (measured, derived, estimated
+or assumed) and points to the study that produced it: a short report with its method, its results in aggregate, its
+limitations and its code. When a result changes, the old value is kept and marked as superseded, so a number quoted
+from an earlier release can still be traced. Each release is archived with its own identifier, and every number in
+this paper that describes VitalDB is generated from the release it cites rather than typed.
+Table~\ref{tab:schema} shows what an atlas records for one variable; the schema, the engine and its checks are
+documented with the code (\url{https://github.com/metrology-atlas/metrology-atlas}).
 
 \begin{table}[tp]
   \centering
@@ -474,12 +454,23 @@ variable, the part a new atlas fills in.
   \end{tabularx}
 \end{table}
 
-Studies are grouped by \fact{atlas.methods} general methods, which another dataset can reuse
+% ---------------------------------------------------------------------------
+\section{VitalDB: the first application}
+\label{sec:vitaldb}
+
+VitalDB holds high-resolution waveforms, numerics and clinical information from \fact{vitaldb.cases} non-cardiac surgical
+cases~\citep{lee2022vitaldb,lee2022vitaldb-physionet,pollard2026physionet}. Each operating room had one computer
+running Vital Recorder~\citep{lee2018vitalrecorder}, which stamped numerics on arrival (the BIS's at arrival minus
+\fact{bis.recorder.sub}\,s) and waveform samples by counting from an anchor taken at arrival. A
+500\,Hz converter (SNUADC)~\citep{snuadc} samples the patient monitor's (Solar8000) analogue outputs; the bispectral index (BIS) monitor, the anaesthesia machine (Primus)
+and several haemodynamic monitors send their own waveforms and numerics on their own clocks; clinical events and
+laboratory results come from the hospital's records.
+
+The studies behind the VitalDB atlas use \fact{atlas.methods} general methods, which another dataset can reuse
 (Table~\ref{tab:methods}). One, method comparison, is the classic design for two measurements of one
 quantity~\citep{bland1986statistical,bland2007agreement}; what an atlas adds is the pairing, taken at the moment each
 value describes, which its timing supplies. Each method's page in the atlas describes its techniques, such as
-sawtooth fits, null controls and predictions tested against the data, and the studies that use them. The loops of
-the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
+sawtooth fits, null controls and predictions tested against the data, and the studies that use them.
 
 \begin{table}[tp]
   \centering
@@ -515,64 +506,6 @@ the clock network are adjusted as in geodesy~\citep{ghilani2017adjustment}.
     \bottomrule
   \end{tabularx}
 \end{table}
-
-The engine checks every field and cross-reference before it builds. It refuses unknown and retired fields, a
-timing form whose bias and uncertainty do not follow the conventions of Section~\ref{sec:approach}, the word
-\emph{accuracy} next to a number~\citep{jcgm-200-2012}, and patterns the dataset forbids, such as a case
-identifier outside a deliberate link, so that no per-recording table leaves by accident. Each variable's page states its timing forms with their
-budgets, its value model, and the chain of clocks behind its stamp; each study links to the code that produced it.
-
-Adding a study to an atlas is the system working, not a new edition. Contributions are pull requests against the folder, checked by
-the same engine. What carries over to a new dataset is the schema, the engine and its checks, the website and the
-machine-readable output, the planner, and the dataset-independent timing tools; what is written afresh is the
-dataset's folder and the studies behind it. The approach will be applied to further datasets, including ones whose
-recording chain can be reverse-engineered in more detail than VitalDB's, and a shared schema will let datasets be
-compared on the same terms. Each atlas has its own site; the project's home page, \homeurl, lists them with the
-software, papers and news.
-
-\subsection{Keeping papers derived from the atlas in step}
-\label{sec:instep}
-
-An atlas is a living document. Studies are added, models refitted and numbers revised as evidence comes in. A
-paper, by contrast, is fixed once published. The two are reconciled by treating each paper as a snapshot: each
-release of an atlas is archived with its own identifier, and a paper quotes one release. The atlas moves on, and the
-paper stays an accurate record of what was known when it was written.
-
-The atlas is the source of truth, and numbers flow one way: from the atlas into the papers, the website and any
-other output, never back. A paper may interpret and argue from the atlas's numbers, but it does not hold numbers of
-its own about the dataset.
-
-That only works if the numbers a paper quotes really come from the release it cites. In practice they drift. An
-analysis is rerun on a changed population, a value is rounded by hand, a draft is written from an older output, and
-nothing compares the text with the analysis, so the disagreement goes unnoticed. Generating every number, rather
-than typing it, closes this gap. Each number lives in the atlas as a parameter or a field of a timing form, tied to
-the study that produced it. A script reads the atlas file and writes a registry of \emph{facts}: each with its
-value, the form in which it is printed, its unit, its status, and the item it came from, and the registry records
-which release of the atlas it was built from. A paper draws its numbers from that registry. If it refers to a fact
-the registry does not define, it fails to build, so a number cannot be printed without a source in the atlas. Every
-number in this paper that describes VitalDB is produced this way.
-
-When a number changes, the atlas does not overwrite it. The old value is kept, marked as superseded, with the date
-and the reason, so a reader of an older paper can see what has moved since and why. Whether a change calls for
-anything beyond the atlas's own record depends on what it touches. A change that leaves a paper's argument intact
-needs nothing further. A change that alters an argument calls for a revised version of the paper.
-
-Generation guarantees agreement, not correctness. A wrong analysis, faithfully generated, passes every check of
-this kind. Correctness rests on the studies themselves, and on the atlas's other checks: the loops of the clock
-network must close, corrections are tested on data held out from their fit, and anyone can read the
-machine-readable file independently and compare it with the website.
-
-% ---------------------------------------------------------------------------
-\section{VitalDB: the first application}
-\label{sec:vitaldb}
-
-VitalDB holds high-resolution waveforms, numerics and clinical information from \fact{vitaldb.cases} non-cardiac surgical
-cases~\citep{lee2022vitaldb,lee2022vitaldb-physionet,pollard2026physionet}. Each operating room had one computer
-running Vital Recorder~\citep{lee2018vitalrecorder}, which stamped numerics on arrival (the BIS's at arrival minus
-\fact{bis.recorder.sub}\,s) and waveform samples by counting from an anchor taken at arrival. A
-500\,Hz converter (SNUADC)~\citep{snuadc} samples the patient monitor's (Solar8000) analogue outputs; the bispectral index (BIS) monitor, the anaesthesia machine (Primus)
-and several haemodynamic monitors send their own waveforms and numerics on their own clocks; clinical events and
-laboratory results come from the hospital's records.
 
 The atlas describes \fact{atlas.variables} variables, \fact{atlas.clocks} clocks, \fact{atlas.links} links and \fact{atlas.devices} devices, with \fact{atlas.studies} studies (\fact{atlas.studies.current} current, the rest
 draft, open or superseded), \fact{atlas.parameters} parameters and \fact{atlas.observations} observations behind them; \fact{atlas.forms} timing forms cover the \fact{atlas.timed} variables
@@ -631,7 +564,10 @@ records mark (Section~\ref{sec:records}), and where the data depart from their d
 \subsection{The timing network}
 \label{sec:network}
 
-Figure~\ref{fig:network} shows how the clocks are linked. Every link is stated with its sign, as one clock's time
+Time reaches a record through a chain of clocks: the reference, a recording computer, each device. An atlas maps
+them as a network, each clock measured against another with the rate and resynchronisation schedule of the link, and
+tests the network by its loops, as a geodetic network is adjusted~\citep{ghilani2017adjustment}.
+Figure~\ref{fig:network} shows VitalDB's. Every link is stated with its sign, as one clock's time
 minus the other's for the same event, and that alone caught an error: in version~1 the sign of the BIS offset was
 lost, and the planner shifted the EEG the wrong way.
 
