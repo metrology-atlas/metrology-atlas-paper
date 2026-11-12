@@ -53,44 +53,50 @@
 
 % ---------------------------------------------------------------------------
 \begin{abstract}
-Every value in a clinical time series is a pair: a recorded time and a recorded value. Neither is the
-truth, yet users of open datasets mostly treat records as exact. We present the Metrology Atlas, a
-dataset-independent way to describe a recorded dataset as a measurement system, in the terms of the International
-Vocabulary of Metrology and the Guide to the Expression of Uncertainty in Measurement. For each variable, an atlas
-states its measurement model; the interval of time each value describes; the bias of its time and value, and the
-distribution of the error that remains, summarised by its standard uncertainty; which errors are shared with other
-signals; and the evidence behind each number, marked as measured, derived, estimated or assumed. It also records how variables relate, what each measures and which it was
-derived from, so that derived features carry their inputs' uncertainty. A schema and an engine, independent of any dataset, check an atlas and
-publish it as a website and a single machine-readable file, and the atlas is revised as evidence comes in. Our
-first application, to VitalDB (\fact{vitaldb.cases} surgical cases), reconstructs the timing of a multi-device recording
-system largely from its own records: \fact{atlas.variables} variables from \fact{atlas.devices} devices on \fact{atlas.clocks} clocks, joined into one timing network by
-\fact{atlas.studies.current} analyses of its own records, each saved with the code that ran it. With open-source tools we developed, it corrects the synchronisation between devices to a stated uncertainty, ties the recording's
-clock rates to an outside reference through the mains hum, and documents where the data depart from their documentation.
-An atlas can be read on its website or loaded by analysis code as a single file.
+Every value in a clinical time series is made up of two parts: a recorded time and a recorded value. Neither part is
+exactly the truth, yet users of open datasets mostly treat these records as exact. We present the Metrology Atlas, a
+dataset-independent approach for describing a recorded dataset as a measurement system, using the terms of the
+International Vocabulary of Metrology and the Guide to the Expression of Uncertainty in Measurement. For each
+variable, an atlas describes its measurement model and the interval of time each value represents. It also reports
+the bias of the variable's time and value, the distribution of the error that remains (summarised by its standard
+uncertainty), which errors are shared with other signals, and the evidence behind each number, which is marked as
+measured, derived, estimated or assumed. An atlas also records how variables are related to one another, including
+what each one measures and which variables it was derived from, so that derived features carry the uncertainty of
+their inputs. A schema and an engine, both independent of any particular dataset, check an atlas and publish it as a
+website and as a single machine-readable file, and the atlas is revised as new evidence becomes available. In our
+first application, to VitalDB (\fact{vitaldb.cases} surgical cases), we reconstructed the timing of a multi-device
+recording system, largely from the dataset's own records. The atlas describes \fact{atlas.variables} variables from
+\fact{atlas.devices} devices on \fact{atlas.clocks} clocks, joined into a single timing network by
+\fact{atlas.studies.current} analyses of the records, each saved with the code that ran it. Using open-source tools
+we developed, the atlas corrects the synchronisation between devices to a stated uncertainty, links the clock rates
+of the recording system to an outside reference using the mains hum, and documents where the data differ from their
+documentation. An atlas can be read on its website, or loaded by analysis code as a single file.
 \end{abstract}
 
 % ---------------------------------------------------------------------------
 \section{Introduction: a record is a measurement}
 
-Open clinical time-series datasets are now the training ground for clinical machine learning and time-series foundation
-models. Their users mostly treat each record as exact: a value that happened at its timestamp, the time the recording system attached to it (its stamp, for short). In a
-multi-device
-recording that assumption fails in ways that matter. Device clocks drift by tens to hundreds of parts per million (ppm)
-against the recording computer and are pulled back to it in jumps, resynchronisations, so their time error grows
-and resets: a sawtooth. Monitor numerics describe a window of signal that closed seconds before their stamp. Values are
-truncated, rounded or heaped by hand. Converters store fewer bits than documented. None of this shows in a typical
-loader's output.
+Open clinical time-series datasets are now widely used to train machine learning models and time-series
+foundation models. Users of these datasets mostly treat each record as exact, that is, as a value that occurred at
+its timestamp (the time the recording system attached to it, referred to here as its stamp). In a recording system
+with several devices, this assumption can fail in ways that matter. Device clocks drift by tens to hundreds of parts
+per million (ppm) relative to the recording computer, and are periodically pulled back into line in steps known as
+resynchronisations. As a result, the time error of each device grows and then resets, producing a sawtooth pattern.
+Numeric values from monitors describe a window of signal that closed several seconds before they were stamped, and
+values may be truncated, rounded, or rounded by hand to convenient numbers (heaped). None of these effects is visible in the output of a typical data loader.
 
-A record is best read not as a point but as a probability density function (PDF): how likely each true time and
-true value is, given the record and what is known about how it was made (Figure~\ref{fig:concept}). A heart rate recorded as 72 beats per minute (bpm) by a
-monitor that rounds down (truncates) could be anything from 72 up to, but not including, 73,
-and it describes the last \fact{hr.window} R--R intervals of ECG, which ended a variable delay before its stamp,
-plus a wait for the recorder's next poll. A laboratory haematocrit of 35\% means (35$\pm$0.5)\% or (35$\pm$0.05)\% depending on
-which analyser made it, which the record does not say, and the blood was drawn minutes before the stamp, by an
-amount that also depends on the analyser. What is known about the true time and value behind each of these records has a shape of its own:
-uniform for a truncated heart rate, a mixture of two for the haematocrit, skewed for a delay. Few of these shapes are
-Gaussian. Some of the steps that made a record can be measured and undone, which narrows its shape; the rest remain
-as an interval or a spread (Section~\ref{sec:correct}).
+Rather than treating a record as a single point, it is more useful to read it as a probability density function
+(PDF), which describes how likely each true time and true value is, given the record and what is known about how it
+was made (Figure~\ref{fig:concept}). For example, a heart rate recorded as 72 beats per minute (bpm) by a monitor that
+rounds down (truncates) could be any value from 72 up to, but not including, 73. This value also describes the last
+\fact{hr.window} R--R intervals of the ECG, which ended a variable delay before the value was stamped, plus a further
+wait for the recorder's next poll. Similarly, a laboratory haematocrit of 35\% means (35$\pm$0.5)\% or
+(35$\pm$0.05)\% depending on which analyser produced it, which the record does not say, and the blood was drawn some
+minutes before the stamp, by an amount that also depends on the analyser. The distributions of the true time and
+value behind these records therefore take different shapes: uniform for a truncated heart rate, a mixture of two
+distributions for the haematocrit, and skewed for a delay. Few of these shapes are Gaussian. Some of the steps that
+produced a record can be measured and undone, which narrows its distribution, while the remaining steps must be
+carried forward as an interval or a spread (Section~\ref{sec:correct}).
 
 \begin{figure}[tp]
   \centering
@@ -111,62 +117,69 @@ as an interval or a spread (Section~\ref{sec:correct}).
   \label{fig:concept}
 \end{figure}
 
-This uncertainty can be quantified, as it is when a sensor is validated against
-a reference, yet it is typically underestimated if considered at all, and rarely carried into the analyses and models
-built on the data~\citep{ansermino2023measurement}. Synchronisation is a case in point. Two signals are not simply
-synchronised or not: their relative timing is a measurement, with a bias and an uncertainty. A statement that a
-dataset's signals are synchronised, without that uncertainty and the statistic it is expressed in, cannot be verified
-objectively, nor used in a quantitative analysis.
+This uncertainty can be quantified, as it is when a sensor is validated against a reference. However, it is typically
+underestimated, if it is considered at all, and it is rarely carried into the analyses and models built on the
+data~\citep{ansermino2023measurement}. Synchronisation is a good example. Two signals are not simply synchronised or
+unsynchronised. Instead, the alignment between them can be measured, and that measurement has a bias and an uncertainty. A statement that
+a dataset's signals are synchronised cannot be verified objectively, or used in a quantitative analysis, unless it is
+accompanied by that uncertainty and the statistic used to express it.
 
-Analyses that relate signals beat by beat, or at a sub-second scale, need synchronisation that many clinical datasets
-do not document, and pooling datasets makes the gap matter more. ECG and photoplethysmogram (PPG) are now learned together by foundation
-models pretrained on open datasets from many sites and devices; a recent review lists 13 that record
-both~\citep[Table~S12]{han2026review}. Yet the offset between the two is a property of each recording system:
-\fact{pleth.delay}\,s in VitalDB, 1.30\,s in a paediatric intensive care unit~\citep{ruffolo2025high}. At 120\,bpm, usual in a child, an R--R interval lasts 0.5\,s, so an offset of 1.30\,s puts the beats of the two
-signals out of phase. A model trained on such datasets together is harmed in two ways. Where the offset differs
-between sites, it is a property of the site, and a model can learn the site in place of the physiology: a shortcut
-that works on the sites it was trained on and fails on a new one~\citep{geirhos2020shortcut,zech2018variable}.
-Where the offset varies within a dataset, between recordings or as clocks drift and resynchronise, it blurs the
-relation between the signals, and the model learns a weaker relation than the true one, as random error in a
-predictor dilutes a regression~\citep{hutcheon2010random}. Neither harm shows in the pooled data, and neither is
-confined to ECG and PPG: the same holds for any pairing across modalities, from pulse arrival time to the EEG's
-response to a drug. The descriptions of the pooled datasets rarely say whether their timing differs. If each were
-described by an atlas, the question would be settled by reading it.
+Analyses that relate signals beat by beat, or at a sub-second scale, require a level of synchronisation that many
+clinical datasets do not document, and this gap becomes more important when datasets are pooled. For example,
+foundation models are now trained on ECG and photoplethysmogram (PPG) signals together, using open datasets collected
+from many sites and devices; a recent review lists 13 datasets that record both signals~\citep{han2026review}.
+However, the offset between these two signals depends on the devices and recording hardware that produced the data.
+In VitalDB the offset is \fact{pleth.delay}\,s, whereas in a paediatric intensive care unit that used different
+recording hardware it was 1.30\,s~\citep{ruffolo2025high}. In that unit, heart rates of 120\,bpm are common, and at
+this rate an R--R interval lasts 0.5\,s, so an offset of 1.30\,s puts the signals more than two beats out of step.
 
-Timing errors in clinical databases have been reviewed~\citep{goodwin2022timing}, and specific cases solved:
-aligning the EEG with bedside waveforms in intensive care~\citep{goodwin2023}, the ECG with the PPG for pulse arrival
-time~\citep{ruffolo2025high}, and the delays of processed EEG indices~\citep{pilge2006timedelay}; the quality of
-high-frequency physiological data has also been modelled~\citep{goodwin2023high}. What is missing is a complete,
-checkable description of a dataset's measurement system that others can read, reuse and correct; to our knowledge,
-no clinical dataset has been described this way. Metrology already has the language: a measurand (the quantity
-intended to be measured), a measurement model, and a stated uncertainty with its evidence, set out in the
-International Vocabulary of Metrology (VIM)~\citep{jcgm-200-2012} and the Guide to the Expression of Uncertainty in
-Measurement (GUM)~\citep{jcgm-100-2008}, whose supplements cover propagation by Monte Carlo and models with several
-outputs~\citep{jcgm-101-2008,jcgm-102-2011}. Earth observation has shown how to apply it to historical data whose
-instruments can no longer be examined~\citep{mittaz2019metrology}. Other fields supply the remaining tools: the
-statistics of coarse and heaped data~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}, change of support
+A model trained on a combination of such datasets can be harmed in two ways. Where
+the offset differs between sites, it becomes a property of the site, and a model may learn to recognise the site
+instead of the physiology. Such a shortcut works on the sites a model was trained on, but fails on a new
+site~\citep{geirhos2020shortcut,zech2018variable}. Where the offset varies within a dataset, either between
+recordings or as clocks drift and resynchronise, it blurs the relationship between the signals, and the model learns
+a weaker relationship than the true one, in the same way that random error in a predictor dilutes a
+regression~\citep{hutcheon2010random}. Neither of these problems is visible in the pooled data, and neither is
+confined to ECG and PPG. The same applies to any pairing of signals from different modalities, from pulse arrival
+time to the response of the EEG to a drug. The documentation of pooled datasets rarely states whether their timing
+differs. If each dataset were described by an atlas, this question could be answered simply by reading it.
+
+Timing errors in clinical databases have been reviewed previously~\citep{goodwin2022timing}, and several specific
+problems have been solved. These include aligning the EEG with bedside waveforms in intensive
+care~\citep{goodwin2023}, aligning the ECG with the PPG to measure pulse arrival time~\citep{ruffolo2025high}, and
+measuring the delays of processed EEG indices~\citep{pilge2006timedelay}. What is still missing is a complete and checkable
+description of a dataset's measurement system that others can read, reuse and correct. To our knowledge, no clinical
+dataset has been described in this way. The field of metrology already provides the necessary language: a measurand
+(the quantity intended to be measured), a measurement model, and a stated uncertainty with its supporting evidence.
+These concepts are set out in the International Vocabulary of Metrology (VIM)~\citep{jcgm-200-2012} and the Guide to
+the Expression of Uncertainty in Measurement (GUM)~\citep{jcgm-100-2008}, whose supplements describe the propagation
+of uncertainty by Monte Carlo methods and models with several outputs~\citep{jcgm-101-2008,jcgm-102-2011}. Earth
+observation scientists have shown how this language can be applied to historical data collected by instruments that
+can no longer be examined~\citep{mittaz2019metrology}. Other fields provide the remaining tools, including statistical
+methods for coarse and heaped data~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}, change of support
 from geostatistics~\citep{gotway2002combining}, network time synchronisation~\citep{rfc5905}, geodetic network
-adjustment~\citep{ghilani2017adjustment} and electrical network frequency analysis~\citep{grigoras2005enf}. The
-Metrology Atlas brings them together for clinical time-series data.
+adjustment~\citep{ghilani2017adjustment}, and electrical network frequency analysis~\citep{grigoras2005enf}. The
+Metrology Atlas brings these tools together for clinical time-series data.
 
 This paper describes the approach and the system that implements it, and uses the first atlas, of
-VitalDB~\citep{lee2022vitaldb}, to show what it finds. Its contributions are:
+VitalDB~\citep{lee2022vitaldb}, to demonstrate what it can reveal. The contributions of this paper are:
 \begin{itemize}[itemsep=2pt]
   \item a way to describe each variable of a recorded dataset by its measurement model, the interval each value
     describes, its bias and uncertainty with their correlation structure, and its evidence
     (Section~\ref{sec:approach});
-  \item a method, with open-source tools we developed, for correcting what can be measured: finding each step of the record's making
-    that can be undone, such as a clock's drift and resynchronisations, measuring it from the dataset's own records,
-    undoing it, testing the result and stating the uncertainty that remains (Section~\ref{sec:correct});
+  \item a method, supported by open-source tools we developed, for correcting what can be measured. The method
+    identifies each step in the making of a record that can be undone, such as a clock's drift and
+    resynchronisations, measures it from the dataset's own records, undoes it, tests the result, and states the
+    uncertainty that remains (Section~\ref{sec:correct});
   \item a dataset-independent schema and engine that check an atlas and publish it as a website and one
     machine-readable file, revised as evidence comes in (Section~\ref{sec:system});
   \item a first atlas, of VitalDB, with \fact{atlas.studies.current} analyses behind it (Section~\ref{sec:vitaldb});
   \item a planner that, for any set of signals, gives the uncertainty of their relative timing and the finest
     time grid on which they can be combined (Section~\ref{sec:use}).
 \end{itemize}
-The detail lives in the atlas, at \atlasurl; this paper quotes its numbers and points to it. The numbers are
-VitalDB's, measured on its devices and recording setup. They show the kinds of error the approach describes, not
-values to assume for another dataset.
+The details behind each result are available in the atlas, at \atlasurl, and this paper quotes its numbers and
+refers to it. The numbers reported here are specific to VitalDB, measured on its devices and recording setup. They
+illustrate the kinds of error the approach can describe, and should not be assumed to apply to other datasets.
 
 % ---------------------------------------------------------------------------
 \section{Describing a dataset as a measurement system}
