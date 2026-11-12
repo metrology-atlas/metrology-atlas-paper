@@ -597,20 +597,6 @@ misclosures also scatter more widely than the links' stated uncertainties allow,
 
 The waveforms come from four clocks, and each pair raises a different problem. Together they show the main ways a
 recording system mistimes its signals, and how a correction can be checked against a second path.
-Figure~\ref{fig:corrected} shows, for every signal with a per-recording timing form, how far it narrows the
-uncertainty.
-
-\begin{figure}[t]
-  \centering
-  \includegraphics[width=0.92\textwidth]{figures/fig6-corrected-uncertainty.pdf}
-  \caption{Standard uncertainty after correction. For each signal with a per-recording timing form: its standard
-    uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; hollow and
-    solid here mark before and after, not status as in Figure~\ref{fig:bias}; $\leq$
-    marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after
-    breath matching, the uncertainty is for stretches matched to the correct breath; \fact{primus.sync.breath}\% of the matched time
-    is still a whole breath off (Table~\ref{tab:findings}). Drawn from the atlas file.}
-  \label{fig:corrected}
-\end{figure}
 
 \emph{The plethysmogram.} The ECG and the plethysmogram are both sampled by the SNUADC, yet the plethysmogram's
 offset from the ECG is \fact{pleth.delay}\,s: a fixed delay inside the monitor, which must be removed before a pulse
@@ -626,7 +612,7 @@ Against the arterial line, a second path to the ECG's clock that carries no sawt
 arterial pulse arrival time falls from \fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms (median over \fact{ppg.art.n} recordings with a sawtooth; Figure~\ref{fig:pleth}e shows one). What remains, the correction's own error
 and the frame grid it cannot undo, is the corrected form's uncertainty (Figure~\ref{fig:corrected}).
 
-\begin{figure}[t]
+\begin{figure}[tp]
   \centering
   \includegraphics[width=\textwidth]{figures/fig7-ppg-correction-steps.pdf}
   \caption{Correcting the plethysmogram's sawtooth, step by step. (a--c) One recording (case 5328, 90 minutes):
@@ -668,6 +654,21 @@ samples at each read, so its timestamps keep close with small forward steps (fre
 rate is known only to \fact{snuadc.drift}\,ppm between recordings, though that \fact{snuadc.ahead}\,s bounds it.
 Because the count is kept up to the latest arrivals, the reference itself is probably late on true time by close to
 the largest delay from the converter to the recorder, which moves every absolute delay against it and no relative one.
+
+Figure~\ref{fig:corrected} gathers the four: for every signal with a per-recording timing form, how far its
+correction narrows the uncertainty.
+
+\begin{figure}[t]
+  \centering
+  \includegraphics[width=0.92\textwidth]{figures/fig6-corrected-uncertainty.pdf}
+  \caption{Standard uncertainty after correction. For each signal with a per-recording timing form: its standard
+    uncertainty with the bias removed by a shift known in advance (hollow), and after the correction (solid; hollow and
+    solid here mark before and after, not status as in Figure~\ref{fig:bias}; $\leq$
+    marks an upper bound, a diamond the likely value where a second reference exists). For the Primus waveforms, after
+    breath matching, the uncertainty is for stretches matched to the correct breath; \fact{primus.sync.breath}\% of the matched time
+    is still a whole breath off (Table~\ref{tab:findings}). Drawn from the atlas file.}
+  \label{fig:corrected}
+\end{figure}
 
 \subsection{Numerics and records}
 \label{sec:records}

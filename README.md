@@ -27,8 +27,8 @@ It refuses while `\todo` notes or unresolved references remain (`--draft` builds
 | 3 | fig3-urine-heaping.pdf | metrology-atlas `tools/fig_urine_heaping.py RESOLUTION_REPO RELEASE --summary SUMMARY.json OUT` (worked example: urine output) |
 | 4 | fig4-bias-uncertainty.pdf | `figures/src/fig_bias_uncertainty.py ATLAS_REPO figures/fig4-bias-uncertainty.pdf figures/fig6-corrected-uncertainty.pdf` |
 | 5 | fig5-timing-network.pdf | metrology-atlas `python -m metrology_atlas graph datasets/vitaldb --out fig5.svg --print` (the site's timing graph in its print layout), then cairosvg to PDF with the Inter font installed |
-| 6 | fig6-corrected-uncertainty.pdf | as Figure 4 |
-| 7 | fig7-ppg-correction-steps.pdf | vitaldb-bench `tools/ppg_correction_steps_figure.py --scan check_rebuilt6.jsonl --beats scan_full --fit fit.jsonl --chain-delay pleth-chain-delay.yaml --case 5328 --out OUT` (physiosync on the path) (saved outputs of the PLETH correction's checks) |
+| 6 | fig7-ppg-correction-steps.pdf | vitaldb-bench `tools/ppg_correction_steps_figure.py --scan check_rebuilt6.jsonl --beats scan_full --fit fit.jsonl --chain-delay pleth-chain-delay.yaml --case 5328 --out OUT` (physiosync on the path) (saved outputs of the PLETH correction's checks) |
+| 7 | fig6-corrected-uncertainty.pdf | as Figure 4 |
 
 Numbers in the text match the atlas at the archived snapshot cited in Section 7.
 
