@@ -230,17 +230,15 @@ more R--R intervals, an end-tidal CO$_2$ value from the last breath, and a labor
 collected during the draw, which takes several seconds or longer to complete. Even a single waveform sample is taken
 over a short acquisition window, which is shaped by the analogue filtering before the converter. An atlas states this
 interval as part of what the value is, and refers to it as the value's \emph{support}. This term is borrowed from
-geostatistics, where the support of a value is the region it averages over~\citep{gotway2002combining}. The support is
-not an error. If the width of the support is counted as uncertainty, as many descriptions do, a value appears to be
-timed much less precisely than it is. An atlas also states where within this interval the stamp sits, for each
-variable, and for each recording or setup where these differ.
+geostatistics, where the support of a value is the region it averages over~\citep{gotway2002combining}. If the width
+of the support were counted as uncertainty, as many descriptions do, a value would appear to be timed much less
+precisely than it is. An atlas also states where within this interval the stamp sits, for each variable, and for each
+recording or setup where these differ.
 
 Separately, every recorded time is itself an interval, known as the \emph{resolution interval} of the clock that
 stamped it. For example, a timestamp from a clock that ticks every millisecond places the support only to within that
-millisecond, in the same way that a recorded heart rate of 72\,bpm places the true heart rate only within 72 to 73. An
-atlas carries this interval as a component of the uncertainty of the time, with a uniform probability density over the
-tick, rather than as part of the support. This is because no timestamp can locate the support more precisely than one
-tick of its clock.
+millisecond. An atlas therefore carries this interval as a component of the uncertainty of the time, with a uniform
+probability density over the tick, rather than as part of the support.
 
 By convention, the time of a value is taken to be the close of its support (close-stamping). The \emph{bias} of a stamp
 is then the stamp minus the close of the support. A negative bias means that the stamp comes before the interval it
