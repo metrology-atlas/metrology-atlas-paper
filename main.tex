@@ -251,45 +251,46 @@ reach the finger after the R~peak is part of what the two signals measure, and i
 \subsection{Bias and uncertainty}
 \label{sec:bias}
 
-Metrology distinguishes between two kinds of error: bias and uncertainty. A \emph{bias} is a systematic shift, the same or nearly the same for every
-value it affects, such as a delay inside a monitor that puts every timestamp late by the same
-amount~\citep{jcgm-200-2012}. A bias that is known can be corrected by removing it~\citep{jcgm-100-2008};
-Section~\ref{sec:correct} describes how. What a correction cannot remove is \emph{uncertainty}: the spread of values
-the true time or value could take, given the record and what is known about how it was made. It includes the random
-scatter of each value, the error of the correction itself, and anything the record cannot resolve, such as where
-within a clock tick an event fell. The \emph{standard uncertainty} summarises that spread as a standard
+Metrology distinguishes between two kinds of error, bias and uncertainty. A \emph{bias} is a systematic shift, the
+same or nearly the same for every value it affects, such as a delay inside a monitor that puts every timestamp late by
+the same amount~\citep{jcgm-200-2012}. A bias that is known can be corrected by removing it~\citep{jcgm-100-2008}, as
+described in Section~\ref{sec:correct}. A correction cannot remove the \emph{uncertainty}, which is the spread of
+values the true time or value could take, given the record and what is known about how it was made. It includes the
+random scatter of each value, the error of the correction itself, and anything the record cannot resolve, such as
+where within a clock tick an event fell. The \emph{standard uncertainty} summarises that spread as a standard
 deviation~\citep{jcgm-100-2008}. Table~\ref{tab:terms} gathers these and the other terms this paper uses, with their
 sources.
 
 An atlas builds each uncertainty from named parts, which we call \emph{components}, as the GUM does and as in the
-effects tables of \citet{mittaz2019metrology}. For a waveform stamped by a device clock, for example, one component
-is the clock's tick, another the clock's drift between resynchronisations, and another the error of the correction
-that removes that drift. Each component has its own size and distribution, and states how it was evaluated:
-\emph{Type~A} if estimated statistically from this dataset's own data, \emph{Type~B} if taken from documentation, a
-specification or judgement~\citep{jcgm-100-2008}. A clock tick is Type~B with a rectangular (uniform) distribution;
-a spread measured between recordings is Type~A with an empirical one.
+effects tables of \citet{mittaz2019metrology}. For a waveform stamped by a device clock, for example, one component is
+the clock's tick, another the clock's drift between resynchronisations, and another the error of the correction that
+removes that drift. Each component has its own size and distribution, and states how it was evaluated: \emph{Type~A}
+if estimated statistically from this dataset's own data, \emph{Type~B} if taken from documentation, a specification or
+judgement~\citep{jcgm-100-2008}. A clock tick is evaluated as Type~B, with a rectangular (uniform) distribution,
+whereas a spread measured between recordings is Type~A, with an empirical distribution.
 
-Components combine by the law of propagation of uncertainty~\citep{jcgm-100-2008}: their standard deviations add in
-quadrature, with a further term for any two that are correlated. A standard deviation is enough when the combined
-distribution is close to normal. Where it is not, as for a truncated value or a delay that differs between groups of
-recordings, the atlas also gives the shape in full, so that it can be propagated by Monte Carlo~\citep{jcgm-101-2008}.
+Components combine by the law of propagation of uncertainty~\citep{jcgm-100-2008}, in which their standard deviations
+add in quadrature, with a further term for any two that are correlated. A standard deviation is enough when the
+combined distribution is close to normal. Where it is not, as for a truncated value or a delay that differs between
+groups of recordings, the atlas also gives the shape in full, so that it can be propagated by Monte
+Carlo~\citep{jcgm-101-2008}.
 
-How components combine also depends on which values they affect together, which an atlas states as each
-component's \emph{scope}. Some errors are independent from one value to the next, such as where each event fell
-within a clock tick. Some are correlated over time: a clock's drift between resynchronisations moves neighbouring
-timestamps together, so for these the atlas also states how long the correlation lasts and its shape (exponential,
-rectangular, triangular or bell). Others are fixed within a recording, shared between signals that use the same
-clock or correction, or common to the whole release. The scope of a component determines what comparison and averaging can achieve. For
-example, errors shared by two signals cancel when the signals are compared, whereas errors fixed within a recording
-do not shrink when values within that recording are averaged. Each shared error carries a key naming what it comes from, such as one clock or one
-correction, so that a user combining two signals can see which errors cancel.
+How components combine also depends on which values they affect together, which an atlas states as each component's
+\emph{scope}. Some errors are independent from one value to the next, such as where each event fell within a clock
+tick. Others are correlated over time, as when a clock's drift moves neighbouring timestamps together, and for these
+the atlas also states how long the correlation lasts and its shape. Others again are fixed within a recording, shared
+between signals that use the same clock or correction, or common to the whole release. The scope of a component
+determines what comparison and averaging can achieve. For example, errors shared by two signals cancel when the
+signals are compared, whereas errors fixed within a recording do not shrink when values within that recording are
+averaged. Each shared error carries a key naming its source, such as one clock or one correction, so that a user
+combining two signals can see which errors cancel.
 
 All biases and uncertainties are stated against the atlas's \emph{working reference}, one clock chosen because the
 others can be tied to it. The reference's own bias against the true event, such as a monitor's output delay, is a
-component common to the whole release where it is known, and is named as unknown where it is not. Some care is
-needed when an uncertainty is evaluated by comparing a signal with a second, checking signal, because the comparison
-includes the checking signal's own noise and so overstates the uncertainty. In that case an atlas gives the result as
-the headline, labelled an upper bound, and beside it, where a second independent reference allows, a likely value.
+component common to the whole release where it is known, and is named as unknown where it is not. Some care is needed
+when an uncertainty is evaluated by comparing a signal with a second, checking signal, because the comparison includes
+the checking signal's own noise and so overstates the uncertainty. In that case an atlas gives the result as the
+headline, labelled an upper bound, and beside it, where a second independent reference allows, a likely value.
 
 \begin{table}[tp]
   \centering
