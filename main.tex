@@ -850,27 +850,25 @@ that others can check and extend.
 An atlas is a reconstruction of a measurement system, and what it can describe depends on what the records reveal.
 Steps that leave a trace in the data, such as a drifting clock or a resynchronisation, can be measured and corrected,
 but steps that leave no trace cannot. For example, two signals that share no artefact, event or rhythm cannot be
-synchronised from the data alone, and steps that are many-to-one, such as rounding, can only be carried forward as
-uncertainty. Where a dataset's devices and recording chain are documented in detail, or the devices themselves can be
-examined, the model can rely more on that knowledge and less on inference. The VitalDB atlas was built largely by
-inference, from the records, the public firmware of one device and the recording software's stamping rules, without
-access to the devices or the recording computers. Absolute times are a particular case, because a dataset's own records
-rarely link its clocks to UTC, and in VitalDB this link is not observed. An atlas can therefore usually state relative
-timing with much greater confidence than absolute timing. Similarly, the value side of a variable can be described by
-its resolution and rounding, but its accuracy against a reference requires calibration and maintenance records, which
-are rarely released with clinical datasets.
+synchronised from the data alone. Where a dataset's devices and recording chain are documented in detail, or the
+devices themselves can be examined, the model can rely more on that knowledge and less on inference. The VitalDB atlas
+was built largely by inference, from the records, the public firmware of one device and the recording software's
+stamping rules, without access to the devices or the recording computers. Absolute times are a particular case,
+because a dataset's own records rarely link its clocks to UTC, and in VitalDB this link is not observed, so an atlas
+can usually state relative timing with much greater confidence than absolute timing. Similarly, the value side of a
+variable can be described by its resolution and rounding, but its accuracy against a reference requires calibration
+and maintenance records, which are rarely released with clinical datasets.
 
 Most of the checks available to an atlas are internal, relying on a shared artefact, a second path to the same clock,
 or a closed loop of links. Such checks can show that results are consistent with one another, and can reveal when
 stated uncertainties are too small, but they cannot replace a comparison with an external reference. In the VitalDB
-atlas, the loops of the clock network show that some stated uncertainties are still too small, and only the
-plethysmogram's correction has been tested end to end, against an arterial line that also helps to place the slips. A
-check of the polled numerics also remains unresolved. When the monitor's heart rate and pulse rate are recomputed from
-the waveforms, they change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their timing forms
-predict, which suggests that these delays may be up to about 1\,s longer than stated
+atlas, only the plethysmogram's correction has been tested end to end, against an arterial line that also helps to
+place the slips. A check of the polled numerics also remains unresolved. When the monitor's heart rate and pulse rate
+are recomputed from the waveforms, they change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their
+timing forms predict, which suggests that these delays may be up to about 1\,s longer than stated
 (\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}), although the cause has not
-yet been found. Where the evidence only supports a bound, an atlas reports an upper bound rather than a value. Finally,
-building an atlas requires considerable effort and expertise, both in the recording systems and in the analysis.
+yet been found. Finally, building an atlas requires considerable effort and expertise, both in the recording systems
+and in the analysis.
 
 \subsection{Future work}
 
