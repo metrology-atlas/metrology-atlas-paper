@@ -121,10 +121,19 @@ carried forward as an interval or a spread (Section~\ref{sec:correct}).
 
 This uncertainty can be quantified, as it is when a sensor is validated against a reference. However, it is typically
 underestimated, if it is considered at all, and it is rarely carried into the analyses and models built on the
-data~\citep{ansermino2023measurement}. Synchronisation is a good example. Two signals are not simply synchronised or
-unsynchronised. Instead, the alignment between them can be measured, and that measurement has a bias and an uncertainty. A statement that
-a dataset's signals are synchronised cannot be verified objectively, or used in a quantitative analysis, unless it is
-accompanied by that uncertainty and the statistic used to express it.
+data~\citep{ansermino2023measurement}. The synchronisation of signals in open datasets shows how this happens in
+practice. For example, VitalDB was recorded with software designed to record time-synchronised data from several
+devices~\citep{lee2018vitalrecorder}, and its data descriptor states that the data from these devices were recorded in
+a time-synchronised manner~\citep{lee2022vitaldb}. A benchmark dataset derived from VitalDB states that its waveform
+synchronisation is secured, and recommends its waveforms for analyses that need precise alignment between signals,
+such as pulse arrival time~\citep{wang2023pulsedb}. A later study then attributed the better performance of blood
+pressure models trained on VitalDB to this synchronisation~\citep{fritzsche2026role}. Similarly, a benchmark built
+from MIMIC-III describes its signals as synchronised~\citep{moulaeifard2026mimic}, although delays of up to 500\,ms
+between the same waveforms have been reported~\citep{wang2023pulsedb}. In each of these cases, the signals are
+described as synchronised without a measurement of how closely they are aligned. However, synchronisation is a matter
+of degree, because the alignment between two signals can be measured, and that measurement has a bias and an
+uncertainty. A statement that a dataset's signals are synchronised cannot be verified objectively, or used in a
+quantitative analysis, unless it is accompanied by that uncertainty and the statistic used to express it.
 
 Analyses that relate signals beat by beat, or at a sub-second scale, require a level of synchronisation that many
 clinical datasets do not document, and this gap becomes more important when datasets are pooled. For example,
