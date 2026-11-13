@@ -809,12 +809,10 @@ without telling the user; instead, it states which shift each form needs, and in
 
 \subsection{Main findings and implications}
 
-Describing VitalDB as a measurement system showed that a recording which appears to share a single timeline is in
-fact made up of many clocks and delays, each with its own behaviour (Section~\ref{sec:vitaldb},
-Table~\ref{tab:findings}). Most of these could be measured from the dataset's own records and corrected to a stated
-uncertainty, and the remainder could at least be bounded and carried forward as uncertainty. The values showed similar
-effects, including truncation and heaping, which are not described in the dataset's documentation and are not
-visible in the output of a typical data loader.
+Describing VitalDB as a measurement system showed that a recording which appears to share a single timeline is in fact
+made up of many clocks and delays, each with its own behaviour, and that most of these could be measured from the
+dataset's own records and corrected to a stated uncertainty (Section~\ref{sec:vitaldb}). The recorded values showed
+similar effects, such as truncation and heaping, which the dataset's documentation does not describe.
 
 Timing differences between signals are rarely simple offsets. Device clocks drift at their own characteristic rates,
 and are pulled back into line by resynchronisations that follow their own schedules, so the offset between two
@@ -831,28 +829,24 @@ recovered from the ECG it exports. Knowing these parameters can help when harmon
 recording chains, or at different clinical sites, since a derived variable from one device can then be recomputed to
 match another.
 
-Much current clinical research implicitly assumes that all signals in a dataset are perfectly synchronised. This
-assumption becomes harder to defend as analyses make more use of high-frequency signals, and combine signals across
-modalities. We suggest that synchronisation is better treated as a measurement, with a bias and an uncertainty that
-depend on the signals, the timing form used and the recording. The relevant question is then whether the uncertainty
-of the synchronisation is small enough for the intended analysis, that is, whether it lies within the \emph{target
-measurement uncertainty} for that analysis~\citep{jcgm-200-2012}. A statement that signals are synchronised cannot be
-checked against such a target unless the uncertainty and the evidence behind it are given. An atlas puts this
-practice into effect, by stating the measured offset between signals, its uncertainty and the studies behind them,
-and the planner described in Section~\ref{sec:use} applies it to a chosen set of signals.
+Because the alignment between signals is a measurement (Section~\ref{sec:intro}), the relevant question for an
+analysis is whether the uncertainty of that alignment is small enough for its purpose, that is, whether it lies within
+the \emph{target measurement uncertainty} for the analysis~\citep{jcgm-200-2012}. This question becomes more pressing
+as analyses make more use of high-frequency signals, and combine signals across modalities. An atlas makes it possible
+to answer it, by stating the measured offset between signals, its uncertainty and the studies behind them, and the
+planner described in Section~\ref{sec:use} applies these to a chosen set of signals.
 
-It follows that systematic biases should be corrected before any analysis, and this is particularly important when
-data from different sites, with different recording chains, are pooled. Where timing and quantisation effects can be
-modelled explicitly, as demonstrated here, we believe it is better to do so than to rely on a model to absorb them
-implicitly. An explicit correction can be inspected, tested and carried to another site, whereas a model that learns
-these effects implicitly may instead learn the site in place of the physiology (Section~\ref{sec:intro}). Stated uncertainties,
+It follows that systematic biases should be corrected before any analysis, particularly when data from sites with
+different recording chains are pooled. Where timing and quantisation effects can be modelled explicitly, as
+demonstrated here, we believe it is better to do so than to rely on a model to absorb them, because an explicit
+correction can be inspected, tested and carried to another site (Section~\ref{sec:intro}). Stated uncertainties,
 together with their correlation structure, also open the data to methods that account for measurement error
-explicitly, such as errors-in-variables regression, which corrects the dilution that random error in a predictor
-causes~\citep{hutcheon2010random,carroll2006measurement}, and Monte Carlo propagation of uncertainty through derived
-features~\citep{jcgm-101-2008}. We expect that other datasets recorded with several devices are affected in similar
-ways, since most share the same architecture of polled numerics, independent device clocks and separate converters,
-and timing errors of these kinds have been documented across clinical systems~\citep{goodwin2022timing}. For the
-custodians of such datasets, an atlas provides a way to document a release that others can check and extend.
+explicitly, such as errors-in-variables regression~\citep{hutcheon2010random,carroll2006measurement} and Monte Carlo
+propagation of uncertainty through derived features~\citep{jcgm-101-2008}. We expect other datasets recorded with
+several devices to be affected in similar ways, since most share the same architecture of polled numerics, independent
+device clocks and separate converters, and timing errors of these kinds have been documented across clinical
+systems~\citep{goodwin2022timing}. For the custodians of such datasets, an atlas provides a way to document a release
+that others can check and extend.
 
 \subsection{Limitations}
 
