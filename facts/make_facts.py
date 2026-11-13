@@ -309,6 +309,15 @@ def main():
     half_up = lambda x: float(Decimal(str(x)).quantize(Decimal("0.1"), rounding=ROUND_HALF_UP))  # 13.95 -> 14.0, as the atlas
     fact("ppg.art.none", p["value"], num(half_up(p["value"]), 1), "ms", "parameter ppg-uncorrected-art-spread", p["quantity"])
     fact("ppg.art.rebuilt", q["value"], num(half_up(q["value"]), 1), "ms", "parameter ppg-correction-art-spread", q["quantity"])
+    # the same, over every recording compared with an arterial line (no sawtooth classification, so no threshold)
+    p, q = P["ppg-uncorrected-art-spread-all"], P["ppg-correction-art-spread-all"]
+    assert p["spread"]["n"] == q["spread"]["n"]
+    fact("ppg.art.all.n", q["spread"]["n"], num(q["spread"]["n"]), "recordings",
+         "parameter ppg-correction-art-spread-all spread.n", "recordings compared with the arterial line")
+    fact("ppg.art.all.none", p["value"], num(half_up(p["value"]), 1), "ms", "parameter ppg-uncorrected-art-spread-all",
+         p["quantity"])
+    fact("ppg.art.all.rebuilt", q["value"], num(half_up(q["value"]), 1), "ms", "parameter ppg-correction-art-spread-all",
+         q["quantity"])
     bits = {t.get("bits_to_store") for t in J["devices"]["snuadc"]["tracks"] if t.get("bits_to_store")}
     assert len(bits) == 1, bits
     nb = bits.pop()

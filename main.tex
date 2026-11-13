@@ -106,8 +106,7 @@ truncates, whereas the delay is a mixture of two distributions, because it diffe
     Both panels share one density scale, and the marginal PDFs (purple) are drawn along the top for time and on the
     right for value. In both panels the value is uniform over [72, 73), because the monitor truncates. From the stored
     record alone (E), the time is a mixture of two groups of VitalDB recordings. The early group has a median delay of
-    \fact{hr.early.d}\,s (\fact{hr.early.share}\% of recordings), and the late group \fact{hr.late.d}\,s
-    (\fact{hr.late.share}\%). Each group is spread by the wait for the poll. With the atlas (F), the delay is measured
+    \fact{hr.early.d}\,s, and the late group, the larger of the two, \fact{hr.late.d}\,s. Each group is spread by the wait for the poll. With the atlas (F), the delay is measured
     for this recording, here \fact{hr.example.d}\,s with a standard uncertainty of \fact{hr.label.u}\,s, so only the
     wait for the poll remains. Every step and its source are given in \atlaspage{worked-example-heart-rate}{Worked
     example: one heart-rate record}.}
@@ -463,8 +462,8 @@ study records the code and version it used, so that a correction can be rerun, o
 \begin{table}[tp]
   \centering
   \small
-  \caption{What an atlas records for each variable, using the BIS EEG after synchronisation in the VitalDB atlas as
-    the example. The engine computes the combined standard uncertainty from the components, so it is never typed in by
+  \caption{What an atlas records for each variable, using the BIS EEG after synchronisation in the cited release of
+    the VitalDB atlas as the example. The engine computes the combined standard uncertainty from the components, so it is never typed in by
     hand.}
   \label{tab:schema}
   \begin{tabularx}{\textwidth}{@{}P{0.17\textwidth}P{0.4\textwidth}L@{}}
@@ -489,7 +488,7 @@ study records the code and version it used, so that a correction can be rerun, o
       index comes from the same source, and the BIS smoothing label is computed from it \\
     Clock domain & The domain whose drift remains, with its rate and its spread between recordings & The working
       reference: the SNUADC sample clock, on the recorder PC's timeline. Its rate is uncertain by \fact{snuadc.drift}\,ppm between
-      recordings where the SNUADC stamps carry no resynchronisations (\fact{snuadc.uncorr.share}\%). The EEG's samples are
+      recordings where the SNUADC stamps carry no resynchronisations. The EEG's samples are
       spaced by the BIS's own clock and its records stamped by the PC; synchronisation moves both onto the reference \\
     Evidence & Status (measured, derived, estimated, assumed), the studies behind each number, the correction and the
       code & Measured; \fact{bis.sync.studies} studies \\
@@ -534,11 +533,10 @@ lists the studies that use them.
     Clocks carried in the signal & Use a regular rhythm inside a signal, such as a pacemaker, an oximeter's frames or
       the mains hum, as a third clock & The mains hum, tying the recording PCs to the grid \\
     Does the waveform run on? & Test whether a waveform continues smoothly across a junction, reset or gap, to tell
-      lost samples from lost time & About \fact{snuadc.reset.loss}\,ms of signal lost at each SNUADC resynchronisation \\
-    Data continuity & Map where each signal's gaps are and how long its unbroken stretches run & Recording pauses of
-      about \fact{rec.pause}\,s \\
+      lost samples from lost time & Signal lost at each SNUADC resynchronisation \\
+    Data continuity & Map where each signal's gaps are and how long its unbroken stretches run & Recording pauses \\
     Delays and averaging windows & Recompute a monitor's numeric from its own waveform, or read it from how the
-      numeric disagrees with another measurement of the same rate, to find the window it summarises and its delay & Heart rate's two delay groups, \fact{hr.groups.gap}\,s apart \\
+      numeric disagrees with another measurement of the same rate, to find the window it summarises and its delay & Heart rate's two delay groups \\
     Clinical and laboratory times & Find what a time in the clinical and lab tables marks, from signatures the event
       leaves in the signals & The lab time marks when the specimen was logged, after the draw and before the result \\
     Rounding, heaping and value resolution & Find the resolution a number was recorded at, its rounding rule and its
@@ -576,16 +574,16 @@ sections.
 \begin{table}[tp]
   \centering
   \small
-  \caption{Findings from the VitalDB atlas that change how its data should be used. Each finding has a study page in
-    the atlas.}
+  \caption{Findings from the VitalDB atlas that change how its data should be used, with their values in the cited
+    release. Each finding has a study page in the atlas that describes how it was found.}
   \label{tab:findings}
   \begin{tabularx}{\textwidth}{@{}P{0.3\textwidth}L@{}}
     \toprule
-    Finding & Number \\
+    Finding & Value \\
     \midrule
     Synchronisation, plethysmogram to ECG & Offset from the ECG of \fact{pleth.delay}\,s, a fixed delay inside the monitor; the
-      frame-slip correction narrows the spread of finger minus arterial pulse arrival time from \fact{ppg.art.none} to
-      \fact{ppg.art.rebuilt}\,ms (median; \fact{ppg.art.n} recordings with a sawtooth) \\
+      frame-slip correction narrows the spread of finger minus arterial pulse arrival time from \fact{ppg.art.all.none} to
+      \fact{ppg.art.all.rebuilt}\,ms (median over all \fact{ppg.art.all.n} recordings compared with an arterial line) \\
     BIS EEG stamps sit early against the ECG (on the working reference) & \fact{bis.bias}\,s median (5th--95th percentile
       \fact{bis.bias.p5} to \fact{bis.bias.p95}\,s; \fact{bis.bias.n} recordings) \\
     Synchronisation, EEG to ECG & Standard uncertainty \fact{bis.shift.uc}\,ms with a shift known in advance; \fact{bis.sync.uc}\,ms after
@@ -593,14 +591,14 @@ sections.
     Synchronisation, ventilator to monitor & \fact{primus.shift.uc}\,ms with a shift known in advance; \fact{primus.sync.uc}\,ms after breath matching, for a
       stretch matched to the correct breath (an upper bound; \fact{primus.sync.n} recordings), and still a whole breath off for
       \fact{primus.sync.breath}\% of the matched time \\
-    Working reference without stamp resynchronisations (\fact{snuadc.uncorr.share}\% of recordings) & Rate error \fact{snuadc.drift}\,ppm (robust SD between
-      recordings; median \fact{snuadc.drift.hourly}\,ms per hour; checked in \fact{snuadc.drift.n}); the mains hum, in the
-      \fact{snuadc.uncorr.hum} such recordings with hum, does not narrow it further (\fact{snuadc.drift.hum}\,ppm), though it
-      trims the tail \\
+    Working reference without stamp resynchronisations & Rate error \fact{snuadc.drift}\,ppm (robust SD between
+      recordings; median \fact{snuadc.drift.hourly}\,ms per hour; checked against the BIS in \fact{snuadc.drift.n} recordings); in
+      recordings with a mains hum strong enough to time, the hum does not narrow it further (\fact{snuadc.drift.hum}\,ppm),
+      though it trims the tail \\
     Working reference at its resynchronisations & About \fact{snuadc.reset.loss}\,ms of signal lost at each \\
-    Recording computers against the mains grid & \fact{pc.grid}\,ppm median (the computer runs slow); setups
-      \fact{pc.grid.setups.min} to \fact{pc.grid.setups.max}\,ppm \\
-    Monitor heart rate is truncated & In \fact{hr.trunc.share}\% of \fact{hr.trunc.n} recordings; it describes its last
+    Recording computers against the mains grid & \fact{pc.grid}\,ppm median (the computer runs slow); most recording
+      stations run close to this, with a few outlying stations \\
+    Monitor heart rate is truncated & In nearly all recordings; it describes its last
       \fact{hr.window} R--R intervals (\fact{hr.span}\,s at the median rate) \\
     The CO$_2$ waveform trails the breath & \fact{co2.line}\,s median (interquartile range \fact{co2.line.q1}--\fact{co2.line.q3}\,s; \fact{co2.line.n} recordings):
       the gas sampling line \\
@@ -618,18 +616,15 @@ network is adjusted~\citep{ghilani2017adjustment}. The timing network for VitalD
 Figure~\ref{fig:network}. Every link is stated with its sign, as one clock's time minus the other's for the same event,
 because an offset without a sign is easily applied in the wrong direction.
 
-One link reaches outside the recording. The SNUADC waveforms contain the mains hum in \fact{snuadc.hum.share}\% of
-recordings, and because the frequency of the electricity grid is regulated, the hum can act as a clock that ties the
-recording's clock rates to an outside reference. It provides rates only, and not absolute
+One link reaches outside the recording. Many of the SNUADC waveforms carry a mains hum strong enough to time, and because the frequency of the electricity grid is regulated, the hum can act as a clock that ties the
+recording's clock rates to an outside reference (Table~\ref{tab:findings}). It provides rates only, and not absolute
 times, so the offset of the recordings from UTC is not observed in the release.
 
 Because each device's rate is measured against another clock, the rates around any loop of links should sum to zero,
-in the same way that the height differences around a levelling loop do in surveying. In VitalDB the loops close to
-within about \fact{loop.bis}\,ppm (median, over \fact{loop.bis.n} loops between the BIS, the SNUADC and the recording
-computer, each measured within a recording), which shows that the links agree with one another. However, the
-misclosures also vary more widely than the stated uncertainties of the links allow, by a factor of
-\fact{loop.se.min} to \fact{loop.se.max}. This means that those uncertainties are too small, and the atlas reports this
-alongside them.
+in the same way that the height differences around a levelling loop do in surveying. In VitalDB, the loops between the BIS, the SNUADC and the recording
+computer close to within a median of \fact{loop.bis}\,ppm, which shows that the links agree with one another. However,
+the misclosures also vary more widely than the stated uncertainties of the links allow. This means that those
+uncertainties are too small, and the atlas reports this alongside them.
 
 \subsection{Synchronising the waveforms}
 \label{sec:sync}
@@ -639,24 +634,23 @@ problems illustrate the main ways in which a recording system can mistime its si
 checked against a second path.
 
 \emph{The plethysmogram.} The ECG and the plethysmogram are both sampled by the SNUADC, yet the plethysmogram trails the
-ECG by a median of \fact{pleth.stored}\,ms as stored. Most of this is a fixed delay inside the monitor: subtracting an
-assumed physiological pulse arrival time of \fact{pat.adopted}\,ms leaves about \fact{pleth.delay.ms}\,ms. A sawtooth
-is superimposed on this fixed delay, and its correction follows the five steps described in Section~\ref{sec:correct}
-(Figure~\ref{fig:pleth}). The problem was found in the delay from each R~peak to the pulse that follows it. Within a
-recording, this delay creeps slowly and then jumps by about \fact{pleth.slip}\,ms (Figure~\ref{fig:pleth}a). This
-happens because the oximeter computes its waveform in frames, short blocks of samples produced on its own clock. The
-oximeter's clock and the converter's clock drift apart until the waveform is pulled back by a whole frame, which
-produces a sawtooth hidden inside a signal that appears continuous. The sawtooth was measured in each recording, by
-locating each slip from the shapes of the pulses and fitting the creep between slips (Figure~\ref{fig:pleth}b), and
-was then undone by removing the fitted sawtooth (Figure~\ref{fig:pleth}c). The correction was tested in three ways.
-First, the slips found by the algorithm were compared with blinded manual labels
+ECG by a median of \fact{pleth.stored}\,ms as stored. Most of this is a fixed delay inside the monitor. Subtracting an
+assumed physiological pulse arrival time of \fact{pat.adopted}\,ms puts that delay at about \fact{pleth.delay.ms}\,ms. A
+sawtooth is superimposed on this fixed delay, and its correction follows the five steps described in
+Section~\ref{sec:correct} (Figure~\ref{fig:pleth}). The problem was found in the delay from each R~peak to the pulse that
+follows it. Within a recording, this delay creeps slowly and then jumps by about \fact{pleth.slip}\,ms
+(Figure~\ref{fig:pleth}a). This happens because the oximeter computes its waveform in frames, short blocks of samples
+produced on its own clock. That clock drifts against the converter's clock until the waveform is pulled back by a whole
+frame, which produces a sawtooth hidden inside a signal that appears continuous. The sawtooth was measured in each
+recording, by locating each slip from the shapes of the pulses and fitting the creep between slips
+(Figure~\ref{fig:pleth}b), and then removed (Figure~\ref{fig:pleth}c). The correction was checked in three ways. The
+slips it found were compared with blinded manual labels
 (\atlaspage{studies/ppg-sawtooth-slips}{Finding and placing each PPG frame slip}), and individual corrections were
-reviewed by eye. Second, at the slips themselves, the step of about one frame falls to close to zero after correction
-(Figure~\ref{fig:pleth}d). Third, the correction was tested against the arterial line, which provides a second path to
-the ECG's clock that carries no sawtooth. The spread of finger minus arterial pulse arrival time falls from
-\fact{ppg.art.none} to \fact{ppg.art.rebuilt}\,ms (median over \fact{ppg.art.n} recordings with a sawtooth;
-Figure~\ref{fig:pleth}e shows one example). What remains, including the correction's own error and the frame grid it
-cannot undo, forms the uncertainty of the corrected form (Figure~\ref{fig:corrected}).
+reviewed by eye. At the slips themselves, the step of about one frame falls to close to zero after correction
+(Figure~\ref{fig:pleth}d). Against the arterial line, which reaches the ECG's clock by a second path with no sawtooth,
+the spread of finger minus arterial pulse arrival time narrows (Figure~\ref{fig:pleth}e and Table~\ref{tab:findings}).
+What remains, including the correction's own error and the frame grid it cannot undo, forms the uncertainty of the
+corrected form (Figure~\ref{fig:corrected}).
 
 \begin{figure}[tp]
   \centering
@@ -683,20 +677,19 @@ activity, which both signals record, were used to synchronise the EEG with the E
 upper bound), or to within \fact{bis.own.uc}\,ms when each recording's own bursts are used.
 
 \emph{The ventilator.} The recorder does not notice samples of the ventilator's airway pressure that are lost in
-transmission, so the stamps of this waveform run ahead of the breaths they record. The
-breath cycle, which can be seen in both the airway pressure and the central venous pressure, was used to synchronise
-the two signals to within \fact{primus.sync.uc}\,ms. However, because ventilation is so regular, a match one breath
-early or late fits almost as well, and only pauses in ventilation show which breath is right. An estimated
-\fact{primus.sync.breath}\% of the matched time is a whole breath out. Since the affected stretches cannot be
-identified, the atlas carries this as a separate component of the uncertainty, rather than including it in a standard
-deviation.
+transmission, so the stamps of this waveform run ahead of the breaths they record. The breath cycle, which can be seen
+in both the airway pressure and the central venous pressure, was used to synchronise the two signals to within about a
+tenth of a second, also an upper bound, for stretches matched to the correct breath (Table~\ref{tab:findings}).
+However, because ventilation is so regular, a match one breath early or late fits almost as well, and only pauses in
+ventilation show which breath is right. Part of the matched time is therefore a whole breath out. Since the affected
+stretches cannot be identified, the atlas carries this as a separate component of the uncertainty, rather than including
+it in a standard deviation.
 
 \emph{The reference itself.} Even the working reference is not a perfect clock. Depending on whether the converter runs
-fast or slow, the recorder either restarts its count of the converter's samples about every
-\fact{snuadc.step.period}\,h, which pulls the timestamps back by about \fact{snuadc.step.size}\,s and loses about
-\fact{snuadc.reset.loss}\,ms of signal each time, or makes frequent small corrections. In
-the \fact{snuadc.uncorr.share}\% of recordings that show neither behaviour, the converter's rate is known only to within
-\fact{snuadc.drift}\,ppm between recordings.
+fast or slow, the recorder either restarts its count of the converter's samples about every \fact{snuadc.step.period}\,h,
+which pulls the timestamps back by about \fact{snuadc.step.size}\,s and loses a little signal each time, or makes
+frequent small corrections. In recordings that show neither behaviour, the converter's rate cannot be read from the
+stamps, and is known only from its spread between recordings (Table~\ref{tab:findings}).
 
 Figure~\ref{fig:corrected} brings the four signals together, showing for every signal with a per-recording timing form
 how far its correction reduces the uncertainty.
@@ -727,11 +720,11 @@ into one of two groups of recordings, and waits for the recorder's next poll bef
 interval that the atlas measures. The other numerics polled by the recorder wait in the same way.
 
 Records made by people, or by other hospital systems, carry their own timing. A laboratory value is stamped when its
-specimen was logged: when the specimen was registered at the central laboratory, or entered from the blood-gas
+specimen was logged, which is when the specimen was registered at the central laboratory or entered from the blood-gas
 analyser in theatre. This time falls after the blood was drawn, and before the result was available. The draw itself
 can be located more precisely, within the access of the arterial line that the blood was taken from, which can be
-found in the arterial pressure waveform. For a blood gas, this access lasts a median of \fact{lab.access.width}\,s
-(10th--90th percentile \fact{lab.access.p10}--\fact{lab.access.p90}\,s). Values that are charted by hand carry the
+found in the arterial pressure waveform. This narrows the draw from the minutes before the lab stamp to the access
+itself. Values that are charted by hand carry the
 rounding applied by the person who charted them (Figure~\ref{fig:urine}).
 
 \subsection{Where the data depart from their documentation}
@@ -755,10 +748,10 @@ examined this closely.
       \fact{snuadc.bits}-bit codes in every channel, from a 10-bit converter in the public firmware~\citep{snuadc} \\
     Primus CO\textsubscript{2} gain & 0.1\,mmHg per code & \fact{primus.co2.gain}\,mmHg per code
       (\fact{primus.co2.gain.kpa}\,kPa, because the device reports CO\textsubscript{2} in kPa) \\
-    Primus airway pressure continuity & Continuous & About \fact{primus.pause}\,s lost every \fact{primus.period}\,s, in \fact{primus.pause.n} recordings \\
-    Laboratory timestamp & Commonly taken as the result time & When the specimen was logged. For blood gases this is a median of
-      \fact{lab.bg.lag}\,min after the draw (10th--90th percentile \fact{lab.bg.lag.p10}--\fact{lab.bg.lag.p90}\,min), and for
-      central-lab panels about \fact{lab.central.lag}\,min. The result came later, after a turnaround that was not recorded \\
+    Primus airway pressure continuity & Continuous & About \fact{primus.pause}\,s lost every \fact{primus.period}\,s, at each of its clock corrections \\
+    Laboratory timestamp & Commonly taken as the result time & When the specimen was logged, minutes after the draw (a
+      median of \fact{lab.bg.lag}\,min for blood gases, and longer for central-lab panels). The result came later, after a
+      turnaround that was not recorded \\
     Operation end & Charted & Set 10\,min before the recording end in \fact{opend.imputed} cases (\fact{opend.imputed.share}\%) \\
     \bottomrule
   \end{tabularx}
@@ -842,7 +835,7 @@ or a closed loop of links. Such checks can show that results are consistent with
 stated uncertainties are too small, but they cannot replace a comparison with an external reference. In the VitalDB
 atlas, only the plethysmogram's correction has been tested end to end, against an arterial line that also helps to
 place the slips. A check of the polled numerics also remains unresolved. When the monitor's heart rate and pulse rate
-are recomputed from the waveforms, they change \fact{hr.recompute.lag} and \fact{pr.recompute.lag}\,s later than their
+are recomputed from the waveforms, they change later than their
 timing forms predict, which suggests that these delays may be up to about 1\,s longer than stated
 (\atlaspage{studies/numeric-delay-check}{Monitor numerics recomputed from the waveforms}), although the cause has not
 yet been found. Finally, building an atlas requires considerable effort and expertise, both in the recording systems

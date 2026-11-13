@@ -1,8 +1,8 @@
 generated: '2026-11-13'
 atlas:
   file: built from metrology-atlas
-  sha256: f03584bf1a0b7450839aa04328ab19f3a4ee38453a696791cc1087a0cfd536f6
-  commit: 7b64442
+  sha256: 86c747f0aa9c352337e7c4db3e9115c36353587b90e5d091745f8c1b75e3403b
+  commit: d62f243
   schema: metrology-atlas/0.5
 facts:
   atlas.variables:
@@ -34,8 +34,8 @@ facts:
     source: 'atlas file: devices'
     definition: number of devices
   atlas.parameters:
-    value: 134
-    display: '134'
+    value: 136
+    display: '136'
     unit: parameters
     status: measured
     source: 'atlas file: parameters'
@@ -727,6 +727,31 @@ facts:
     definition: Spread of finger minus arterial pulse arrival time after the rebuilt
       sawtooth correction (robust SD of 30 s window medians), median over recordings
       with a sawtooth.
+  ppg.art.all.n:
+    value: 2976
+    display: 2,976
+    unit: recordings
+    status: measured
+    source: parameter ppg-correction-art-spread-all spread.n
+    definition: recordings compared with the arterial line
+  ppg.art.all.none:
+    value: 14.01
+    display: '14.0'
+    unit: ms
+    status: measured
+    source: parameter ppg-uncorrected-art-spread-all
+    definition: Spread of finger minus arterial pulse arrival time without a sawtooth
+      correction (robust SD of 30 s window medians), median over every recording compared
+      with an arterial line, before any classification by slips.
+  ppg.art.all.rebuilt:
+    value: 11.72
+    display: '11.7'
+    unit: ms
+    status: measured
+    source: parameter ppg-correction-art-spread-all
+    definition: Spread of finger minus arterial pulse arrival time after the rebuilt
+      sawtooth correction (robust SD of 30 s window medians), median over every recording
+      compared with an arterial line, before any classification by slips.
   snuadc.bits:
     value: 10
     display: '10'
