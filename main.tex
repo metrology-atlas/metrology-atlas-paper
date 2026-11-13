@@ -94,8 +94,6 @@ down (truncates) could be any value from 72 up to, but not including, 73. This v
 wait for the recorder's next poll. The distributions of the true value and the true time behind this record therefore
 take different shapes, and neither of them is Gaussian. The value is uniform over one step, because the monitor
 truncates, whereas the delay is a mixture of two distributions, because it differs between two groups of recordings.
-Some of the steps that produced a record can be measured and undone, which narrows its distribution, while the
-remaining steps must be carried forward as an interval or a spread (Section~\ref{sec:correct}).
 
 \begin{figure}[tp]
   \centering
@@ -142,16 +140,16 @@ In VitalDB the offset is \fact{pleth.delay}\,s, whereas in a paediatric intensiv
 recording hardware it was 1.30\,s~\citep{ruffolo2025high}. In that unit, heart rates of 120\,bpm are common, and at
 this rate an R--R interval lasts 0.5\,s, so an offset of 1.30\,s puts the signals more than two beats out of step.
 
-A model trained on a combination of such datasets can be harmed in two ways. Where
-the offset differs between sites, it becomes a property of the site, and a model may learn to recognise the site
-instead of the physiology. Such a shortcut works on the sites a model was trained on, but fails on a new
-site~\citep{geirhos2020shortcut,zech2018variable}. Where the offset varies within a dataset, either between
-recordings or as clocks drift and resynchronise, it blurs the relationship between the signals, and the model learns
-a weaker relationship than the true one, in the same way that random error in a predictor dilutes a
-regression~\citep{hutcheon2010random}. Neither of these problems is visible in the pooled data, and neither is
-confined to ECG and PPG. The same applies to any pairing of signals from different modalities, from pulse arrival
-time to the response of the EEG to a drug. The documentation of pooled datasets rarely states whether their timing
-differs. If each dataset were described by an atlas, this question could be answered simply by reading it.
+A model trained on a combination of such datasets can be harmed in two ways. Where the offset differs between sites,
+it becomes a property of the site, and a model may learn to recognise the site instead of the physiology. Such a
+shortcut works on the sites a model was trained on, but fails on a new
+site~\citep{geirhos2020shortcut,zech2018variable}. Where the offset varies within a dataset, either between recordings
+or as clocks drift and resynchronise, it blurs the relationship between the signals, and the model learns a weaker
+relationship than the true one, in the same way that random error in a predictor dilutes a
+regression~\citep{hutcheon2010random}. Neither problem is visible in the pooled data, and the same applies to any
+pairing of signals from different modalities, from pulse arrival time to the response of the EEG to a drug. The
+documentation of pooled datasets rarely states whether their timing differs. If each dataset were described by an
+atlas, this question could be answered simply by reading it.
 
 Timing errors in clinical databases have been reviewed previously~\citep{goodwin2022timing}, and several specific
 problems have been solved. These include aligning the EEG with bedside waveforms in intensive
@@ -161,8 +159,7 @@ description of a dataset's measurement system that others can read, reuse and co
 dataset has been described in this way. The field of metrology already provides the necessary language: a measurand
 (the quantity intended to be measured), a measurement model, and a stated uncertainty with its supporting evidence.
 These concepts are set out in the International Vocabulary of Metrology (VIM)~\citep{jcgm-200-2012} and the Guide to
-the Expression of Uncertainty in Measurement (GUM)~\citep{jcgm-100-2008}, whose supplements describe the propagation
-of uncertainty by Monte Carlo methods and models with several outputs~\citep{jcgm-101-2008,jcgm-102-2011}. Earth
+the Expression of Uncertainty in Measurement (GUM)~\citep{jcgm-100-2008}. Earth
 observation scientists have shown how this language can be applied to historical data collected by instruments that
 can no longer be examined~\citep{mittaz2019metrology}. Other fields provide the remaining tools, including statistical
 methods for coarse and heaped data~\citep{heitjan1989grouped,heitjan1991coarse,wang2008heaping}, change of support
@@ -174,17 +171,15 @@ This paper describes the approach and the system that implements it, and uses th
 VitalDB~\citep{lee2022vitaldb}, to demonstrate what it can reveal. The contributions of this paper are:
 \begin{itemize}[itemsep=2pt]
   \item a way to describe each variable of a recorded dataset by its measurement model, the interval each value
-    describes, its bias and uncertainty with their correlation structure, and its evidence
-    (Section~\ref{sec:approach});
-  \item a method, supported by open-source tools we developed, for correcting what can be measured. The method
-    identifies each step in the making of a record that can be undone, such as a clock's drift and
-    resynchronisations, measures it from the dataset's own records, undoes it, tests the result, and states the
-    uncertainty that remains (Section~\ref{sec:correct});
+    describes, its bias and uncertainty with their correlation structure, and its evidence (Section~\ref{sec:approach});
+  \item a method, supported by open-source tools we developed, for measuring each step in the making of a record
+    that can be undone, undoing it, testing the result, and stating the uncertainty that remains
+    (Section~\ref{sec:correct});
   \item a dataset-independent schema and engine that check an atlas and publish it as a website and one
-    machine-readable file, revised as evidence comes in (Section~\ref{sec:system});
+    machine-readable file (Section~\ref{sec:system});
   \item a first atlas, of VitalDB, with \fact{atlas.studies.current} analyses behind it (Section~\ref{sec:vitaldb});
-  \item a planner that, for any set of signals, gives the uncertainty of their relative timing and the finest
-    time grid on which they can be combined (Section~\ref{sec:use}).
+  \item a planner that gives the uncertainty of the relative timing of any set of signals, and the finest time grid
+    on which they can be combined (Section~\ref{sec:use}).
 \end{itemize}
 The details behind each result are available in the atlas, at \atlasurl, and this paper quotes its numbers and
 refers to it. The numbers reported here are specific to VitalDB, measured on its devices and recording setup. They
