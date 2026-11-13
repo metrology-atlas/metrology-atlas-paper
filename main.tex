@@ -403,31 +403,19 @@ value part (\atlaspage{worked-example-record-pdf}{Worked example: a record as a 
   \label{fig:urine}
 \end{figure}
 
-Values can drift in the same way that clocks do. The zero and gain of a transducer wander between adjustments, which
-is known as instrumental drift, and each adjustment, such as zeroing the transducer, pulls them
-back~\citep{jcgm-200-2012}. This is the same pattern of drift and resynchronisation that is seen in clocks, and an
-atlas describes it in the same way, using a drift rate, an adjustment schedule, and the evidence for each.
-
-Values are also related to one another. Some variables measure the same quantity by different routes. For example,
-arterial pressure can be measured with an invasive line or with a cuff, and oxygen saturation with a pulse oximeter
-or a blood-gas analyser. We have quantified comparisons of this kind
-previously~\citep{goodwin2021blood,eytan2019revisiting}. Other variables are derived from other values, in one of two
-ways. They may be computed from data stored in the dataset, as a length of stay is computed from two dates, or
-computed inside a device from a signal that the dataset also records, as a monitor computes its heart rate from the
-ECG it exports. A model can also \emph{estimate} a quantity that it never measures, for example when arterial pressure
-is estimated from the ECG and the plethysmogram. The uncertainty of such an estimate includes the model's own error,
-which can only be determined by validation against a reference measurement.
-
-An atlas records these relationships explicitly, including what each variable measures or estimates, which variables
-it was derived from and how, and the algorithm, code and version behind it. Along each derivation, the atlas carries
-forward what the inputs imply. A derived value describes at least the intervals its inputs describe. Its uncertainty
-follows from the law of propagation of uncertainty~\citep{jcgm-100-2008}, including the covariance of any errors its
-inputs share, or, for a value defined by code, from the study that measured it. Features derived for machine learning
-are treated in the same way as any other value. The atlas therefore describes variables that were never measured
-directly from the patient as fully as those that were, and a feature store can draw them from the atlas in the same
-way that this paper draws its numbers (Section~\ref{sec:system}). In the VitalDB atlas, \fact{atlas.measured}
-variables measure \fact{atlas.measurands} measurands of value (the time of each record is the other measurand), and
-\fact{atlas.derived} variables are derived from others.
+Values are also related to one another, and an atlas records these relationships explicitly. Some variables measure
+the same quantity by different routes, for example arterial pressure measured with an invasive line or with a cuff,
+which allows the two to be compared~\citep{goodwin2021blood,eytan2019revisiting}. Others are derived from other
+values, either from data stored in the dataset, as a length of stay is computed from two dates, or inside a device
+from a signal that the dataset also records, as a monitor computes its heart rate from the ECG it exports. A model can
+also estimate a quantity that it never measures, such as arterial pressure from the ECG and the plethysmogram, and the
+uncertainty of such an estimate can only be found by validation against a reference. For each derived variable, the
+atlas records the variables it was derived from, and the algorithm, code and version behind it. A derived value
+describes at least the intervals its inputs describe, and its uncertainty follows from the law of propagation of
+uncertainty~\citep{jcgm-100-2008}, including the covariance of any errors its inputs share. Features derived for
+machine learning are treated in the same way, so that a feature store can draw them from the atlas together with their
+uncertainty. In the VitalDB atlas, \fact{atlas.measured} variables measure \fact{atlas.measurands} measurands of value
+(the time of each record is the other measurand), and \fact{atlas.derived} variables are derived from others.
 
 \subsection{Forms of the times}
 \label{sec:forms}
