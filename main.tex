@@ -884,8 +884,16 @@ uncertainty is known, rather than being left to learn these effects implicitly.
 The timing results presented here should also be tested against an external reference. Bench recordings of the
 devices, or recordings with a known injected offset, would provide such a reference. Calibration and maintenance
 records would also allow an atlas to describe each device's drift in value, in the same way that it describes the
-drift of its clocks. Finally, it would be useful to test whether analyses, and the AI assistants used to plan them,
-give better answers when an atlas is available than when it is not.
+drift of its clocks. Finally, it would be useful to test whether analyses give better answers when an atlas is available
+than when it is not.
+
+The most accurate corrections described here could in principle also be applied in real time, although this would
+require new techniques. The corrections in the VitalDB atlas are fitted to the whole recording, and so use data
+recorded after the values they correct (Section~\ref{sec:forms}). A real-time system would instead need to estimate
+the same corrections using only data from the past, for example by tracking a clock's drift as the recording proceeds,
+and detecting each resynchronisation soon after it occurs. The uncertainty of a correction estimated in this way would
+be larger than that of a correction fitted to the whole recording, particularly early in a recording, and an atlas
+could state both.
 
 % ---------------------------------------------------------------------------
 \section{Access, licences and contributing}
