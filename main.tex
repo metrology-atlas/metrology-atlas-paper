@@ -264,10 +264,11 @@ sources.
 An atlas builds each uncertainty from named parts, which we call \emph{components}, as the GUM does and as in the
 effects tables of \citet{mittaz2019metrology}. For a waveform stamped by a device clock, for example, one component is
 the clock's tick, another the clock's drift between resynchronisations, and another the error of the correction that
-removes that drift. Each component has its own size and distribution, and states how it was evaluated: \emph{Type~A}
-if estimated statistically from this dataset's own data, \emph{Type~B} if taken from documentation, a specification or
-judgement~\citep{jcgm-100-2008}. A clock tick is evaluated as Type~B, with a rectangular (uniform) distribution,
-whereas a spread measured between recordings is Type~A, with an empirical distribution.
+removes that drift. Each component has its own size and distribution, and states how it was evaluated, either as
+\emph{Type~A}, if it was estimated statistically from this dataset's own data, or as \emph{Type~B}, if it was taken
+from documentation, a specification or judgement~\citep{jcgm-100-2008}. A clock tick is evaluated as Type~B, with a
+rectangular (uniform) distribution, whereas a spread measured between recordings is Type~A, with an empirical
+distribution.
 
 Components combine by the law of propagation of uncertainty~\citep{jcgm-100-2008}, in which their standard deviations
 add in quadrature, with a further term for any two that are correlated. A standard deviation is enough when the
@@ -348,21 +349,14 @@ grows slowly and collapses at intervals, which indicates a drift and its resynch
 fewer levels than the converter should produce. The second step is to measure the problem from the dataset's own
 records, using a model of the step. In the case of a drift, this means fitting the rate of the drift and the time of
 each resynchronisation for each recording, against the working reference. The third step is to undo it, by applying
-the inverse of the step to the stamps or the values. The fourth step is to test the correction, using data the fit
-did not use, known errors injected into real recordings, and a second, independent reference where one exists. The
-fifth and final step is to state what remains. The correction's own error, and any steps it cannot undo, become
-components of the uncertainty of the corrected form (Section~\ref{sec:forms}), and the correction is recorded with its
-evidence like any other result. Note that steps that are many-to-one cannot be undone, and remain as intervals that are
-carried into the uncertainty. For example, no correction can recover where within a clock tick an event fell, or
-whether a heart rate recorded as 72\,bpm by a monitor that truncates was 72.1 or 72.9\,bpm.
-
-We developed the tools used in this work, and kept them independent of any particular dataset where we could. The
-physiosync package fits drifts, resynchronisations and frame slips from times and samples supplied by the user. The
-vitaldb-reader package reads the VitalDB release at its native resolution, and applies each correction as a separate,
-versioned step. The vitaldb-bench repository holds the studies that measured and tested each correction
-(\url{https://github.com/metrology-atlas}). Each study records the code and version it used, so that a correction can
-be rerun, or replaced by a better one. Section~\ref{sec:sync} works through one of these corrections, for the
-plethysmogram, step by step.
+the inverse of the step to the stamps or the values. The fourth step is to test the correction, using data the fit did
+not use, known errors injected into real recordings, and a second, independent reference where one exists. The fifth
+and final step is to state what remains. The correction's own error, and any steps it cannot undo, become components
+of the uncertainty of the corrected form (Section~\ref{sec:forms}), and the correction is recorded with its evidence
+like any other result. Note that steps that are many-to-one cannot be undone, and remain as intervals that are carried
+into the uncertainty. For example, no correction can recover where within a clock tick an event fell, or whether a
+heart rate recorded as 72\,bpm by a monitor that truncates was 72.1 or 72.9\,bpm. Section~\ref{sec:sync} works through
+one correction, for the plethysmogram, step by step.
 
 \subsection{The value side}
 
@@ -459,6 +453,13 @@ from an earlier release can still be traced. Each release is archived with its o
 this paper that describes VitalDB is generated from the release it cites rather than typed.
 Table~\ref{tab:schema} shows what an atlas records for one variable; the schema, the engine and its checks are
 documented with the code (\url{https://github.com/metrology-atlas/metrology-atlas}).
+
+We developed the tools used in this work, and kept them independent of any particular dataset where we could. The
+physiosync package fits drifts, resynchronisations and frame slips from times and samples supplied by the user. The
+vitaldb-reader package reads the VitalDB release at its native resolution, and applies each correction as a separate,
+versioned step. The vitaldb-bench repository holds the studies that measured and tested each correction, and each
+study records the code and version it used, so that a correction can be rerun, or replaced by a better one
+(\url{https://github.com/metrology-atlas}).
 
 \begin{table}[tp]
   \centering
