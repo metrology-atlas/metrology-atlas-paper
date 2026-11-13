@@ -86,18 +86,16 @@ resynchronisations. As a result, the time error of each device grows and then re
 Numeric values from monitors describe a window of signal that closed several seconds before they were stamped, and
 values may be truncated, rounded, or rounded by hand to convenient numbers (heaped). None of these effects is visible in the output of a typical data loader.
 
-Rather than treating a record as a single point, it is more useful to read it as a probability density function
-(PDF), which describes how likely each true time and true value is, given the record and what is known about how it
-was made (Figure~\ref{fig:concept}). For example, a heart rate recorded as 72 beats per minute (bpm) by a monitor that
-rounds down (truncates) could be any value from 72 up to, but not including, 73. This value also describes the last
+Rather than treating a record as a single point, it is more useful to read it as a probability density function (PDF),
+which describes how likely each true time and true value is, given the record and what is known about how it was made
+(Figure~\ref{fig:concept}). For example, a heart rate recorded as 72 beats per minute (bpm) by a monitor that rounds
+down (truncates) could be any value from 72 up to, but not including, 73. This value also describes the last
 \fact{hr.window} R--R intervals of the ECG, which ended a variable delay before the value was stamped, plus a further
-wait for the recorder's next poll. Similarly, a laboratory haematocrit of 35\% means (35$\pm$0.5)\% or
-(35$\pm$0.05)\% depending on which analyser produced it, which the record does not say, and the blood was drawn some
-minutes before the stamp, by an amount that also depends on the analyser. The distributions of the true time and
-value behind these records therefore take different shapes: uniform for a truncated heart rate, a mixture of two
-distributions for the haematocrit, and skewed for a delay. Few of these shapes are Gaussian. Some of the steps that
-produced a record can be measured and undone, which narrows its distribution, while the remaining steps must be
-carried forward as an interval or a spread (Section~\ref{sec:correct}).
+wait for the recorder's next poll. The distributions of the true value and the true time behind this record therefore
+take different shapes, and neither of them is Gaussian. The value is uniform over one step, because the monitor
+truncates, whereas the delay is a mixture of two distributions, because it differs between two groups of recordings.
+Some of the steps that produced a record can be measured and undone, which narrows its distribution, while the
+remaining steps must be carried forward as an interval or a spread (Section~\ref{sec:correct}).
 
 \begin{figure}[tp]
   \centering
@@ -389,11 +387,10 @@ may have been read to the nearest 5 or 10\,mL, or rounded to 50 or 100\,mL, and 
 value model in the atlas separates the rounding from the volumes, so that each recorded value maps back to its own
 PDF. This PDF is wide for a round number, and narrow for a value that can only have been read finely.
 
-The time and the value of a record can also depend on each other. For example, a laboratory haematocrit of 35\% means
-34.5--35.5\% if it was measured by a blood-gas analyser, but 34.95--35.05\% if it was measured by the central
-laboratory. The analyser also determines how long before the stamp the blood was drawn. As a result, the joint PDF of
-the record is a mixture of two shapes, in time and value together
-(\atlaspage{worked-example-record-pdf}{Worked example: a record as a PDF}).
+The time and the value of a record can also depend on each other, for example for a haematocrit, which the central
+laboratory reports to 0.1\% and the blood-gas analyser in theatre to 1\%, and which the central laboratory also logs
+longer after the blood was drawn. The joint PDF of such a record therefore cannot be separated into a time part and a
+value part (\atlaspage{worked-example-record-pdf}{Worked example: a record as a PDF}).
 
 \begin{figure}[tp]
   \centering
