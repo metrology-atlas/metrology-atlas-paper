@@ -53,24 +53,23 @@
 
 % ---------------------------------------------------------------------------
 \begin{abstract}
-Every value in a clinical time series is made up of two parts: a recorded time and a recorded value. Neither part is
+Every value in a clinical time series is made up of two parts, a recorded time and a recorded value. Neither part is
 exactly the truth, yet users of open datasets mostly treat these records as exact. We present the Metrology Atlas, a
 dataset-independent approach for describing a recorded dataset as a measurement system, using the terms of the
 International Vocabulary of Metrology and the Guide to the Expression of Uncertainty in Measurement. For each
-variable, an atlas describes its measurement model and the interval of time each value represents. It also reports
-the bias of the variable's time and value, the distribution of the error that remains (summarised by its standard
+variable, an atlas describes its measurement model and the interval of time each value represents. It also reports the
+bias of the variable's time and value, the distribution of the error that remains (summarised by its standard
 uncertainty), which errors are shared with other signals, and the evidence behind each number, which is marked as
 measured, derived, estimated or assumed. An atlas also records how variables are related to one another, including
 what each one measures and which variables it was derived from, so that derived features carry the uncertainty of
-their inputs. A schema and an engine, both independent of any particular dataset, check an atlas and publish it as a
-website and as a single machine-readable file, and the atlas is revised as new evidence becomes available. In our
-first application, to VitalDB (\fact{vitaldb.cases} surgical cases), we reconstructed the timing of a multi-device
-recording system, largely from the dataset's own records. The atlas describes \fact{atlas.variables} variables from
-\fact{atlas.devices} devices on \fact{atlas.clocks} clocks, joined into a single timing network by
-\fact{atlas.studies.current} analyses of the records, each saved with the code that ran it. Using open-source tools
-we developed, the atlas corrects the synchronisation between devices to a stated uncertainty, links the clock rates
-of the recording system to an outside reference using the mains hum, and documents where the data differ from their
-documentation. An atlas can be read on its website, or loaded by analysis code as a single file.
+their inputs. A dataset-independent schema and engine check each atlas and publish it as a website and a single
+machine-readable file, which is revised as new evidence becomes available. In our first application, to VitalDB
+(\fact{vitaldb.cases} surgical cases), we reconstructed the timing of a multi-device recording system, largely from
+the dataset's own records. The atlas describes \fact{atlas.variables} variables from \fact{atlas.devices} devices on
+\fact{atlas.clocks} clocks, joined into a single timing network by \fact{atlas.studies.current} analyses of the
+records, each saved with the code that ran it. Using open-source tools we developed, the atlas corrects the
+synchronisation between devices to a stated uncertainty, links the clock rates of the recording system to an outside
+reference using the mains hum, and documents where the data differ from their documentation.
 \end{abstract}
 
 % ---------------------------------------------------------------------------
