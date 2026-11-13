@@ -437,8 +437,8 @@ form, and a signal may have more than one form of each kind. The first kind is t
 shifts the stored timestamps by an amount known in advance, such as the median delay across the release. Because this
 shift is fixed before the recording's own data arrive, this form can be used in real time. The third kind applies a
 correction fitted to each recording separately. This correction is estimated from the whole recording, including data
-recorded after the values it corrects, so it cannot be used in real time; a corrected time is only available once the
-recording has ended. Each form has its own bias and uncertainty, so a user can choose the form that suits their
+recorded after the values it corrects, so it cannot be used in real time, and a corrected time is only available once
+the recording has ended. Each form has its own bias and uncertainty, so a user can choose the form that suits their
 analysis and see what that choice costs (Figure~\ref{fig:bias}; the uncertainty left after correction is described in
 Section~\ref{sec:sync}).
 
@@ -882,13 +882,13 @@ records would also allow an atlas to describe each device's drift in value, in t
 drift of its clocks. Finally, it would be useful to test whether analyses give better answers when an atlas is available
 than when it is not.
 
-The most accurate corrections described here could in principle also be applied in real time, although this would
-require new techniques. The corrections in the VitalDB atlas are fitted to the whole recording, and so use data
-recorded after the values they correct (Section~\ref{sec:forms}). A real-time system would instead need to estimate
-the same corrections using only data from the past, for example by tracking a clock's drift as the recording proceeds,
-and detecting each resynchronisation soon after it occurs. The uncertainty of a correction estimated in this way would
-be larger than that of a correction fitted to the whole recording, particularly early in a recording, and an atlas
-could state both.
+The most accurate corrections described here could in principle also be applied in real time, which would add a fourth
+kind of form to the three described in Section~\ref{sec:forms}, although this would require new techniques. The
+corrections in the VitalDB atlas are fitted to the whole recording, and so use data recorded after the values they
+correct. A real-time system would instead need to estimate the same corrections using only data from the past, for
+example by tracking a clock's drift as the recording proceeds, and detecting each resynchronisation soon after it
+occurs. The uncertainty of a correction estimated in this way would be larger than that of a correction fitted to the
+whole recording, particularly early in a recording, and an atlas could state both.
 
 % ---------------------------------------------------------------------------
 \section{Access, licences and contributing}
